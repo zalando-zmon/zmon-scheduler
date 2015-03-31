@@ -4,14 +4,13 @@ package de.zalando.zmon.scheduler.ng;
  * Created by jmussler on 3/26/15.
  */
 
+import com.codahale.metrics.MetricRegistry;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.*;
 import org.springframework.boot.autoconfigure.*;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @EnableAutoConfiguration
@@ -19,12 +18,13 @@ import java.util.List;
 @ComponentScan
 public class Application {
 
+    @Autowired
+    MetricRegistry metrics;
+
+    @Autowired
+    Scheduler scheduler;
+
     public static void main(String[] args) throws Exception {
-        Scheduler s = new Scheduler();
-
-        List<String> users = new ArrayList<>();
-        s.addAdapter(new EntityAdapter());
-
         SpringApplication.run(Application.class, args);
     }
 }
