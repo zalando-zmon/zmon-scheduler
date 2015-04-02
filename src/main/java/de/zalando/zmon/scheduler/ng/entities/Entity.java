@@ -1,4 +1,4 @@
-package de.zalando.zmon.scheduler.ng;
+package de.zalando.zmon.scheduler.ng.entities;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +15,14 @@ public class Entity {
     public Entity(String id, String adapterName) {
         this.id = id;
         this.adapterName = adapterName;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public Map<String, String> getProperties() {
+        return filterProperties;
     }
 
     private void addFilterProperties(Map<String, Object> valueMap) {

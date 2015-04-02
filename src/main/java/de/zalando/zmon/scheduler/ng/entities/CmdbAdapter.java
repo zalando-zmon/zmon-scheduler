@@ -1,7 +1,7 @@
 package de.zalando.zmon.scheduler.ng.entities;
 
-import de.zalando.zmon.scheduler.ng.Entity;
-import de.zalando.zmon.scheduler.ng.EntityAdapter;
+import com.codahale.metrics.*;
+import com.codahale.metrics.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -18,13 +18,17 @@ public class CmdbAdapter implements EntityAdapter {
     private final String url;
     private final String user;
     private final String password;
+    private final MetricRegistry metrics;
+    private final Timer timer;
 
     private static Logger LOG = LoggerFactory.getLogger(CmdbAdapter.class);
 
-    public CmdbAdapter(String url, String user, String password) {
+    public CmdbAdapter(String url, String user, String password, MetricRegistry metrics) {
         this.url = url;
         this.user = user;
         this.password = password;
+        this.metrics = metrics;
+        this.timer = metrics.timer("entity-adapter.cmdb");
     }
 
     private static class BaseEntity extends HashMap<String, Object> {}
@@ -46,7 +50,11 @@ public class CmdbAdapter implements EntityAdapter {
 
         RestTemplate rt = new RestTemplate();
         HttpEntity<String> request = new HttpEntity<>(getWithAuth());
+
+        Timer.Context tC = timer.time();
         BaseEntityList list = rt.postForObject(url, request, BaseEntityList.class);
+        LOG.info("Cmdb Adapter used: {}ms", tC.stop() / 1000000);
+
         List<Entity> entityList = new ArrayList<>(list.size());
 
         for(BaseEntity base: list) {
@@ -57,11 +65,11 @@ public class CmdbAdapter implements EntityAdapter {
 
             if(base.containsKey("physical_machine")) {
                 Map<String, Object> physicalMachine = (Map<String, Object>) base.get("physical_machine");
-                if(physicalMachine.containsKey("data_center_code")) {
+                if(null!=physicalMachine && physicalMachine.containsKey("data_center_code")) {
                     base.put("data_center_code", physicalMachine.get("data_center_code"));
                 }
 
-                if(physicalMachine.containsKey("physical_machine_model")) {
+                if(null != physicalMachine && physicalMachine.containsKey("physical_machine_model")) {
                     base.put("model", physicalMachine.get("physical_machine_model"));
                 }
                 base.remove("physical_machine");

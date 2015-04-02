@@ -1,4 +1,4 @@
-package de.zalando.zmon.scheduler.ng;
+package de.zalando.zmon.scheduler.ng.entities;
 
 import java.util.List;
 

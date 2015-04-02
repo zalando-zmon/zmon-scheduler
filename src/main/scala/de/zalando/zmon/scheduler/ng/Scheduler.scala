@@ -1,6 +1,7 @@
 package de.zalando.zmon.scheduler.ng
 
 import com.codahale.metrics.MetricRegistry
+import de.zalando.zmon.scheduler.ng.entities.EntityAdapter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component

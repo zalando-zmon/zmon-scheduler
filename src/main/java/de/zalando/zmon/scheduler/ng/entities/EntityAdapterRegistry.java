@@ -1,8 +1,7 @@
-package de.zalando.zmon.scheduler.ng;
+package de.zalando.zmon.scheduler.ng.entities;
 
-import de.zalando.zmon.scheduler.ng.entities.CmdbAdapter;
-import de.zalando.zmon.scheduler.ng.entities.DeployCtlInstanceAdapter;
-import de.zalando.zmon.scheduler.ng.entities.EmptyAdapter;
+import com.codahale.metrics.MetricRegistry;
+import de.zalando.zmon.scheduler.ng.ZalandoConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,19 +26,24 @@ public class EntityAdapterRegistry {
 
     private final static EntityAdapter EMPTY_ADAPTER = new EmptyAdapter();
 
-    public EntityAdapterRegistry() {
+    private final MetricRegistry metrics;
+
+    public EntityAdapterRegistry(MetricRegistry metrics) {
+        this.metrics = metrics;
         registerAdapter(EMPTY_ADAPTER);
     }
 
     @Autowired
-    public EntityAdapterRegistry(ZalandoConfig zConfig) {
+    public EntityAdapterRegistry(ZalandoConfig zConfig, MetricRegistry metrics) {
+        this.metrics = metrics;
+
         if(zConfig.cmdb != null && zConfig.cmdb.url != null) {
-            CmdbAdapter a = new CmdbAdapter(zConfig.cmdb.url, zConfig.cmdb.user, zConfig.cmdb.password);
+            CmdbAdapter a = new CmdbAdapter(zConfig.cmdb.url, zConfig.cmdb.user, zConfig.cmdb.password, metrics);
             registerAdapter(a);
         }
 
         if(zConfig.deployctl != null && zConfig.deployctl.url != null) {
-            DeployCtlInstanceAdapter a = new DeployCtlInstanceAdapter();
+            DeployCtlInstanceAdapter a = new DeployCtlInstanceAdapter(metrics);
             registerAdapter(a);
         }
     }

@@ -1,8 +1,5 @@
 package de.zalando.zmon.scheduler.ng.entities;
 
-import de.zalando.zmon.scheduler.ng.Entity;
-import de.zalando.zmon.scheduler.ng.EntityAdapter;
-
 import java.util.ArrayList;
 import java.util.List;
 
