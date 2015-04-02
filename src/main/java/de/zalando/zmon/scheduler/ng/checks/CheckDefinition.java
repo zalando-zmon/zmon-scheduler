@@ -4,6 +4,8 @@ package de.zalando.zmon.scheduler.ng.checks;
  * Created by jmussler on 4/2/15.
  */
 
+import de.zalando.zmon.scheduler.ng.DefinitionStatus;
+
 import java.util.List;
 import java.util.Map;
 

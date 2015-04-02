@@ -1,4 +1,4 @@
-package de.zalando.zmon.scheduler.ng.checks;
+package de.zalando.zmon.scheduler.ng;
 
 /**
  * Created by jmussler on 4/2/15.
