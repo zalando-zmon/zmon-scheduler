@@ -1,3 +1,5 @@
 target/
+src/main/resources/application-zalando.properties
+src/main/resources/application-zalando.yaml
 .idea
 *.iml
