@@ -13,7 +13,7 @@ import java.util.*;
 /**
  * Created by jmussler on 4/1/15.
  */
-public class CmdbAdapter implements EntityAdapter {
+public class CmdbAdapter extends EntityAdapter {
 
     private final String url;
     private final String user;
@@ -24,6 +24,7 @@ public class CmdbAdapter implements EntityAdapter {
     private static Logger LOG = LoggerFactory.getLogger(CmdbAdapter.class);
 
     public CmdbAdapter(String url, String user, String password, MetricRegistry metrics) {
+        super("CmdbAdapter");
         this.url = url;
         this.user = user;
         this.password = password;
@@ -46,7 +47,7 @@ public class CmdbAdapter implements EntityAdapter {
     }
 
     @Override
-    public List<Entity> getEntities() {
+    public Collection<Entity> getCollection() {
 
         RestTemplate rt = new RestTemplate();
         HttpEntity<String> request = new HttpEntity<>(getWithAuth());

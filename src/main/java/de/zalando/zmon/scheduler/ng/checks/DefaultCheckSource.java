@@ -12,25 +12,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by jmussler on 4/2/15.
  */
-public class DefaultCheckSource implements CheckSource {
+public class DefaultCheckSource extends CheckSource {
 
     private final static Logger LOG = LoggerFactory.getLogger(DefaultCheckSource.class);
 
-    private String name;
     private String url;
     private String user;
     private String password;
 
     public DefaultCheckSource(String name, String url) {
-        this.name = name;
+        super(name);
         this.url = url;
     }
 
@@ -43,7 +39,7 @@ public class DefaultCheckSource implements CheckSource {
     }
 
     public DefaultCheckSource(String name, String url, String user, String password) {
-        this.name = name;
+        super(name);
         this.url = url;
         this.user = user;
         this.password = password;
@@ -56,12 +52,7 @@ public class DefaultCheckSource implements CheckSource {
     }
 
     @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public List<CheckDefinition> getChecks() {
+    public Collection<CheckDefinition> getCollection() {
 
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         converter.setObjectMapper(mapper);

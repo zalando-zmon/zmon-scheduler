@@ -1,5 +1,6 @@
 package de.zalando.zmon.scheduler.ng.checks;
 
+import de.zalando.zmon.scheduler.ng.BaseSource;
 import de.zalando.zmon.scheduler.ng.Source;
 
 import java.util.List;
@@ -7,6 +8,8 @@ import java.util.List;
 /**
  * Created by jmussler on 3/31/15.
  */
-public interface CheckSource extends Source {
-    List<CheckDefinition> getChecks();
+public abstract class CheckSource extends BaseSource<CheckDefinition> {
+    public CheckSource(String name) {
+        super(name);
+    }
 }

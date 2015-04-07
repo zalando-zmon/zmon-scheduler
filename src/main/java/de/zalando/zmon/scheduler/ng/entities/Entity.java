@@ -26,8 +26,8 @@ public class Entity {
     }
 
     private void addFilterProperties(Map<String, Object> valueMap) {
-        for(Map.Entry<String,Object> e : valueMap.entrySet()) {
-            if(e.getValue() instanceof String) {
+        for (Map.Entry<String, Object> e : valueMap.entrySet()) {
+            if (e.getValue() instanceof String) {
                 filterProperties.put(e.getKey(), (String) e.getValue());
             }
         }

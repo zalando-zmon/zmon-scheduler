@@ -62,8 +62,8 @@ public class Application {
     }
 
     @RequestMapping(value="/api/v1/entity-adapter/{name}", method=RequestMethod.GET)
-    List<Entity> getEntities(@PathVariable(value = "name") String name) {
-        return entityRegistry.get(name).getEntities();
+    Collection<Entity> getEntities(@PathVariable(value = "name") String name) {
+        return entityRegistry.get(name).getCollection();
     }
 
     @RequestMapping(value="/api/v1/check-source", method=RequestMethod.GET)
@@ -73,7 +73,7 @@ public class Application {
 
     @RequestMapping(value="/api/v1/check-source/{name}", method=RequestMethod.GET)
     Collection<CheckDefinition> getChecks(@PathVariable(value="name") String name) {
-        return checkSourceRegistry.get(name).getChecks();
+        return checkSourceRegistry.get(name).getCollection();
     }
 
     @RequestMapping(value="/api/v1/alert-source", method=RequestMethod.GET)
@@ -83,7 +83,7 @@ public class Application {
 
     @RequestMapping(value="/api/v1/alert-source/{name}", method=RequestMethod.GET)
     Collection<AlertDefinition> getAlerts(@PathVariable(value="name") String name) {
-        return alertSourceRegistry.get(name).getAlerts();
+        return alertSourceRegistry.get(name).getCollection();
     }
 
     private static class Test2 {

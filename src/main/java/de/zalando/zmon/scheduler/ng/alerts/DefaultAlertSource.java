@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * Created by jmussler on 4/7/15.
  */
-public class DefaultAlertSource implements AlertSource {
+public class DefaultAlertSource extends AlertSource {
 
     private final MetricRegistry metrics;
     private final Timer timer;
@@ -30,7 +30,6 @@ public class DefaultAlertSource implements AlertSource {
     private final String url;
     private final String user;
     private final String password;
-    private final String name;
 
     private final static Logger LOG = LoggerFactory.getLogger(DefaultAlertSource.class);
 
@@ -43,20 +42,20 @@ public class DefaultAlertSource implements AlertSource {
     }
 
     public DefaultAlertSource(String name, String url, String user, String password, MetricRegistry metrics) {
+        super(name);
         this.metrics = metrics;
         this.user = user;
         this.url = url;
         this.password = password;
-        this.name = name;
         this.timer = metrics.timer("alert-adapter."+name);
     }
 
     public DefaultAlertSource(String name, String url, MetricRegistry metrics) {
+        super(name);
         this.metrics = metrics;
         this.user = null;
         this.url = url;
         this.password = null;
-        this.name = name;
         this.timer = metrics.timer("alert-adapter."+name);
     }
 
@@ -68,7 +67,7 @@ public class DefaultAlertSource implements AlertSource {
     }
 
     @Override
-    public Collection<AlertDefinition> getAlerts() {
+    public Collection<AlertDefinition> getCollection() {
         RestTemplate rt = new RestTemplate();
 
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
@@ -94,11 +93,6 @@ public class DefaultAlertSource implements AlertSource {
         LOG.info("Got {} alerts from {}", defs.getAlertDefinitions().size(), getName());
 
         return defs.getAlertDefinitions();
-    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 }
 
