@@ -9,7 +9,7 @@ import scala.beans.BeanProperty
 /**
  * Created by jmussler on 4/2/15.
  */
-class ZalandoControler {
+class ZalandoControllerConfig {
   @BeanProperty var name : String = "";
   @BeanProperty var url : String = "";
   @BeanProperty var refresh : Int = 0;
@@ -21,5 +21,12 @@ class ZalandoControler {
 @Profile(Array("zalando"))
 @ConfigurationProperties(prefix = "zalando.checks")
 class ZalandoCheckConfig {
-  @BeanProperty var controller : ZalandoControler = null
+  @BeanProperty var controller : ZalandoControllerConfig = null
+}
+
+@Component
+@Profile(Array("zalando"))
+@ConfigurationProperties(prefix = "zalando.alerts")
+class ZalandoAlertConfig {
+  @BeanProperty var controller : ZalandoControllerConfig = null
 }

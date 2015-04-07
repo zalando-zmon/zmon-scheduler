@@ -1,6 +1,8 @@
 package de.zalando.zmon.scheduler.ng.checks;
 
+import de.zalando.zmon.scheduler.ng.SourceRegistry;
 import de.zalando.zmon.scheduler.ng.ZalandoCheckConfig;
+import de.zalando.zmon.scheduler.ng.ZalandoControllerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,9 +14,7 @@ import java.util.Map;
  * Created by jmussler on 4/2/15.
  */
 @Component
-public class CheckSourceRegistry {
-
-    private final Map<String, CheckSource> registry = new HashMap<>();
+public class CheckSourceRegistry extends SourceRegistry<CheckSource> {
 
     public CheckSourceRegistry() {
 
@@ -22,21 +22,13 @@ public class CheckSourceRegistry {
 
     @Autowired
     public CheckSourceRegistry(ZalandoCheckConfig config) {
+
+
         if(config.controller()!=null && config.controller().getUrl()!=null && !"".equals(config.controller().url())) {
-            DefaultCheckSource source = new DefaultCheckSource(config.controller().name(), config.controller().url(),config.controller().user(),config.controller().password());
-            registerSource(source);
+            ZalandoControllerConfig conf = config.controller();
+
+            DefaultCheckSource source = new DefaultCheckSource(conf.name(), conf.url(), conf.user(), conf.password());
+            register(source);
         }
-    }
-
-    public void registerSource(CheckSource source) {
-        registry.put(source.getName(), source);
-    }
-
-    public Collection<String> getSources() {
-        return registry.keySet();
-    }
-
-    public CheckSource getCheckSource(String name) {
-        return registry.get(name);
     }
 }

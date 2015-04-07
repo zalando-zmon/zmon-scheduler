@@ -1,14 +1,20 @@
 package de.zalando.zmon.scheduler.ng.checks;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -26,6 +32,14 @@ public class DefaultCheckSource implements CheckSource {
     public DefaultCheckSource(String name, String url) {
         this.name = name;
         this.url = url;
+    }
+
+    private static final ObjectMapper mapper = createObjectMapper();
+
+    private static ObjectMapper createObjectMapper() {
+        ObjectMapper m = new ObjectMapper();
+        m.setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
+        return m;
     }
 
     public DefaultCheckSource(String name, String url, String user, String password) {
@@ -47,8 +61,13 @@ public class DefaultCheckSource implements CheckSource {
     }
 
     @Override
-    public List<CheckDefinition> getCheckData() {
+    public List<CheckDefinition> getChecks() {
+
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        converter.setObjectMapper(mapper);
         RestTemplate rt = new RestTemplate();
+        rt.getMessageConverters().clear();
+        rt.getMessageConverters().add(converter);
 
         CheckDefinitions defs;
         if(null!=user && !"".equals(user)) {
@@ -61,6 +80,7 @@ public class DefaultCheckSource implements CheckSource {
             LOG.info("Querying without credentials");
             defs = rt.getForObject(url, CheckDefinitions.class);
         }
+        LOG.info("Got {} checks from {}", defs.getCheckDefinitions().size(), getName());
 
         return defs.getCheckDefinitions();
     }
