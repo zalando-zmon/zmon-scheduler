@@ -1,7 +1,6 @@
 package de.zalando.zmon.scheduler.ng
 
 import java.io.{FileWriter, OutputStreamWriter}
-import java.util
 import java.io.File
 import java.util.concurrent.{TimeUnit, ScheduledThreadPoolExecutor}
 
@@ -42,8 +41,12 @@ object filter {
 
 class Check(val id: Integer, val repo : CheckRepository) {
 
+  def getCheckDef() = {
+    repo.get(id)
+  }
+
   def matchEntity(entity: Entity): Boolean = {
-    val properties = entity.getProperties
+    val properties = entity.getFilterProperties
     for (filterMap <- repo.get(id).getEntities) { // OR on entity level definition in checks
       if(filter.overlaps(filterMap, properties)) {
         return true
@@ -57,7 +60,7 @@ class Check(val id: Integer, val repo : CheckRepository) {
 class Alert(var id : Integer, val repo : AlertRepository) {
 
   def matchEntity(entity : Entity): Boolean = {
-    val properties = entity.getProperties
+    val properties = entity.getFilterProperties
     for(inFilter <- repo.get(id).getEntities) {
       if(filter.overlaps(inFilter, properties)) {
         for(outFilter <- repo.get(id).getEntitiesExclude) {
@@ -157,7 +160,6 @@ class Scheduler(val schedulerConfig: SchedulerConfig, val alertRepo : AlertRepos
   val schedulerMetrics = new SchedulerMetrics(metrics)
   val lastScheduleAtStartup = SchedulePersister.loadSchedule()
 
-  Scheduler.LOG.info("Scheduling schedule persister")
   service.scheduleAtFixedRate(new SchedulePersister(scheduledChecks), 5, 15, TimeUnit.SECONDS)
 
   def scheduleCheck(id : Integer): Unit = {

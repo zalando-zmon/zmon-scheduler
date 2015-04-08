@@ -21,8 +21,12 @@ public class Entity {
         return id;
     }
 
-    public Map<String, String> getProperties() {
+    public Map<String, String> getFilterProperties() {
         return filterProperties;
+    }
+
+    public Map<String, Object> getProperties() {
+        return properties;
     }
 
     private void addFilterProperties(Map<String, Object> valueMap) {
