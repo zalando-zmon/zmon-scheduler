@@ -35,6 +35,20 @@ public class AlertRepository extends CachedRepository<Integer, AlertSourceRegist
         currentMap = m;
     }
 
+    @Override
+    protected AlertDefinition getNullObject() {
+        return NULL_OBJ;
+    }
+
+    private static final AlertDefinition NULL_OBJ;
+
+    static {
+        NULL_OBJ = new AlertDefinition();
+        NULL_OBJ.setCheckDefinitionId(0);
+        NULL_OBJ.setEntities(new ArrayList<>(0));
+        NULL_OBJ.setEntitiesExclude(new ArrayList<>(0));
+    }
+
     @Autowired
     public AlertRepository(AlertSourceRegistry registry) {
         super(registry);

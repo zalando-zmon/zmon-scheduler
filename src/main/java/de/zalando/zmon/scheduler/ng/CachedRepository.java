@@ -14,8 +14,14 @@ public abstract class CachedRepository<I, S, T> {
         registry = r;
     }
 
-    T get(I id) {
-        return currentMap.get(id);
+    protected abstract T getNullObject();
+
+    public T get(I id) {
+        T v = currentMap.get(id);
+        if(null==v) {
+            return getNullObject();
+        }
+        return v;
     }
 
     Collection<T> get() {

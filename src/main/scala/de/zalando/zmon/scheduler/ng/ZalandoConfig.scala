@@ -30,3 +30,11 @@ class ZalandoCheckConfig {
 class ZalandoAlertConfig {
   @BeanProperty var controller : ZalandoControllerConfig = null
 }
+
+@Component
+@Profile(Array("zalando"))
+@ConfigurationProperties(prefix = "scheduler")
+class SchedulerConfig {
+  @BeanProperty var last_run_persist = SchedulePersistType.FILE
+  @BeanProperty var check_detail_metrics = false
+}

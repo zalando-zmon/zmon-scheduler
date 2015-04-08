@@ -25,6 +25,17 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
         currentMap = m;
     }
 
+    private static final Entity NULL_ENTITY;
+
+    static {
+        NULL_ENTITY = new Entity("--NULL--ENTITY--", "--ENTITY--REPO--");
+    }
+
+    @Override
+    protected Entity getNullObject() {
+        return NULL_ENTITY;
+    }
+
     @Autowired
     public EntityRepository(EntityAdapterRegistry registry) {
         super(registry);

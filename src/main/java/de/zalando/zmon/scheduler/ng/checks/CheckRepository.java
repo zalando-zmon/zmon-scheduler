@@ -4,6 +4,7 @@ import de.zalando.zmon.scheduler.ng.CachedRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +23,20 @@ public class CheckRepository extends CachedRepository<Integer, CheckSourceRegist
         }
 
         currentMap = m;
+    }
+
+    private static final CheckDefinition NULL_OBJ;
+
+    static {
+        NULL_OBJ = new CheckDefinition();
+        NULL_OBJ.setId(0);
+        NULL_OBJ.setCommand("False");
+        NULL_OBJ.setEntities(new ArrayList<>(0));
+    }
+
+    @Override
+    protected CheckDefinition getNullObject() {
+        return NULL_OBJ;
     }
 
     @Autowired
