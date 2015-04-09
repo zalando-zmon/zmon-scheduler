@@ -34,6 +34,9 @@ object CommandWriter {
     command.entity = entity.getProperties
     body.args.add(command)
 
+    val alertList : java.util.List[CeleryAlertArg] = new java.util.ArrayList[CeleryAlertArg]();
+    body.args.add(alertList)
+
     for(alert <- alerts) {
       val alertArg = new CeleryAlertArg()
       val alertDef = alert.getAlertDef
@@ -47,8 +50,9 @@ object CommandWriter {
       alertArg.team = alertDef.getTeam
       alertArg.responsible_team = alertDef.getResponsibleTeam
       alertArg.paramters = alertDef.getParameters
+      alertArg.entities_map = alertDef.getEntities
 
-      body.args.add(alertArg)
+      alertList.add(alertArg)
     }
 
     val writer = new CeleryWriter()

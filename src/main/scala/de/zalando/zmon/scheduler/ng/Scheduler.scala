@@ -16,6 +16,7 @@ import de.zalando.zmon.scheduler.ng.entities.{EntityRepository, Entity, EntityAd
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
+import redis.clients.jedis.Jedis
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -93,8 +94,8 @@ class ScheduledCheck(private val rate : Long, var lastRun:Long, private val chec
       checkMeter.mark()
     }
 
-    ScheduledCheck.LOG.info(CommandWriter.write(entity, check, alerts))
-
+    val command = CommandWriter.write(entity, check, alerts)
+    JedisWriter.jedis.rpush("zmon:queue:default", command)
     metrics.totalChecks.mark()
   }
 
@@ -114,6 +115,10 @@ class ScheduledCheck(private val rate : Long, var lastRun:Long, private val chec
       }
     }
   }
+}
+
+object JedisWriter {
+  val jedis = new Jedis("localhost", 6379)
 }
 
 object SchedulerFactory {
@@ -177,7 +182,8 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
   def scheduleCheck(id : Integer): Unit = {
 
     if(!schedulerConfig.check_filter.isEmpty) {
-      if (schedulerConfig.check_filter.contains(id)) {
+      if(!schedulerConfig.check_filter.contains(id)) {
+        Scheduler.LOG.info("skipping check id: " + id)
         return
       }
     }
@@ -192,7 +198,7 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
     var startDelay = 1L
     var lastScheduled = 0L
 
-    if(lastScheduleAtStartup != null && lastScheduleAtStartup.contains(id)) {
+    if(false && lastScheduleAtStartup != null && lastScheduleAtStartup.contains(id)) {
       lastScheduled = lastScheduleAtStartup.getOrElse(id, 0L)
       startDelay += math.max(rate - (System.currentTimeMillis() - lastScheduled) / 1000, 0)
     }

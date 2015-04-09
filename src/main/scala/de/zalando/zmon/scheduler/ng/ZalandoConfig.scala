@@ -1,5 +1,7 @@
 package de.zalando.zmon.scheduler.ng
 
+import java.util
+
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -38,7 +40,7 @@ class SchedulerConfig {
   @BeanProperty var last_run_persist = SchedulePersistType.FILE
   @BeanProperty var check_detail_metrics = false
   @BeanProperty var thread_count = 8
-  @BeanProperty var check_filter : List[Int] = List()
+  @BeanProperty var check_filter : java.util.List[Integer] = new util.ArrayList[Integer]()
   @BeanProperty var entity_teams : List[String] = List()
   @BeanProperty var default_queue : String = "zmon:queue:default"
 

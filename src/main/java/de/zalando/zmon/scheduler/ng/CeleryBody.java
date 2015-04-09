@@ -44,7 +44,7 @@ public class CeleryBody {
         public String name;
         public Map<String, Parameter> paramters;
         public int check_id;
-        public List<JsonNode> entities_map;
+        public List<Map<String,String>> entities_map;
         public String responsible_team;
         public int priority = 1;
         public String team;

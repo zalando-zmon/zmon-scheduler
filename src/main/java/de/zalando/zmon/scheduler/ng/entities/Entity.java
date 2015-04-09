@@ -34,6 +34,9 @@ public class Entity {
             if (e.getValue() instanceof String) {
                 filterProperties.put(e.getKey(), (String) e.getValue());
             }
+            else if(e.getValue() instanceof Integer) {
+                filterProperties.put(e.getKey(), e.getValue() + "");
+            }
         }
     }
 

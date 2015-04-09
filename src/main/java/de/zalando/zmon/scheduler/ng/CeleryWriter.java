@@ -32,8 +32,8 @@ public class CeleryWriter {
 
         ObjectNode deliveryInfo = properties.putObject("delivery_info");
         deliveryInfo.put("priority", 0);
-        deliveryInfo.put("routing_key", "");
-        deliveryInfo.put("exchange", "");
+        deliveryInfo.put("routing_key", "default");
+        deliveryInfo.put("exchange", "zmon");
 
         try {
             String bodyString = mapper.writeValueAsString(task);
