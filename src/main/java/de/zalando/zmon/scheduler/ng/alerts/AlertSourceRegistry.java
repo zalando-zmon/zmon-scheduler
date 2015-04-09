@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AlertSourceRegistry extends SourceRegistry<AlertSource> {
 
-    private MetricRegistry metrics;
+    private MetricRegistry metrics = null;
 
     @Autowired
     public AlertSourceRegistry(ZalandoAlertConfig config,  MetricRegistry metrics) {

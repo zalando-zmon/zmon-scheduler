@@ -37,4 +37,17 @@ class ZalandoAlertConfig {
 class SchedulerConfig {
   @BeanProperty var last_run_persist = SchedulePersistType.FILE
   @BeanProperty var check_detail_metrics = false
+  @BeanProperty var thread_count = 8
+  @BeanProperty var check_filter : List[Int] = List()
+  @BeanProperty var entity_teams : List[String] = List()
+  @BeanProperty var default_queue : String = "zmon:queue:default"
+
+  // Mapping based on check url prefix
+  @BeanProperty var queue_mapping_by_url : Map[String, String] = Map()
+
+  // Map certrain check IDs to queue
+  @BeanProperty var queue_mapping : Map[Int, String] = Map()
+
+  // Map certrain properties to queues e.g. "dc":"gth" => "dclocal:gth"
+  @BeanProperty var queue_property_mapping : List[Map[String,Map[String,String]]] = List()
 }

@@ -1,6 +1,7 @@
 package de.zalando.zmon.scheduler.ng;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import de.zalando.zmon.scheduler.ng.alerts.Parameter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,7 +42,7 @@ public class CeleryBody {
         public int id;
         public String condition;
         public String name;
-        public Map<String, Object> paramters;
+        public Map<String, Parameter> paramters;
         public int check_id;
         public List<JsonNode> entities_map;
         public String responsible_team;

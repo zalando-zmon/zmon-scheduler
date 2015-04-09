@@ -16,22 +16,23 @@ public class AlertRepository extends CachedRepository<Integer, AlertSourceRegist
 
     private void fill() {
         Map<Integer, AlertDefinition> m = new HashMap<>();
-        Map<Integer, List<AlertDefinition>> mCheckId = new HashMap<>();
+        Map<Integer, List<AlertDefinition>> newByCheckId = new HashMap<>();
 
         for(String name : registry.getSourceNames()) {
             for(AlertDefinition ad: registry.get(name).getCollection()) {
                 m.put(ad.getId(), ad);
-                if(mCheckId.containsKey(ad.getCheckDefinitionId())) {
-                    mCheckId.get(ad.getCheckDefinitionId()).add(ad);
+                if(newByCheckId.containsKey(ad.getCheckDefinitionId())) {
+                    newByCheckId.get(ad.getCheckDefinitionId()).add(ad);
                 }
                 else {
-                    List<AlertDefinition> ads = new ArrayList<>(3);
+                    List<AlertDefinition> ads = new ArrayList<>(1);
                     ads.add(ad);
-                    mCheckId.put(ad.getCheckDefinitionId(), ads);
+                    newByCheckId.put(ad.getCheckDefinitionId(), ads);
                 }
             }
         }
 
+        byCheckId = newByCheckId;
         currentMap = m;
     }
 

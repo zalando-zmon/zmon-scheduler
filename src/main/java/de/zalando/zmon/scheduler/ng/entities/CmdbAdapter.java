@@ -21,7 +21,9 @@ public class CmdbAdapter extends EntityAdapter {
     private final MetricRegistry metrics;
     private final Timer timer;
 
-    private static Logger LOG = LoggerFactory.getLogger(CmdbAdapter.class);
+    private static final List<String> FIELDS = Arrays.asList("host","id","role","role_name","type","external_ip","internal_ip","virt_type","physcial_machine");
+
+    private static final Logger LOG = LoggerFactory.getLogger(CmdbAdapter.class);
 
     public CmdbAdapter(String url, String user, String password, MetricRegistry metrics) {
         super("CmdbAdapter");
@@ -48,6 +50,8 @@ public class CmdbAdapter extends EntityAdapter {
 
     @Override
     public Collection<Entity> getCollection() {
+        LOG.info("Loading collection...");
+
 
         RestTemplate rt = new RestTemplate();
         HttpEntity<String> request = new HttpEntity<>(getWithAuth());
@@ -64,6 +68,13 @@ public class CmdbAdapter extends EntityAdapter {
                 continue;
             }
 
+            Set<String> keys = new HashSet<>(base.keySet());
+            for(String k : keys) {
+                if(!FIELDS.contains(k)) {
+                    base.remove(k);
+                }
+            }
+
             if(base.containsKey("physical_machine")) {
                 Map<String, Object> physicalMachine = (Map<String, Object>) base.get("physical_machine");
                 if(null!=physicalMachine && physicalMachine.containsKey("data_center_code")) {
@@ -76,6 +87,7 @@ public class CmdbAdapter extends EntityAdapter {
                 base.remove("physical_machine");
             }
 
+            base.put("host", hostName);
             base.put("type","host");
 
             Entity entity = new Entity(hostName, "CmdbAdapter");

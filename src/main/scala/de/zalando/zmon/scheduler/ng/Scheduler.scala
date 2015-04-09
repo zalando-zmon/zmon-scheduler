@@ -59,6 +59,10 @@ class Check(val id: Integer, val repo : CheckRepository) {
 
 class Alert(var id : Integer, val repo : AlertRepository) {
 
+  def getAlertDef() = {
+    repo.get(id)
+  }
+
   def matchEntity(entity : Entity): Boolean = {
     val properties = entity.getFilterProperties
     for(inFilter <- repo.get(id).getEntities) {
@@ -79,7 +83,7 @@ object ScheduledCheck {
   val LOG = LoggerFactory.getLogger(ScheduledCheck.getClass)
 }
 
-class ScheduledCheck(private val rate : Long, var lastRun:Long, private val check : Check, private val alerts : mutable.MutableList[Alert], entityRepo : EntityRepository, private val config : SchedulerConfig, private val metrics: SchedulerMetrics) extends Runnable {
+class ScheduledCheck(private val rate : Long, var lastRun:Long, private val check : Check, private val alerts : mutable.MutableList[Alert], entityRepo : EntityRepository)(implicit private val config : SchedulerConfig, private val metrics: SchedulerMetrics) extends Runnable {
 
   val checkMeter : Meter = if (config.check_detail_metrics) metrics.metrics.meter("scheduler.check."+check.id) else null
 
@@ -88,6 +92,8 @@ class ScheduledCheck(private val rate : Long, var lastRun:Long, private val chec
     if(checkMeter != null) {
       checkMeter.mark()
     }
+
+    ScheduledCheck.LOG.info(CommandWriter.write(entity, check, alerts))
 
     metrics.totalChecks.mark()
   }
@@ -101,7 +107,10 @@ class ScheduledCheck(private val rate : Long, var lastRun:Long, private val chec
             viableAlerts += alert
           }
         }
-        execute(entity, viableAlerts)
+
+        if(!viableAlerts.isEmpty) {
+          execute(entity, viableAlerts)
+        }
       }
     }
   }
@@ -115,9 +124,10 @@ object SchedulerFactory {
 class SchedulerFactory {
   @Bean
   @Autowired
-  def createScheduler(schedulerConfig : SchedulerConfig, alertRepo : AlertRepository, checkRepo: CheckRepository, entityRepo : EntityRepository, metrics: MetricRegistry) : Scheduler = {
+  def createScheduler(alertRepo : AlertRepository, checkRepo: CheckRepository, entityRepo : EntityRepository)
+                     (implicit schedulerConfig : SchedulerConfig, metrics: MetricRegistry) : Scheduler = {
     SchedulerFactory.LOG.info("Createing scheduler instance")
-    val s = new Scheduler(schedulerConfig, alertRepo, checkRepo, entityRepo, metrics)
+    val s = new Scheduler(alertRepo, checkRepo, entityRepo)
     SchedulerFactory.LOG.info("Initial scheduling of all checks")
     for(cd <- checkRepo.get()) {
       s.scheduleCheck(cd.getId)
@@ -127,25 +137,26 @@ class SchedulerFactory {
   }
 }
 
-class SchedulerMetrics(val metrics : MetricRegistry) {
+class SchedulerMetrics(implicit val metrics : MetricRegistry) {
   val totalChecks = metrics.meter("scheduler.total-checks")
 }
 
 object SchedulePersister {
   val mapper = new ObjectMapper with ScalaObjectMapper
   mapper.registerModule(DefaultScalaModule)
-  val LOG = LoggerFactory.getLogger(SchedulePersister.getClass)
 
   def loadSchedule(): Map[Integer, Long] = {
     mapper.readValue(new File("schedule.json"), new TypeReference[Map[Integer,Long]] {})
+  }
+
+  def writeSchedule( schedule : collection.concurrent.Map[Integer, Long]) = {
+    mapper.writeValue(new File("schedule.json"), schedule)
   }
 }
 
 class SchedulePersister(val scheduledChecks : scala.collection.concurrent.TrieMap[Integer, ScheduledCheck]) extends Runnable {
   override def run(): Unit = {
-    SchedulePersister.LOG.info("Serializing current schedule")
-    SchedulePersister.mapper.writeValue(new File("schedule.json"),
-                                        scheduledChecks.filter(_._2.lastRun > 0).map(x=>(x._1, x._2.lastRun)))
+    SchedulePersister.writeSchedule(scheduledChecks.filter(_._2.lastRun > 0).map(x=>(x._1, x._2.lastRun)))
   }
 }
 
@@ -153,16 +164,24 @@ object Scheduler {
   val LOG = LoggerFactory.getLogger(Scheduler.getClass())
 }
 
-class Scheduler(val schedulerConfig: SchedulerConfig, val alertRepo : AlertRepository, val checkRepo: CheckRepository, val entityRepo : EntityRepository, val metrics: MetricRegistry) {
+class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository, val entityRepo : EntityRepository)
+               (implicit val schedulerConfig: SchedulerConfig, val metrics: MetricRegistry) {
 
-  val service = new ScheduledThreadPoolExecutor(8)
+  val service = new ScheduledThreadPoolExecutor(schedulerConfig.thread_count)
   val scheduledChecks = scala.collection.concurrent.TrieMap[Integer, ScheduledCheck]()
-  val schedulerMetrics = new SchedulerMetrics(metrics)
+  implicit val schedulerMetrics = new SchedulerMetrics()
   val lastScheduleAtStartup = SchedulePersister.loadSchedule()
 
   service.scheduleAtFixedRate(new SchedulePersister(scheduledChecks), 5, 15, TimeUnit.SECONDS)
 
   def scheduleCheck(id : Integer): Unit = {
+
+    if(!schedulerConfig.check_filter.isEmpty) {
+      if (schedulerConfig.check_filter.contains(id)) {
+        return
+      }
+    }
+
     val rate = checkRepo.get(id).getInterval
     val alerts = collection.mutable.MutableList[Alert]()
 
@@ -178,7 +197,7 @@ class Scheduler(val schedulerConfig: SchedulerConfig, val alertRepo : AlertRepos
       startDelay += math.max(rate - (System.currentTimeMillis() - lastScheduled) / 1000, 0)
     }
 
-    val check = new ScheduledCheck(rate,lastScheduled, new Check(id, checkRepo), alerts, entityRepo, schedulerConfig, schedulerMetrics)
+    val check = new ScheduledCheck(rate,lastScheduled, new Check(id, checkRepo), alerts, entityRepo)
     scheduledChecks.put(id, check)
     service.scheduleAtFixedRate(check, startDelay, rate, TimeUnit.SECONDS)
   }
