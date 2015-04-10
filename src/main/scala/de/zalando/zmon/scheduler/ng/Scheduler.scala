@@ -27,13 +27,23 @@ import org.springframework.context.annotation.Configuration
  */
 
 object filter {
-  def overlaps(filter: java.util.Map[String, String], entity : java.util.Map[String, String]) : Boolean = {
+  def overlaps(filter: java.util.Map[String, String], entity : java.util.Map[String, Object]) : Boolean = {
       for ((k,v) <- filter) {
         if (!entity.containsKey(k)) {
           return false
         }
-        if (!entity.get(k).equals(v)) {
-          return false
+        val eV = entity.get(k)
+
+        // e.g. host->teams
+        if( eV.isInstanceOf[java.util.Collection[Object]]) {
+          if(!eV.asInstanceOf[java.util.Collection[Object]].contains(v)) {
+            return false
+          }
+        }
+        else {
+          if (!eV.equals(v)) {
+            return false
+          }
         }
       }
       true

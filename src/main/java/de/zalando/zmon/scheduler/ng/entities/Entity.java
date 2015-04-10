@@ -1,13 +1,15 @@
 package de.zalando.zmon.scheduler.ng.entities;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Created by jmussler on 3/31/15.
  */
 public class Entity {
-    private final Map<String, String> filterProperties = new HashMap<>();
+    private final Map<String, Object> filterProperties = new HashMap<>();
     private final Map<String, Object> properties = new HashMap<>();
     private String id;
     private String adapterName;
@@ -21,7 +23,7 @@ public class Entity {
         return id;
     }
 
-    public Map<String, String> getFilterProperties() {
+    public Map<String, Object> getFilterProperties() {
         return filterProperties;
     }
 
@@ -32,10 +34,18 @@ public class Entity {
     private void addFilterProperties(Map<String, Object> valueMap) {
         for (Map.Entry<String, Object> e : valueMap.entrySet()) {
             if (e.getValue() instanceof String) {
-                filterProperties.put(e.getKey(), (String) e.getValue());
+                filterProperties.put(e.getKey(), e.getValue());
             }
             else if(e.getValue() instanceof Integer) {
                 filterProperties.put(e.getKey(), e.getValue() + "");
+            }
+            else if(e.getValue() instanceof java.util.Collection) {
+                List<Object> list = new ArrayList<>();
+                for(Object o : (java.util.List)e.getValue()) {
+                    if(o instanceof String || o instanceof Integer)
+                        list.add(o);
+                }
+                filterProperties.put(e.getKey(), list);
             }
         }
     }
