@@ -10,7 +10,7 @@ spring:
       indent_output: true
 
 scheduler:
-  redis_host: "monitor03"
+  redis_host: "localhost"
   redis_port: 6379
   default_queue: "zmon:queue:default"
   last_run_persist: DISABLED

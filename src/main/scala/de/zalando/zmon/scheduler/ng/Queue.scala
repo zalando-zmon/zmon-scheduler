@@ -22,7 +22,7 @@ object WriterFactory {
 
   def createWriter(schedulerConfig : SchedulerConfig, metrics: MetricRegistry): QueueWriter = {
     if(schedulerConfig.redis_host!=null && !schedulerConfig.redis_host.equals("")) {
-      LOG.info("Creating Redis queue writer")
+      LOG.info(s"Creating Redis queue writer: ${schedulerConfig.redis_host} ${schedulerConfig.redis_port}")
       return new JedisQueueWriter(schedulerConfig.redis_host, schedulerConfig.redis_port, metrics)
     }
     LOG.info("Creating LOG queue writer")
