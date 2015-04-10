@@ -1,0 +1,20 @@
+endpoints:
+  enabled: false
+  metrics:
+    enabled: true
+
+spring:
+  jackson:
+    property-naming-strategy: CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES
+    serialization:
+      indent_output: true
+
+scheduler:
+  redis_host: "monitor03"
+  redis_port: 6379
+  default_queue: "zmon:queue:default"
+  last_run_persist: DISABLED
+  check_detail_metrics: true
+  thread_count: 8
+  check_filter: [13]
+  disable_persisted_schedule: true

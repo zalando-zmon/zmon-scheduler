@@ -84,7 +84,7 @@ object ScheduledCheck {
   val LOG = LoggerFactory.getLogger(ScheduledCheck.getClass)
 }
 
-class ScheduledCheck(private val rate : Long, var lastRun:Long, private val check : Check, private val alerts : mutable.MutableList[Alert], entityRepo : EntityRepository)(implicit private val config : SchedulerConfig, private val metrics: SchedulerMetrics) extends Runnable {
+class ScheduledCheck(private val selector : QueueSelector, private val rate : Long, var lastRun:Long, private val check : Check, private val alerts : mutable.MutableList[Alert], entityRepo : EntityRepository)(implicit private val config : SchedulerConfig, private val metrics: SchedulerMetrics) extends Runnable {
 
   val checkMeter : Meter = if (config.check_detail_metrics) metrics.metrics.meter("scheduler.check."+check.id) else null
 
@@ -94,8 +94,7 @@ class ScheduledCheck(private val rate : Long, var lastRun:Long, private val chec
       checkMeter.mark()
     }
 
-    val command = CommandWriter.write(entity, check, alerts)
-    JedisWriter.jedis.rpush("zmon:queue:default", command)
+    selector.execute(entity, check, alerts)
     metrics.totalChecks.mark()
   }
 
@@ -129,10 +128,10 @@ object SchedulerFactory {
 class SchedulerFactory {
   @Bean
   @Autowired
-  def createScheduler(alertRepo : AlertRepository, checkRepo: CheckRepository, entityRepo : EntityRepository)
+  def createScheduler(alertRepo : AlertRepository, checkRepo: CheckRepository, entityRepo : EntityRepository, queueSelector : QueueSelector)
                      (implicit schedulerConfig : SchedulerConfig, metrics: MetricRegistry) : Scheduler = {
     SchedulerFactory.LOG.info("Createing scheduler instance")
-    val s = new Scheduler(alertRepo, checkRepo, entityRepo)
+    val s = new Scheduler(alertRepo, checkRepo, entityRepo, queueSelector)
     SchedulerFactory.LOG.info("Initial scheduling of all checks")
     for(cd <- checkRepo.get()) {
       s.scheduleCheck(cd.getId)
@@ -140,6 +139,8 @@ class SchedulerFactory {
     SchedulerFactory.LOG.info("Initial scheduling of all checks done")
     s
   }
+
+
 }
 
 class SchedulerMetrics(implicit val metrics : MetricRegistry) {
@@ -155,7 +156,9 @@ object SchedulePersister {
   }
 
   def writeSchedule( schedule : collection.concurrent.Map[Integer, Long]) = {
-    mapper.writeValue(new File("schedule.json"), schedule)
+    if(schedule.size > 0) {
+      mapper.writeValue(new File("schedule.json"), schedule)
+    }
   }
 }
 
@@ -169,7 +172,7 @@ object Scheduler {
   val LOG = LoggerFactory.getLogger(Scheduler.getClass())
 }
 
-class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository, val entityRepo : EntityRepository)
+class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository, val entityRepo : EntityRepository, val queueSelector : QueueSelector)
                (implicit val schedulerConfig: SchedulerConfig, val metrics: MetricRegistry) {
 
   val service = new ScheduledThreadPoolExecutor(schedulerConfig.thread_count)
@@ -183,7 +186,6 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
 
     if(!schedulerConfig.check_filter.isEmpty) {
       if(!schedulerConfig.check_filter.contains(id)) {
-        Scheduler.LOG.info("skipping check id: " + id)
         return
       }
     }
@@ -198,12 +200,12 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
     var startDelay = 1L
     var lastScheduled = 0L
 
-    if(false && lastScheduleAtStartup != null && lastScheduleAtStartup.contains(id)) {
+    if(schedulerConfig.last_run_persist!=SchedulePersistType.DISABLED && lastScheduleAtStartup != null && lastScheduleAtStartup.contains(id)) {
       lastScheduled = lastScheduleAtStartup.getOrElse(id, 0L)
       startDelay += math.max(rate - (System.currentTimeMillis() - lastScheduled) / 1000, 0)
     }
 
-    val check = new ScheduledCheck(rate,lastScheduled, new Check(id, checkRepo), alerts, entityRepo)
+    val check = new ScheduledCheck(queueSelector, rate,lastScheduled, new Check(id, checkRepo), alerts, entityRepo)
     scheduledChecks.put(id, check)
     service.scheduleAtFixedRate(check, startDelay, rate, TimeUnit.SECONDS)
   }

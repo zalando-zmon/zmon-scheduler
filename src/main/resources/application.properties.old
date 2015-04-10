@@ -8,10 +8,11 @@ testconfig.sub.refresh=60
 spring.jackson.property-naming-strategy=CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES
 spring.jackson.serialization.indent_output = true
 
-redis.servers=localhost
-redis.port=6379
+scheduler.redis_servers=localhost
+scheduler.redis_port=6379
 
 scheduler.last_run_persist=FILE
 scheduler.check_detail_metrics=true
 scheduler.thread_count = 8
 scheduler.check_filter = 13,
+scheduler.disable_persisted_schedule=true
