@@ -52,7 +52,6 @@ public class CmdbAdapter extends EntityAdapter {
     public Collection<Entity> getCollection() {
         LOG.info("Loading collection...");
 
-
         RestTemplate rt = new RestTemplate();
         HttpEntity<String> request = new HttpEntity<>(getWithAuth());
 
@@ -89,7 +88,7 @@ public class CmdbAdapter extends EntityAdapter {
 
             base.put("id", hostName);
             base.put("host", hostName);
-            base.put("type","host");
+            base.put("type", "host");
 
             Entity entity = new Entity(hostName, "CmdbAdapter");
             entity.addProperties(base);

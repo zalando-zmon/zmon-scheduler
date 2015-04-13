@@ -4,7 +4,6 @@ import com.codahale.metrics.{Meter, MetricRegistry}
 import de.zalando.zmon.scheduler.ng.entities.Entity
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
 import org.springframework.context.annotation.{Configuration, Bean}
 import redis.clients.jedis.Jedis
 
@@ -14,7 +13,6 @@ import scala.collection.mutable.ArrayBuffer
 /**
  * Created by jmussler on 4/10/15.
  */
-
 
 object WriterFactory {
 
@@ -35,15 +33,59 @@ class QueueSelectorFactory {
   @Autowired
   @Bean
   def getSelector(config :SchedulerConfig, metrics : MetricRegistry): QueueSelector = {
-    new QueueSelector(config, metrics)
+    new QueueSelector()(config, metrics)
   }
 }
 
-class  QueueSelector (val config : SchedulerConfig, val metrics : MetricRegistry) {
+abstract class Selector() {
+  def getQueue()(implicit entity : Entity, check: Check, alerts : ArrayBuffer[Alert]) : String = null
+}
+
+class RepoSelector(implicit val config : SchedulerConfig ) extends Selector {
+  override def getQueue()(implicit entity : Entity, check: Check, alerts : ArrayBuffer[Alert]) : String = {
+//    for((k, v) <- config.queue_mapping_by_url) {
+//      if(check.getCheckDef().getSourceUrl().startsWith(k)) {
+//        return v
+//      }
+//    }
+    null
+  }
+}
+
+class HardCodedSelector(implicit val config: SchedulerConfig) extends Selector {
+  override def getQueue()(implicit entity : Entity, check: Check, alerts : ArrayBuffer[Alert]) : String = {
+    if (config.queue_mapping.containsKey(check.id) ) {
+      return config.queue_mapping.get(check.id)
+    }
+    null
+  }
+}
+
+class PropertyQueueSelector(implicit val config: SchedulerConfig) extends Selector {
+  override def getQueue()(implicit entity : Entity, check: Check, alerts : ArrayBuffer[Alert]) : String = {
+    null
+  }
+}
+
+class  QueueSelector (implicit val config : SchedulerConfig, val metrics : MetricRegistry) {
   val queueWriter = WriterFactory.createWriter(config, metrics)
 
-  def execute(entity : Entity, check: Check, alerts : ArrayBuffer[Alert]) : Unit = {
+  val selectors : List[Selector]= List(new RepoSelector(), new HardCodedSelector(), new PropertyQueueSelector())
+
+  def execute()(implicit entity : Entity, check: Check, alerts : ArrayBuffer[Alert]) : Unit = {
     val command = CommandWriter.write(entity, check, alerts)
+
+    var queue : String = null
+    for(s <- selectors) {
+      if(null != queue) {
+        queue = s.getQueue()
+      }
+    }
+
+    if(null == queue) {
+      queue = config.default_queue
+    }
+
     queueWriter.exec(config.default_queue, command)
   }
 }

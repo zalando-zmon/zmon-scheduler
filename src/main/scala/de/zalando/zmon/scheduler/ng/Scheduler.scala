@@ -32,18 +32,15 @@ object filter {
         if (!entity.containsKey(k)) {
           return false
         }
-        val eV = entity.get(k)
 
-        // e.g. host->teams
-        if( eV.isInstanceOf[java.util.Collection[Object]]) {
-          if(!eV.asInstanceOf[java.util.Collection[Object]].contains(v)) {
-            return false
-          }
-        }
-        else {
-          if (!eV.equals(v)) {
-            return false
-          }
+        val eV = entity.get(k)
+        eV match {
+          case x : java.util.Collection[String] =>
+            if(!x.contains(v)) {
+              return false
+            }
+          case _ =>
+            if(!eV.equals(v)) return false
         }
       }
       true
@@ -104,7 +101,7 @@ class ScheduledCheck(private val selector : QueueSelector, private val rate : Lo
       checkMeter.mark()
     }
 
-    selector.execute(entity, check, alerts)
+    selector.execute()(entity, check, alerts)
     metrics.totalChecks.mark()
   }
 

@@ -1,6 +1,7 @@
 import org.scalatest._
 import scala.collection.convert.wrapAsJava._
 import de.zalando.zmon.scheduler.ng._
+import java.util.List
 
 class OverlapSpec extends FlatSpec with Matchers {
 
@@ -33,4 +34,23 @@ class OverlapSpec extends FlatSpec with Matchers {
     filter.overlaps(jmS(filterMap), jm(entityMap)) should be (false)
   }
 
+  "Entity" should "match team collection" in {
+    val teamCollection = new java.util.ArrayList[String]()
+    teamCollection.add("Platform/Database")
+    teamCollection.add("Platform/Software")
+    val entityMap = Map("type"->"host", "team"->teamCollection)
+    val filterMap = Map("type"->"host","team"->"Platform/Software")
+
+    filter.overlaps(jmS(filterMap), jm(entityMap)) should be (true)
+  }
+
+  "Entity" should "not match team collection" in {
+    val teamCollection = new java.util.ArrayList[String]()
+    teamCollection.add("Platform/Database")
+    teamCollection.add("Platform/Software")
+    val entityMap = Map("type"->"host", "team"->teamCollection)
+    val filterMap = Map("type"->"host","team"->"Platform/System")
+
+    filter.overlaps(jmS(filterMap), jm(entityMap)) should be (false)
+  }
 }
