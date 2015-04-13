@@ -95,7 +95,16 @@ class ScheduledCheck(private val selector : QueueSelector, private val rate : Lo
 
   val checkMeter : Meter = if (config.check_detail_metrics) metrics.metrics.meter("scheduler.check."+check.id) else null
 
+  @volatile
+  var cancel : Boolean = false
+
   def execute(entity : Entity, alerts : ArrayBuffer[Alert]): Unit = {
+    if(cancel) {
+      // throw exception, cancels future executions
+      ScheduledCheck.LOG.info("canceling future execs of: " + check.id)
+      return
+    }
+
     lastRun = System.currentTimeMillis()
     if(checkMeter != null) {
       checkMeter.mark()
@@ -188,6 +197,10 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
   val lastScheduleAtStartup = SchedulePersister.loadSchedule()
 
   service.scheduleAtFixedRate(new SchedulePersister(scheduledChecks), 5, 15, TimeUnit.SECONDS)
+
+  def scheduleImmediate(id : Integer): Unit = {
+
+  }
 
   def scheduleCheck(id : Integer): Unit = {
 

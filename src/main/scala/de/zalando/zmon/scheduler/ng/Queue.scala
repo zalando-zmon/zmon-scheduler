@@ -10,6 +10,8 @@ import redis.clients.jedis.Jedis
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ArrayBuffer
 
+import scala.collection.JavaConversions._
+
 /**
  * Created by jmussler on 4/10/15.
  */
@@ -43,11 +45,11 @@ abstract class Selector() {
 
 class RepoSelector(implicit val config : SchedulerConfig ) extends Selector {
   override def getQueue()(implicit entity : Entity, check: Check, alerts : ArrayBuffer[Alert]) : String = {
-//    for((k, v) <- config.queue_mapping_by_url) {
-//      if(check.getCheckDef().getSourceUrl().startsWith(k)) {
-//        return v
-//      }
-//    }
+    for((k, v) <- config.queue_mapping_by_url) {
+      if(check.getCheckDef().getSourceUrl().startsWith(k)) {
+        return v
+      }
+    }
     null
   }
 }
@@ -63,6 +65,13 @@ class HardCodedSelector(implicit val config: SchedulerConfig) extends Selector {
 
 class PropertyQueueSelector(implicit val config: SchedulerConfig) extends Selector {
   override def getQueue()(implicit entity : Entity, check: Check, alerts : ArrayBuffer[Alert]) : String = {
+    for((q, fList) <- config.getQueue_property_mapping) {
+      for(f <- fList) {
+        if(filter.overlaps(f, entity.getFilterProperties)) {
+          return q
+        }
+      }
+    }
     null
   }
 }

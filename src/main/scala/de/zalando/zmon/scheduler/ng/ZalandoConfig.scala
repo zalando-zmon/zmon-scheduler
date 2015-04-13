@@ -54,5 +54,5 @@ class SchedulerConfig {
   @BeanProperty var queue_mapping : java.util.Map[Integer, String] = new java.util.HashMap[Integer, String]()
 
   // Map certrain properties to queues e.g. "dc":"gth" => "dclocal:gth"
-  @BeanProperty var queue_property_mapping : java.util.List[java.util.Map[String,java.util.Map[String,String]]] = new java.util.ArrayList[util.Map[String, util.Map[String, String]]]()
+  @BeanProperty var queue_property_mapping : java.util.Map[String,java.util.List[java.util.Map[String,String]]] = new util.HashMap[String,java.util.List[java.util.Map[String,String]]]()
 }
