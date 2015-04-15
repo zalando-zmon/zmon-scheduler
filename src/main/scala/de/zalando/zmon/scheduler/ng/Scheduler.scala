@@ -2,7 +2,7 @@ package de.zalando.zmon.scheduler.ng
 
 import java.io.{FileWriter, OutputStreamWriter}
 import java.io.File
-import java.util.concurrent.{TimeUnit, ScheduledThreadPoolExecutor}
+import java.util.concurrent.{ScheduledExecutorService, ScheduledFuture, TimeUnit, ScheduledThreadPoolExecutor}
 
 import com.codahale.metrics.{Meter, MetricRegistry}
 import com.fasterxml.jackson.core.`type`.TypeReference
@@ -91,16 +91,46 @@ object ScheduledCheck {
   val LOG = LoggerFactory.getLogger(ScheduledCheck.getClass)
 }
 
-class ScheduledCheck(private val selector : QueueSelector, private val rate : Long, var lastRun:Long, private val check : Check, private val alerts : mutable.MutableList[Alert], entityRepo : EntityRepository)(implicit private val config : SchedulerConfig, private val metrics: SchedulerMetrics) extends Runnable {
+class ScheduledCheck(val id : Integer,
+                     private val selector : QueueSelector,
+                     private val checkRepo : CheckRepository,
+                     private val alertRepo: AlertRepository,
+                     val entityRepo : EntityRepository)
+                    (implicit private val config : SchedulerConfig, private val metrics: SchedulerMetrics) extends Runnable {
 
+  var lastRun : Long = 0
+  val check = new Check(id, checkRepo)
   val checkMeter : Meter = if (config.check_detail_metrics) metrics.metrics.meter("scheduler.check."+check.id) else null
+
+  private var taskFuture : ScheduledFuture[_] = null
+
+  def getAlerts(): mutable.MutableList[Alert] = {
+    val alerts = collection.mutable.MutableList[Alert]()
+
+    for(ad <- alertRepo.getByCheckId(id)) {
+      alerts += new Alert(ad.getId, alertRepo)
+    }
+
+    alerts
+  }
+
+  def schedule(service : ScheduledExecutorService, delay: Long): Unit = {
+    this.synchronized {
+      if(taskFuture == null && delay > 0) {
+        // set last run to roughly last execution during first scheduling
+        lastRun = System.currentTimeMillis() - (check.getCheckDef.getInterval * 1000L - delay * 1000L)
+      }
+      if(taskFuture != null) taskFuture.cancel(false) // this should only happen for imidiate evaluation triggered by UI
+      taskFuture = service.scheduleAtFixedRate(this, delay, check.getCheckDef.getInterval, TimeUnit.SECONDS)
+    }
+  }
 
   @volatile
   var cancel : Boolean = false
 
   def execute(entity : Entity, alerts : ArrayBuffer[Alert]): Unit = {
     if(cancel) {
-      // throw exception, cancels future executions
+      taskFuture.cancel(false)
       ScheduledCheck.LOG.info("canceling future execs of: " + check.id)
       return
     }
@@ -118,7 +148,7 @@ class ScheduledCheck(private val selector : QueueSelector, private val rate : Lo
     for(entity <- entityRepo.get()) {
       if(check.matchEntity(entity)) {
         val viableAlerts = ArrayBuffer[Alert]()
-        for(alert <- alerts) {
+        for(alert <- getAlerts()) {
           if(alert.matchEntity(entity)) {
             viableAlerts += alert
           }
@@ -155,8 +185,6 @@ class SchedulerFactory {
     SchedulerFactory.LOG.info("Initial scheduling of all checks done")
     s
   }
-
-
 }
 
 class SchedulerMetrics(implicit val metrics : MetricRegistry) {
@@ -164,6 +192,7 @@ class SchedulerMetrics(implicit val metrics : MetricRegistry) {
 }
 
 object SchedulePersister {
+
   val mapper = new ObjectMapper with ScalaObjectMapper
   mapper.registerModule(DefaultScalaModule)
 
@@ -191,42 +220,53 @@ object Scheduler {
 class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository, val entityRepo : EntityRepository, val queueSelector : QueueSelector)
                (implicit val schedulerConfig: SchedulerConfig, val metrics: MetricRegistry) {
 
-  val service = new ScheduledThreadPoolExecutor(schedulerConfig.thread_count)
-  val scheduledChecks = scala.collection.concurrent.TrieMap[Integer, ScheduledCheck]()
+  private val service = new ScheduledThreadPoolExecutor(schedulerConfig.thread_count)
+  private val scheduledChecks = scala.collection.concurrent.TrieMap[Integer, ScheduledCheck]()
+
   implicit val schedulerMetrics = new SchedulerMetrics()
   val lastScheduleAtStartup = SchedulePersister.loadSchedule()
 
   service.scheduleAtFixedRate(new SchedulePersister(scheduledChecks), 5, 15, TimeUnit.SECONDS)
 
-  def scheduleImmediate(id : Integer): Unit = {
+  def viableCheck(id : Integer) : Boolean = {
+    if(!schedulerConfig.check_filter.isEmpty) {
+      if(!schedulerConfig.check_filter.contains(id)) {
+        return false
+      }
+    }
+    true
+  }
 
+  def schedule(id: Integer, delay: Long) : Unit = {
+    this.synchronized {
+      var scheduledCheck = scheduledChecks.getOrElse(id, null)
+      if(scheduledCheck==null){
+        scheduledCheck = new ScheduledCheck(id, queueSelector, checkRepo, alertRepo, entityRepo)
+        scheduledChecks.put(id, scheduledCheck)
+      }
+      scheduledCheck.schedule(service, delay)
+    }
+  }
+
+  def executeImmediate(id : Integer): Unit = {
+    if(!viableCheck(id)) return
+    schedule(id, 0)
   }
 
   def scheduleCheck(id : Integer): Unit = {
-
-    if(!schedulerConfig.check_filter.isEmpty) {
-      if(!schedulerConfig.check_filter.contains(id)) {
-        return
-      }
-    }
+    if(!viableCheck(id)) return
 
     val rate = checkRepo.get(id).getInterval
-    val alerts = collection.mutable.MutableList[Alert]()
-
-    for(ad <- alertRepo.getByCheckId(id)) {
-      alerts += new Alert(ad.getId, alertRepo)
-    }
-
     var startDelay = 1L
     var lastScheduled = 0L
 
-    if(schedulerConfig.last_run_persist!=SchedulePersistType.DISABLED && lastScheduleAtStartup != null && lastScheduleAtStartup.contains(id)) {
+    if(schedulerConfig.last_run_persist != SchedulePersistType.DISABLED
+         && lastScheduleAtStartup != null
+         && lastScheduleAtStartup.contains(id)) {
       lastScheduled = lastScheduleAtStartup.getOrElse(id, 0L)
       startDelay += math.max(rate - (System.currentTimeMillis() - lastScheduled) / 1000, 0)
     }
 
-    val check = new ScheduledCheck(queueSelector, rate,lastScheduled, new Check(id, checkRepo), alerts, entityRepo)
-    scheduledChecks.put(id, check)
-    service.scheduleAtFixedRate(check, startDelay, rate, TimeUnit.SECONDS)
+    schedule(id, startDelay)
   }
 }

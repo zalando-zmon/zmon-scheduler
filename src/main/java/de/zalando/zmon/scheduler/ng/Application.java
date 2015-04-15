@@ -56,6 +56,9 @@ public class Application {
     @Autowired
     ObjectMapper mapper;
 
+    @Autowired
+    Scheduler scheduler;
+
     @RequestMapping(value="/api/v1/entity-adapter", method=RequestMethod.GET)
     Collection<String> getAdapters() {
         return entityRegistry.getSourceNames();
@@ -84,6 +87,11 @@ public class Application {
     @RequestMapping(value="/api/v1/alert-source/{name}", method=RequestMethod.GET)
     Collection<AlertDefinition> getAlerts(@PathVariable(value="name") String name) {
         return alertSourceRegistry.get(name).getCollection();
+    }
+
+    @RequestMapping(value="/api/v1/trigger-check/{id}", method=RequestMethod.GET)
+    void triggerInstantEval(@PathVariable(value="id") int checkId) {
+        scheduler.executeImmediate(checkId);
     }
 
     private static class Test2 {
