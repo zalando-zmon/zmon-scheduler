@@ -57,7 +57,7 @@ public class ZalandoConfig {
 
     }
 
-    public static class Entityservice extends BaseAdapterConfig {
+    public static class Entityservice extends AuthAdapterConfig {
     }
 
     public static class Cmdb extends AuthAdapterConfig  {

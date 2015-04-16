@@ -237,20 +237,24 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
     true
   }
 
-  def schedule(id: Integer, delay: Long) : Unit = {
+  def schedule(id: Integer, delay: Long) : Long = {
     this.synchronized {
       var scheduledCheck = scheduledChecks.getOrElse(id, null)
       if(scheduledCheck==null){
         scheduledCheck = new ScheduledCheck(id, queueSelector, checkRepo, alertRepo, entityRepo)
         scheduledChecks.put(id, scheduledCheck)
       }
+      val result = scheduledCheck.lastRun
       scheduledCheck.schedule(service, delay)
+      return result
     }
   }
 
   def executeImmediate(id : Integer): Unit = {
     if(!viableCheck(id)) return
-    schedule(id, 0)
+
+    val lastRun = schedule(id, 0)
+    Scheduler.LOG.info("Schedule for immediate execution: " + id + " last run: " + ((System.currentTimeMillis()-lastRun)/1000)+"s ago")
   }
 
   def scheduleCheck(id : Integer): Unit = {

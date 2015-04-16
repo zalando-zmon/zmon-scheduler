@@ -32,13 +32,18 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
         this.metrics = metrics;
 
         if(zConfig.cmdb != null && zConfig.cmdb.url != null) {
-            CmdbAdapter a = new CmdbAdapter(zConfig.cmdb.url, zConfig.cmdb.user, zConfig.cmdb.password, metrics);
-            register(a);
+            CmdbAdapter c = new CmdbAdapter(zConfig.cmdb.url, zConfig.cmdb.user, zConfig.cmdb.password, metrics);
+            register(c);
         }
 
         if(zConfig.deployctl != null && zConfig.deployctl.url != null) {
-            DeployCtlInstanceAdapter a = new DeployCtlInstanceAdapter(zConfig.deployctl.url, zConfig.deployctl.user, zConfig.deployctl.password, metrics);
-            register(a);
+            DeployCtlInstanceAdapter d = new DeployCtlInstanceAdapter(zConfig.deployctl.url, zConfig.deployctl.user, zConfig.deployctl.password, metrics);
+            register(d);
+        }
+
+        if(zConfig.entityservice != null && zConfig.entityservice.url != null) {
+            EntityServiceAdapter e = new EntityServiceAdapter(zConfig.entityservice.url, zConfig.entityservice.user, zConfig.entityservice.password, metrics);
+            register(e);
         }
     }
 

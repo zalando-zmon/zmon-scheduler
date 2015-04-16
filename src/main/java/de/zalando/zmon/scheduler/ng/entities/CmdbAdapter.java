@@ -50,7 +50,6 @@ public class CmdbAdapter extends EntityAdapter {
 
     @Override
     public Collection<Entity> getCollection() {
-        LOG.info("Loading collection...");
 
         RestTemplate rt = new RestTemplate();
         HttpEntity<String> request = new HttpEntity<>(getWithAuth());
