@@ -37,7 +37,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
         }
 
         if(zConfig.deployctl != null && zConfig.deployctl.url != null) {
-            DeployCtlInstanceAdapter a = new DeployCtlInstanceAdapter(metrics);
+            DeployCtlInstanceAdapter a = new DeployCtlInstanceAdapter(zConfig.deployctl.url, zConfig.deployctl.user, zConfig.deployctl.password, metrics);
             register(a);
         }
     }
