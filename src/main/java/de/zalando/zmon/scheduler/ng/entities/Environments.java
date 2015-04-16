@@ -23,7 +23,7 @@ public class Environments {
         environmentMap.put("perf.staging","performance-staging");
         environmentMap.put("performance-staging","performance-staging");
         environmentMap.put("live","live");
-        environmentMap.put("live","integration");
+        environmentMap.put("integration","integration");
     }
 
     public static String getNormalized(String name) {
