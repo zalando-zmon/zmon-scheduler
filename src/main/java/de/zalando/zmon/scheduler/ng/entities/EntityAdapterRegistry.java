@@ -1,6 +1,7 @@
 package de.zalando.zmon.scheduler.ng.entities;
 
 import com.codahale.metrics.MetricRegistry;
+import de.zalando.zmon.scheduler.ng.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.SourceRegistry;
 import de.zalando.zmon.scheduler.ng.ZalandoConfig;
 import org.slf4j.Logger;
@@ -22,14 +23,18 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
 
     private final MetricRegistry metrics;
 
-    public EntityAdapterRegistry(MetricRegistry metrics) {
+    public EntityAdapterRegistry(SchedulerConfig config, MetricRegistry metrics) {
         this.metrics = metrics;
         register(EMPTY_ADAPTER);
     }
 
     @Autowired
-    public EntityAdapterRegistry(ZalandoConfig zConfig, MetricRegistry metrics) {
+    public EntityAdapterRegistry(SchedulerConfig config, ZalandoConfig zConfig, MetricRegistry metrics) {
         this.metrics = metrics;
+
+        if(config.enable_global_entity()) {
+            register(new GlobalAdapter());
+        }
 
         if(zConfig.cmdb != null && zConfig.cmdb.url != null) {
             CmdbAdapter c = new CmdbAdapter(zConfig.cmdb.url, zConfig.cmdb.user, zConfig.cmdb.password, metrics);

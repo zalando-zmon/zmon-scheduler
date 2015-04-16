@@ -73,7 +73,10 @@ class Alert(var id : Integer, val repo : AlertRepository) {
 
   def matchEntity(entity : Entity): Boolean = {
     val properties = entity.getFilterProperties
-    for(inFilter <- repo.get(id).getEntities) {
+    val entityFilters = repo.get(id).getEntities
+    if ( entityFilters.size()==0 ) return true
+
+    for(inFilter <- entityFilters) {
       if(filter.overlaps(inFilter, properties)) {
         for(outFilter <- repo.get(id).getEntitiesExclude) {
           if(filter.overlaps(outFilter, properties)) {
@@ -135,6 +138,8 @@ class ScheduledCheck(val id : Integer,
       return
     }
 
+    // ScheduledCheck.LOG.info("Scheduling: " + id + " after: " + ((System.currentTimeMillis()-lastRun)/1000.0))
+
     lastRun = System.currentTimeMillis()
     if(checkMeter != null) {
       checkMeter.mark()
@@ -145,25 +150,26 @@ class ScheduledCheck(val id : Integer,
   }
 
   override def run(): Unit = {
-    for(entity <- entityRepo.get()) {
-      if(check.matchEntity(entity)) {
-        val viableAlerts = ArrayBuffer[Alert]()
-        for(alert <- getAlerts()) {
-          if(alert.matchEntity(entity)) {
-            viableAlerts += alert
+    try {
+      for (entity <- entityRepo.get()) {
+        if (check.matchEntity(entity)) {
+          val viableAlerts = ArrayBuffer[Alert]()
+          for (alert <- getAlerts()) {
+            if (alert.matchEntity(entity)) {
+              viableAlerts += alert
+            }
           }
-        }
 
-        if(!viableAlerts.isEmpty) {
-          execute(entity, viableAlerts)
+          if (!viableAlerts.isEmpty) {
+            execute(entity, viableAlerts)
+          }
         }
       }
     }
+    catch {
+      case e : Exception => ScheduledCheck.LOG.error("", e)
+    }
   }
-}
-
-object JedisWriter {
-  val jedis = new Jedis("localhost", 6379)
 }
 
 object SchedulerFactory {

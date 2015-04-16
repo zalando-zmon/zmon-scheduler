@@ -43,6 +43,7 @@ class SchedulerConfig {
   @BeanProperty var check_filter : java.util.List[Integer] = new util.ArrayList[Integer]()
   @BeanProperty var entity_teams : java.util.List[String] = new util.ArrayList[String]()
   @BeanProperty var default_queue : String = "zmon:queue:default"
+  @BeanProperty var enable_global_entity : Boolean = false
 
   @BeanProperty var redis_host : String = ""
   @BeanProperty var redis_port : Int = 6379

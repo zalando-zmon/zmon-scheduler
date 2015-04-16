@@ -13,6 +13,20 @@ class OverlapSpec extends FlatSpec with Matchers {
     mapAsJavaMap(m)
   }
 
+  "GLOBAL" should "match global" in {
+    val entityMap : Map[String, Object] = Map("type"->"GLOBAL")
+    val filterMap : Map[String, String] = Map("type"->"GLOBAL")
+
+    filter.overlaps(jmS(filterMap), jm(entityMap)) should be (true)
+  }
+
+  "GLOBAL" should "match empty filter" in {
+    val entityMap : Map[String, Object] = Map("type"->"GLOBAL")
+    val filterMap : Map[String, String] = Map()
+
+    filter.overlaps(jmS(filterMap), jm(entityMap)) should be (true)
+  }
+
   "Entity" should "match by type" in {
     val entityMap : Map[String, Object] = Map("host"->"host1","type"->"host")
     val filterMap : Map[String, String] = Map("type"->"host")

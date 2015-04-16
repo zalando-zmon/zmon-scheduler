@@ -85,7 +85,6 @@ public class CmdbAdapter extends EntityAdapter {
                 }
             }
 
-            base.put("id", hostName);
             base.put("host", hostName);
             base.put("type", "host");
 

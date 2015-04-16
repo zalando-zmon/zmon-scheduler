@@ -17,6 +17,9 @@ public class Entity {
     public Entity(String id, String adapterName) {
         this.id = id;
         this.adapterName = adapterName;
+
+        filterProperties.put("id",id);
+        properties.put("id",id);
     }
 
     public String getId() {

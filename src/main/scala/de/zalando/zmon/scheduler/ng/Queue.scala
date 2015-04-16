@@ -5,7 +5,7 @@ import de.zalando.zmon.scheduler.ng.entities.Entity
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.{Configuration, Bean}
-import redis.clients.jedis.Jedis
+import redis.clients.jedis.{JedisPoolConfig, JedisPool, Jedis}
 
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ArrayBuffer
@@ -134,10 +134,19 @@ class QueueMetrics(val metrics : MetricRegistry) {
 
 class JedisQueueWriter(host : String, port : Int = 6379, metrics : MetricRegistry) extends QueueWriter(metrics) {
 
-  private val jedis = new Jedis(host, port)
+  var jc = new JedisPoolConfig()
+  jc.setMinIdle(8)
+
+  private val jedisPool = new JedisPool(jc, host, port)
 
   override def write(queue: String, command : String) : Unit = {
-    jedis.rpush(queue, command)
+    val jedis = jedisPool.getResource
+    try {
+      jedis.rpush(queue, command)
+    }
+    finally {
+      jedis.close()
+    }
   }
 }
 

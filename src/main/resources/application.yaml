@@ -12,9 +12,10 @@ spring:
 scheduler:
   redis_host: "localhost"
   redis_port: 6379
-  default_queue: "zmon:queue:default"
+  default_queue: "zmon:queue:test"
   last_run_persist: DISABLED
   check_detail_metrics: true
   thread_count: 8
-  check_filter: [13]
+  check_filter: [1,12,30]
   disable_persisted_schedule: true
+  enable_global_entity: true
