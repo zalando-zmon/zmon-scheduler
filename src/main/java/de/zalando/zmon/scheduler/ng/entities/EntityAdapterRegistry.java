@@ -23,6 +23,10 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
 
     private final MetricRegistry metrics;
 
+    public EntityAdapterRegistry(MetricRegistry metrics) {
+        this.metrics = metrics;
+    }
+
     public EntityAdapterRegistry(SchedulerConfig config, MetricRegistry metrics) {
         this.metrics = metrics;
         register(EMPTY_ADAPTER);

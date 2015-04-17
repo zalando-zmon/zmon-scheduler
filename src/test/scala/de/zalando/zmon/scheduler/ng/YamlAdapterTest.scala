@@ -1,7 +1,9 @@
 package de.zalando.zmon.scheduler.ng
 
-import de.zalando.zmon.scheduler.ng.checks.YamlCheckSource
-import de.zalando.zmon.scheduler.ng.entities.YamlEntityAdapter
+import com.codahale.metrics.MetricRegistry
+import de.zalando.zmon.scheduler.ng.alerts.{AlertRepository, YamlAlertSource, AlertSourceRegistry}
+import de.zalando.zmon.scheduler.ng.checks.{CheckRepository, CheckSourceRegistry, YamlCheckSource}
+import de.zalando.zmon.scheduler.ng.entities.{EntityRepository, EntityAdapterRegistry, YamlEntityAdapter}
 import org.scalatest._
 
 /**
@@ -10,7 +12,22 @@ import org.scalatest._
 class YamlAdapterTest extends FlatSpec with Matchers {
   val ea = new YamlEntityAdapter("yaml-entites","dummy_data/entities.yaml")
   val cs = new YamlCheckSource("yaml-checks","dummy_data/checks.yaml")
-  val as = new YamlCheckSource("yaml-alerts","dummy_data/alerts.yaml")
+  val as = new YamlAlertSource("yaml-alerts","dummy_data/alerts.yaml")
+
+  val metrics = new MetricRegistry()
+
+  val er = new EntityAdapterRegistry(metrics)
+  er.register(ea)
+
+  val cr = new CheckSourceRegistry(metrics)
+  cr.register(cs)
+
+  val ar = new AlertSourceRegistry(metrics)
+  ar.register(as)
+
+  val checkRepo = new CheckRepository(cr)
+  val alertRepo = new AlertRepository(ar)
+  val entityRepository = new EntityRepository(er)
 
   "Entities" should "contain 2 entites" in {
     ea.getCollection.size() should be (2)

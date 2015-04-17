@@ -22,12 +22,77 @@ object WriterFactory {
   val LOG = LoggerFactory.getLogger(WriterFactory.getClass())
 
   def createWriter(schedulerConfig : SchedulerConfig, metrics: MetricRegistry): QueueWriter = {
-    if(schedulerConfig.redis_host!=null && !schedulerConfig.redis_host.equals("")) {
+    if(schedulerConfig.task_writer_type == TaskWriterType.REDIS) {
       LOG.info(s"Creating Redis queue writer: ${schedulerConfig.redis_host} ${schedulerConfig.redis_port}")
       return new JedisQueueWriter(schedulerConfig.redis_host, schedulerConfig.redis_port, metrics)
     }
-    LOG.info("Creating LOG queue writer")
-    new LogQueueWriter(metrics)
+    else if (schedulerConfig.task_writer_type == TaskWriterType.ARRAY_LIST) {
+      LOG.info("creating ArrayQueueWriter")
+      return new ArrayQueueWriter(metrics)
+    }
+    else {
+      LOG.info("Creating LOG queue writer")
+      new LogQueueWriter(metrics)
+    }
+  }
+}
+
+abstract class QueueWriter(metrics : MetricRegistry) {
+  private val queueMetrics = new QueueMetrics(metrics)
+
+  def exec(queue : String, command : String ): Unit = {
+    write(queue, command)
+    queueMetrics.mark(queue)
+  }
+
+  protected def write(queue: String, command : String) : Unit = {}
+}
+
+class ArrayQueueWriter(metrics : MetricRegistry) extends QueueWriter(metrics) {
+  val tasks = new mutable.HashMap[String, ArrayBuffer[String]]()
+
+  override def write(queue : String, command : String): Unit = {
+    this.synchronized {
+      var l = tasks.getOrElse(queue,null)
+      if(null==l) {
+        l = new ArrayBuffer[String]()
+        tasks.put(queue, l)
+      }
+      l.add(command)
+    }
+  }
+
+  def getTasks(queue : String): ArrayBuffer[String] = {
+    tasks.getOrElse(queue, null)
+  }
+}
+
+class JedisQueueWriter(host : String, port : Int = 6379, metrics : MetricRegistry) extends QueueWriter(metrics) {
+
+  var jc = new JedisPoolConfig()
+  jc.setMinIdle(8)
+
+  private val jedisPool = new JedisPool(jc, host, port)
+
+  override def write(queue: String, command : String) : Unit = {
+    val jedis = jedisPool.getResource
+    try {
+      jedis.rpush(queue, command)
+    }
+    finally {
+      jedisPool.returnResource(jedis)
+    }
+  }
+}
+
+object LogQueueWriter {
+  val LOG = LoggerFactory.getLogger(LogQueueWriter.getClass)
+}
+
+class LogQueueWriter(metrics : MetricRegistry) extends QueueWriter(metrics) {
+
+  override def write(queue : String, command :String ): Unit = {
+    LogQueueWriter.LOG.info("q: " + queue + " command: " + command)
   }
 }
 
@@ -35,8 +100,14 @@ object WriterFactory {
 class QueueSelectorFactory {
   @Autowired
   @Bean
-  def getSelector(config :SchedulerConfig, metrics : MetricRegistry): QueueSelector = {
-    new QueueSelector()(config, metrics)
+  def getWriter(config: SchedulerConfig, metrics : MetricRegistry): QueueWriter = {
+    WriterFactory.createWriter(config, metrics)
+  }
+
+  @Autowired
+  @Bean
+  def getSelector(writer : QueueWriter, config :SchedulerConfig, metrics : MetricRegistry): QueueSelector = {
+    new QueueSelector(writer)(config, metrics)
   }
 }
 
@@ -82,10 +153,8 @@ class PropertyQueueSelector(implicit val config: SchedulerConfig) extends Select
   }
 }
 
-class  QueueSelector (implicit val config : SchedulerConfig, val metrics : MetricRegistry) {
-  val queueWriter = WriterFactory.createWriter(config, metrics)
-
-  val selectors : List[Selector]= List(new RepoSelector(), new HardCodedSelector(), new PropertyQueueSelector())
+class  QueueSelector(writer : QueueWriter)(implicit val config : SchedulerConfig, val metrics : MetricRegistry) {
+  val selectors : List[Selector] = List(new RepoSelector(), new HardCodedSelector(), new PropertyQueueSelector())
 
   def execute()(implicit entity : Entity, check: Check, alerts : ArrayBuffer[Alert]) : Unit = {
     val command = CommandWriter.write(entity, check, alerts)
@@ -101,7 +170,7 @@ class  QueueSelector (implicit val config : SchedulerConfig, val metrics : Metri
       queue = config.default_queue
     }
 
-    queueWriter.exec(config.default_queue, command)
+    writer.exec(config.default_queue, command)
   }
 }
 
@@ -127,52 +196,3 @@ class QueueMetrics(val metrics : MetricRegistry) {
   }
 }
 
-abstract class QueueWriter(metrics : MetricRegistry) {
-  private val queueMetrics = new QueueMetrics(metrics)
-
-  def exec(queue : String, command : String ): Unit = {
-    write(queue, command)
-    queueMetrics.mark(queue)
-  }
-
-  protected def write(queue: String, command : String) : Unit = {}
-}
-
-class ArrayQueueWriter(metrics : MetricRegistry) extends QueueWriter(metrics) {
-  val tasks = new mutable.HashMap[String, List[String]]()
-
-  override def write(queue : String, command : String): Unit = {
-    this.synchronized {
-
-    }
-  }
-}
-
-class JedisQueueWriter(host : String, port : Int = 6379, metrics : MetricRegistry) extends QueueWriter(metrics) {
-
-  var jc = new JedisPoolConfig()
-  jc.setMinIdle(8)
-
-  private val jedisPool = new JedisPool(jc, host, port)
-
-  override def write(queue: String, command : String) : Unit = {
-    val jedis = jedisPool.getResource
-    try {
-      jedis.rpush(queue, command)
-    }
-    finally {
-      jedisPool.returnResource(jedis)
-    }
-  }
-}
-
-object LogQueueWriter {
-  val LOG = LoggerFactory.getLogger(LogQueueWriter.getClass)
-}
-
-class LogQueueWriter(metrics : MetricRegistry) extends QueueWriter(metrics) {
-
-  override def write(queue : String, command :String ): Unit = {
-    LogQueueWriter.LOG.info("q: " + queue + " command: " + command)
-  }
-}

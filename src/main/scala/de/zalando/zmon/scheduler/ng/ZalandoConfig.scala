@@ -45,6 +45,7 @@ class SchedulerConfig {
   @BeanProperty var default_queue : String = "zmon:queue:default"
   @BeanProperty var enable_global_entity : Boolean = false
 
+  @BeanProperty var task_writer_type = TaskWriterType.REDIS
   @BeanProperty var redis_host : String = ""
   @BeanProperty var redis_port : Int = 6379
 

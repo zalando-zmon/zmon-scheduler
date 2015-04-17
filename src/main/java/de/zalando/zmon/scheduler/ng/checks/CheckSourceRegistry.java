@@ -1,5 +1,6 @@
 package de.zalando.zmon.scheduler.ng.checks;
 
+import com.codahale.metrics.MetricRegistry;
 import de.zalando.zmon.scheduler.ng.SourceRegistry;
 import de.zalando.zmon.scheduler.ng.ZalandoCheckConfig;
 import de.zalando.zmon.scheduler.ng.ZalandoControllerConfig;
@@ -17,6 +18,10 @@ import java.util.Map;
 public class CheckSourceRegistry extends SourceRegistry<CheckSource> {
 
     public CheckSourceRegistry() {
+
+    }
+
+    public CheckSourceRegistry(MetricRegistry metrics) {
 
     }
 

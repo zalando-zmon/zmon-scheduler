@@ -15,6 +15,10 @@ public class AlertSourceRegistry extends SourceRegistry<AlertSource> {
 
     private MetricRegistry metrics = null;
 
+    public AlertSourceRegistry(MetricRegistry metrics) {
+        this.metrics= metrics;
+    }
+
     @Autowired
     public AlertSourceRegistry(ZalandoAlertConfig config,  MetricRegistry metrics) {
         this.metrics = metrics;
