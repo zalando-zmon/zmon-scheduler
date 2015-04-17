@@ -153,7 +153,7 @@ class PropertyQueueSelector(implicit val config: SchedulerConfig) extends Select
   }
 }
 
-class  QueueSelector(writer : QueueWriter)(implicit val config : SchedulerConfig, val metrics : MetricRegistry) {
+class QueueSelector(writer : QueueWriter)(implicit val config : SchedulerConfig, val metrics : MetricRegistry) {
   val selectors : List[Selector] = List(new RepoSelector(), new HardCodedSelector(), new PropertyQueueSelector())
 
   def execute()(implicit entity : Entity, check: Check, alerts : ArrayBuffer[Alert]) : Unit = {

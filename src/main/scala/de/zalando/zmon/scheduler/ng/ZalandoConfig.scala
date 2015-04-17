@@ -37,7 +37,7 @@ class ZalandoAlertConfig {
 @Profile(Array("zalando"))
 @ConfigurationProperties(prefix = "scheduler")
 class SchedulerConfig {
-  @BeanProperty var last_run_persist = SchedulePersistType.FILE
+  @BeanProperty var last_run_persist = SchedulePersistType.DISABLED
   @BeanProperty var check_detail_metrics = false
   @BeanProperty var thread_count = 8
   @BeanProperty var check_filter : java.util.List[Integer] = new util.ArrayList[Integer]()
@@ -45,7 +45,7 @@ class SchedulerConfig {
   @BeanProperty var default_queue : String = "zmon:queue:default"
   @BeanProperty var enable_global_entity : Boolean = false
 
-  @BeanProperty var task_writer_type = TaskWriterType.REDIS
+  @BeanProperty var task_writer_type = TaskWriterType.ARRAY_LIST
   @BeanProperty var redis_host : String = ""
   @BeanProperty var redis_port : Int = 6379
 

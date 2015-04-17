@@ -2,6 +2,7 @@ package de.zalando.zmon.scheduler.ng.alerts;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,10 @@ public class YamlAlertSource extends AlertSource {
     private String fileName;
 
     private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+
+    static {
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
+    }
 
     public YamlAlertSource(String name, String fileName) {
         super(name);

@@ -1,6 +1,8 @@
 - id: 1
+  check_definition_id: 1
   name: "Alert 1"
   entities: []
 - id: 2
+  check_definition_id: 1
   name: "Alert 2"
   entities: []

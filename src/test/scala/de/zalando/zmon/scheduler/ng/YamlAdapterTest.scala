@@ -14,7 +14,7 @@ class YamlAdapterTest extends FlatSpec with Matchers {
   val cs = new YamlCheckSource("yaml-checks","dummy_data/checks.yaml")
   val as = new YamlAlertSource("yaml-alerts","dummy_data/alerts.yaml")
 
-  val metrics = new MetricRegistry()
+  implicit val metrics = new MetricRegistry()
 
   val er = new EntityAdapterRegistry(metrics)
   er.register(ea)
@@ -27,7 +27,15 @@ class YamlAdapterTest extends FlatSpec with Matchers {
 
   val checkRepo = new CheckRepository(cr)
   val alertRepo = new AlertRepository(ar)
-  val entityRepository = new EntityRepository(er)
+  val entityRepo = new EntityRepository(er)
+
+  implicit val config = new SchedulerConfig()
+  implicit val schedulerMetrics = new SchedulerMetrics()
+
+  val writer = WriterFactory.createWriter(config, metrics)
+  val selector = new QueueSelector(writer)
+
+  val check1 = new ScheduledCheck(1, selector, checkRepo, alertRepo, entityRepo)
 
   "Entities" should "contain 2 entites" in {
     ea.getCollection.size() should be (2)
@@ -39,6 +47,10 @@ class YamlAdapterTest extends FlatSpec with Matchers {
 
   "Alerts" should "contain 2 alerts" in {
     as.getCollection.size() should be (2)
+  }
+
+  "Check 1" should "match 2 entities" in {
+    check1.runCheck(true).size should be (2)
   }
 
 }

@@ -75,9 +75,12 @@ class Alert(var id : Integer, val repo : AlertRepository) {
     val properties = entity.getFilterProperties
     val entityFilters = repo.get(id).getEntities
     if ( entityFilters.size()==0 ) {
-      for(outFilter <- repo.get(id).getEntitiesExclude) {
-        if(filter.overlaps(outFilter, properties)) {
-          return false
+      val excludeEntityFilter = repo.get(id).getEntitiesExclude
+      if(excludeEntityFilter!=null) {
+        for (outFilter <- excludeEntityFilter) {
+          if (filter.overlaps(outFilter, properties)) {
+            return false
+          }
         }
       }
       return true
@@ -156,22 +159,33 @@ class ScheduledCheck(val id : Integer,
     metrics.totalChecks.mark()
   }
 
-  override def run(): Unit = {
-    try {
-      for (entity <- entityRepo.get()) {
-        if (check.matchEntity(entity)) {
-          val viableAlerts = ArrayBuffer[Alert]()
-          for (alert <- getAlerts()) {
-            if (alert.matchEntity(entity)) {
-              viableAlerts += alert
-            }
-          }
+  val lastRunEntities : mutable.ArrayBuffer[Entity]= new ArrayBuffer[Entity]()
 
-          if (!viableAlerts.isEmpty) {
-            execute(entity, viableAlerts)
+  def runCheck(dryRun : Boolean = false) : mutable.ArrayBuffer[Entity] = {
+    lastRunEntities.clear()
+
+    for (entity <- entityRepo.get()) {
+      if (check.matchEntity(entity)) {
+        val viableAlerts = ArrayBuffer[Alert]()
+        for (alert <- getAlerts()) {
+          if (alert.matchEntity(entity)) {
+            viableAlerts += alert
           }
         }
+
+        if (!viableAlerts.isEmpty) {
+          if(!dryRun) execute(entity, viableAlerts)
+          lastRunEntities.add(entity)
+        }
       }
+    }
+
+    return lastRunEntities
+  }
+
+  override def run(): Unit = {
+    try {
+      runCheck()
     }
     catch {
       case e : Exception => ScheduledCheck.LOG.error("", e)
