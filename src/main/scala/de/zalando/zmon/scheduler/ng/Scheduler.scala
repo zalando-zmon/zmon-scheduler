@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import de.zalando.zmon.scheduler.ng.alerts.{AlertRepository, AlertDefinition, AlertSourceRegistry}
-import de.zalando.zmon.scheduler.ng.checks.{CheckRepository, CheckDefinition, CheckSourceRegistry}
+import de.zalando.zmon.scheduler.ng.checks.{CheckChangeListener, CheckRepository, CheckDefinition, CheckSourceRegistry}
 import de.zalando.zmon.scheduler.ng.entities.{EntityRepository, Entity, EntityAdapterRegistry}
 
 import org.slf4j.LoggerFactory
@@ -74,7 +74,14 @@ class Alert(var id : Integer, val repo : AlertRepository) {
   def matchEntity(entity : Entity): Boolean = {
     val properties = entity.getFilterProperties
     val entityFilters = repo.get(id).getEntities
-    if ( entityFilters.size()==0 ) return true
+    if ( entityFilters.size()==0 ) {
+      for(outFilter <- repo.get(id).getEntitiesExclude) {
+        if(filter.overlaps(outFilter, properties)) {
+          return false
+        }
+      }
+      return true
+    }
 
     for(inFilter <- entityFilters) {
       if(filter.overlaps(inFilter, properties)) {
@@ -95,8 +102,8 @@ object ScheduledCheck {
 }
 
 class ScheduledCheck(val id : Integer,
-                     private val selector : QueueSelector,
-                     private val checkRepo : CheckRepository,
+                     private val selector: QueueSelector,
+                     private val checkRepo: CheckRepository,
                      private val alertRepo: AlertRepository,
                      val entityRepo : EntityRepository)
                     (implicit private val config : SchedulerConfig, private val metrics: SchedulerMetrics) extends Runnable {
@@ -176,8 +183,26 @@ object SchedulerFactory {
   val LOG = LoggerFactory.getLogger(SchedulerFactory.getClass)
 }
 
+class CheckChangedListener(val scheduler : Scheduler) extends CheckChangeListener {
+  override def notifyNewCheck(repo: CheckRepository, checkId: Int): Unit = {
+    scheduler.schedule(checkId, 0)
+  }
+
+  override def notifyCheckIntervalChange(repo: CheckRepository, checkId: Int): Unit = {
+    scheduler.executeImmediate(checkId)
+  }
+}
+
 @Configuration
 class SchedulerFactory {
+  @Bean
+  @Autowired
+  def createCheckChangeListener(checkRepo: CheckRepository, scheduler: Scheduler): CheckChangedListener = {
+    val listener = new CheckChangedListener(scheduler)
+    checkRepo.registerListener(listener)
+    listener
+  }
+
   @Bean
   @Autowired
   def createScheduler(alertRepo : AlertRepository, checkRepo: CheckRepository, entityRepo : EntityRepository, queueSelector : QueueSelector)
@@ -275,6 +300,9 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
          && lastScheduleAtStartup.contains(id)) {
       lastScheduled = lastScheduleAtStartup.getOrElse(id, 0L)
       startDelay += math.max(rate - (System.currentTimeMillis() - lastScheduled) / 1000, 0)
+    }
+    else {
+      startDelay = (rate.doubleValue() * math.random).toLong; // try to distribute everything along one interval
     }
 
     schedule(id, startDelay)

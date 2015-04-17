@@ -14,7 +14,8 @@ public class AlertRepository extends CachedRepository<Integer, AlertSourceRegist
 
     private Map<Integer, List<AlertDefinition>> byCheckId;
 
-    private void fill() {
+    @Override
+    protected void fill() {
         Map<Integer, AlertDefinition> m = new HashMap<>();
         Map<Integer, List<AlertDefinition>> newByCheckId = new HashMap<>();
 

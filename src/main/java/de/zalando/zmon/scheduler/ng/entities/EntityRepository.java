@@ -13,7 +13,8 @@ import java.util.Map;
 @Component
 public class EntityRepository extends CachedRepository<String, EntityAdapterRegistry, Entity> {
 
-    private void fill() {
+    @Override
+    protected void fill() {
         Map<String, Entity> m = new HashMap<>();
 
         for(String name : registry.getSourceNames()) {
@@ -22,6 +23,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
             }
         }
 
+        // TODO build cleanup of old entities here, or notify something responsible
         currentMap = m;
     }
 

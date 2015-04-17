@@ -1,0 +1,4 @@
+- id: "host1"
+  type: "host"
+- id: "host2"
+  type: "host"

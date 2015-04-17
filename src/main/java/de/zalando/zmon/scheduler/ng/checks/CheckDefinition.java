@@ -23,7 +23,7 @@ public class CheckDefinition {
     @XmlElement(required = true)
     private String name;
 
-    @XmlElement(required = true)
+    @XmlElement
     private String description;
 
     @XmlElement
@@ -38,7 +38,7 @@ public class CheckDefinition {
     @XmlElement
     private String potentialSolution;
 
-    @XmlElement(required = true)
+    @XmlElement
     private String owningTeam;
 
     @XmlElement(required = true)
@@ -50,13 +50,13 @@ public class CheckDefinition {
     @XmlElement(required = true)
     private String command;
 
-    @XmlElement(required = true)
+    @XmlElement
     private DefinitionStatus status;
 
     @XmlElement
     private String sourceUrl;
 
-    @XmlElement(required = true)
+    @XmlElement
     private String lastModifiedBy;
 
     public Integer getId() {

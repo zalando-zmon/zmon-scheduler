@@ -27,15 +27,13 @@ public class AlertDefinition {
     @XmlElement(required = true)
     private String name;
 
-    @XmlElement(required = true)
+    @XmlElement
     private String description;
 
-    @XmlElement(required = true)
-    @NotNull(message = "team is mandatory")
+    @XmlElement
     private String team;
 
-    @XmlElement(required = true)
-    @NotNull(message = "responsible team is mandatory")
+    @XmlElement
     private String responsibleTeam;
 
     /* Map passing
@@ -57,11 +55,10 @@ public class AlertDefinition {
     @XmlElement(required = true)
     private Integer checkDefinitionId;
 
-    @XmlElement(required = true)
-    @NotNull(message = "status is mandatory")
+    @XmlElement
     private DefinitionStatus status;
 
-    @XmlElement(required = true)
+    @XmlElement
     private Integer priority;
 
     private Date lastModified;
@@ -71,7 +68,6 @@ public class AlertDefinition {
     @XmlElement
     private String period;
 
-    @NotNull(message = "template is mandatory")
     private Boolean template;
 
     private Integer parentId;

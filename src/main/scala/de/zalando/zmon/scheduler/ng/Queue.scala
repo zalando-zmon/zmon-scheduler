@@ -8,6 +8,7 @@ import org.springframework.context.annotation.{Configuration, Bean}
 import redis.clients.jedis.{JedisPoolConfig, JedisPool, Jedis}
 
 import scala.collection.concurrent.TrieMap
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 import scala.collection.JavaConversions._
@@ -55,11 +56,16 @@ class RepoSelector(implicit val config : SchedulerConfig ) extends Selector {
 }
 
 class HardCodedSelector(implicit val config: SchedulerConfig) extends Selector {
-  override def getQueue()(implicit entity : Entity, check: Check, alerts : ArrayBuffer[Alert]) : String = {
-    if (config.queue_mapping.containsKey(check.id) ) {
-      return config.queue_mapping.get(check.id)
+
+  val mapById = new collection.mutable.HashMap[Integer, String]()
+  for((queue,ids) <- config.queue_mapping) {
+    for(id <- ids) {
+      mapById.put(id, queue)
     }
-    null
+  }
+
+  override def getQueue()(implicit entity : Entity, check: Check, alerts : ArrayBuffer[Alert]) : String = {
+    mapById.getOrElse(check.id, null)
   }
 }
 
@@ -99,17 +105,6 @@ class  QueueSelector (implicit val config : SchedulerConfig, val metrics : Metri
   }
 }
 
-abstract class QueueWriter(metrics : MetricRegistry) {
-  private val queueMetrics = new QueueMetrics(metrics)
-
-  def exec(queue : String, command : String ): Unit = {
-    write(queue, command)
-    queueMetrics.mark(queue)
-  }
-
-  protected def write(queue: String, command : String) : Unit = {}
-}
-
 class QueueMetrics(val metrics : MetricRegistry) {
   private val meters : TrieMap[String, Meter] = new TrieMap[String, Meter]()
 
@@ -132,6 +127,27 @@ class QueueMetrics(val metrics : MetricRegistry) {
   }
 }
 
+abstract class QueueWriter(metrics : MetricRegistry) {
+  private val queueMetrics = new QueueMetrics(metrics)
+
+  def exec(queue : String, command : String ): Unit = {
+    write(queue, command)
+    queueMetrics.mark(queue)
+  }
+
+  protected def write(queue: String, command : String) : Unit = {}
+}
+
+class ArrayQueueWriter(metrics : MetricRegistry) extends QueueWriter(metrics) {
+  val tasks = new mutable.HashMap[String, List[String]]()
+
+  override def write(queue : String, command : String): Unit = {
+    this.synchronized {
+
+    }
+  }
+}
+
 class JedisQueueWriter(host : String, port : Int = 6379, metrics : MetricRegistry) extends QueueWriter(metrics) {
 
   var jc = new JedisPoolConfig()
@@ -145,7 +161,7 @@ class JedisQueueWriter(host : String, port : Int = 6379, metrics : MetricRegistr
       jedis.rpush(queue, command)
     }
     finally {
-      jedis.close()
+      jedisPool.returnResource(jedis)
     }
   }
 }
