@@ -28,7 +28,7 @@ public class CheckRepository extends CachedRepository<Integer, CheckSourceRegist
 
         for(Integer id : oldMap.keySet()) {
             if(newMap.containsKey(id)) {
-                if(oldMap.get(id).getInterval()!=newMap.get(id).getInterval()) {
+                if(!oldMap.get(id).getInterval().equals(newMap.get(id).getInterval())) {
                     intervalChanged.add(id);
                 }
             }

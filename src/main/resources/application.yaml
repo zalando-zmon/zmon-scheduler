@@ -12,10 +12,16 @@ spring:
 scheduler:
   redis_host: "localhost"
   redis_port: 6379
+  redis_downtime_pubsub: "zmon:downtime_schedule:pubsub"
+  redis_downtime_requests: "zmon:downtime_schedule:requests"
+  redis_instant_eval_pubsub: "zmon:alert_evaluation:pubsub"
+  redis_instant_eval_requests: "zmon:alert_evaluation:requests"
   default_queue: "zmon:queue:default"
   last_run_persist: DISABLED
   check_detail_metrics: true
   thread_count: 8
-  check_filter: []
+  check_filter: [13]
   disable_persisted_schedule: true
   enable_global_entity: true
+  task_writer_type: REDIS
+

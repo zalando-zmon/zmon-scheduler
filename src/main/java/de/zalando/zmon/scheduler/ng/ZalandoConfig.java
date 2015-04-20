@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "zalando.entities")
 public class ZalandoConfig {
 
-    private static class BaseAdapterConfig {
+    public static class BaseAdapterConfig {
         public String url;
 
         public String getUrl() {
@@ -35,7 +35,7 @@ public class ZalandoConfig {
         }
     }
 
-    private static class AuthAdapterConfig extends BaseAdapterConfig {
+    public static class AuthAdapterConfig extends BaseAdapterConfig {
         public String user;
         public String password;
 
@@ -66,9 +66,14 @@ public class ZalandoConfig {
     public static class DeployCtl extends AuthAdapterConfig  {
     }
 
+    public static class DdsCluster extends BaseAdapterConfig {
+
+    }
+
     public Entityservice entityservice;
     public Cmdb cmdb;
     public DeployCtl deployctl;
+    public DdsCluster ddscluster;
 
     public DeployCtl getDeployctl() {
         return deployctl;
@@ -92,5 +97,13 @@ public class ZalandoConfig {
 
     public void setEntityservice(Entityservice entityservice) {
         this.entityservice = entityservice;
+    }
+
+    public DdsCluster getDdscluster() {
+        return ddscluster;
+    }
+
+    public void setDdscluster(DdsCluster ddscluster) {
+        this.ddscluster = ddscluster;
     }
 }

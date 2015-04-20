@@ -16,7 +16,6 @@ import de.zalando.zmon.scheduler.ng.entities.{EntityRepository, Entity, EntityAd
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
-import redis.clients.jedis.Jedis
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -185,6 +184,7 @@ class ScheduledCheck(val id : Integer,
 
   override def run(): Unit = {
     try {
+      ScheduledCheck.LOG.info("exec: 13")
       runCheck()
     }
     catch {
@@ -228,6 +228,10 @@ class SchedulerFactory {
       s.scheduleCheck(cd.getId)
     }
     SchedulerFactory.LOG.info("Initial scheduling of all checks done")
+
+    val instantEvalListener = new RedisInstantEvalSubscriber(s, schedulerConfig, alertRepo)
+    val downtimeEvalListener = new RedisDownTimeSubscriber(s, schedulerConfig, alertRepo)
+
     s
   }
 }

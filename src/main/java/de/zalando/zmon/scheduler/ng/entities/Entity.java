@@ -18,8 +18,8 @@ public class Entity {
         this.id = id;
         this.adapterName = adapterName;
 
-        filterProperties.put("id",id);
-        properties.put("id",id);
+        filterProperties.put("id", id);
+        properties.put("id", id);
     }
 
     public String getId() {

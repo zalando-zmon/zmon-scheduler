@@ -49,6 +49,11 @@ class SchedulerConfig {
   @BeanProperty var redis_host : String = ""
   @BeanProperty var redis_port : Int = 6379
 
+  @BeanProperty var redis_downtime_pubsub : String = ""
+  @BeanProperty var redis_downtime_requests : String = ""
+  @BeanProperty var redis_instant_eval_pubsub : String = ""
+  @BeanProperty var redis_instant_eval_requests : String = ""
+
   // Mapping based on check url prefix
   @BeanProperty var queue_mapping_by_url : java.util.Map[String, String] = new java.util.HashMap[String,String]()
 

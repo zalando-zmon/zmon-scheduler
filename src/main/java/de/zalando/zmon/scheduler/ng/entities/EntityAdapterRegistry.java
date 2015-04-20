@@ -54,6 +54,11 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
             EntityServiceAdapter e = new EntityServiceAdapter(zConfig.entityservice.url, zConfig.entityservice.user, zConfig.entityservice.password, metrics);
             register(e);
         }
+
+        if(zConfig.ddscluster != null && zConfig.ddscluster.url != null) {
+            DDSClusterAdapter dds = new DDSClusterAdapter(zConfig.ddscluster.url, metrics);
+            register(dds);
+        }
     }
 
 }
