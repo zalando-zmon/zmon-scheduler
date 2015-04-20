@@ -46,6 +46,20 @@ public class DDSClusterAdapter extends EntityAdapter {
             Entity e = new Entity(base.get("cluster")+"@"+base.get("instance_name"),"DDSAdapter");
             base.put("environment",Environments.getNormalized((String)base.get("environment")));
             base.remove("id");
+            if(!base.containsKey("pci")) {
+                base.put("pci","false");
+            }
+            else {
+                Object o = base.get("pci");
+                if(o instanceof Boolean) {
+                    if((Boolean)o) {
+                        base.put("pci", "true");
+                    }
+                    else {
+                        base.put("pci", "false");
+                    }
+                }
+            }
             e.addProperties(base);
             entities.add(e);
         }

@@ -49,7 +49,7 @@ object CommandWriter {
       alertArg.period = alertDef.getPeriod
       alertArg.team = alertDef.getTeam
       alertArg.responsible_team = alertDef.getResponsibleTeam
-      alertArg.paramters = alertDef.getParameters
+      alertArg.parameters = alertDef.getParameters
       alertArg.entities_map = alertDef.getEntities
 
       alertList.add(alertArg)

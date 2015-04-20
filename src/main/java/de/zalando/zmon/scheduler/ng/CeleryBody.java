@@ -42,7 +42,7 @@ public class CeleryBody {
         public int id;
         public String condition;
         public String name;
-        public Map<String, Parameter> paramters;
+        public Map<String, Parameter> parameters;
         public int check_id;
         public List<Map<String,String>> entities_map;
         public String responsible_team;
