@@ -184,7 +184,6 @@ class ScheduledCheck(val id : Integer,
 
   override def run(): Unit = {
     try {
-      ScheduledCheck.LOG.info("exec: " + id)
       runCheck()
     }
     catch {
