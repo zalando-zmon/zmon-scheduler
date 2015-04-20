@@ -1,10 +1,14 @@
 package de.zalando.zmon.scheduler.ng.entities;
 
 import de.zalando.zmon.scheduler.ng.CachedRepository;
+import de.zalando.zmon.scheduler.ng.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.filter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,13 +17,24 @@ import java.util.Map;
 @Component
 public class EntityRepository extends CachedRepository<String, EntityAdapterRegistry, Entity> {
 
+    private final List<Map<String,String>> baseFilter;
+
     @Override
     protected void fill() {
         Map<String, Entity> m = new HashMap<>();
 
         for(String name : registry.getSourceNames()) {
             for(Entity e: registry.get(name).getCollection()) {
-                m.put(e.getId(), e);
+                if(baseFilter.size()>0) {
+                    for(Map<String,String> f : baseFilter) {
+                        if (filter.overlaps(f, e.getFilterProperties())) {
+                            m.put(e.getId(), e);
+                        }
+                    }
+                }
+                else {
+                    m.put(e.getId(), e);
+                }
             }
         }
 
@@ -39,9 +54,21 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     }
 
     @Autowired
+    public EntityRepository(EntityAdapterRegistry registry, SchedulerConfig config) {
+        super(registry);
+
+        baseFilter = config.entity_base_filter();
+
+        currentMap = new HashMap<>();
+        fill();
+    }
+
     public EntityRepository(EntityAdapterRegistry registry) {
         super(registry);
+
+        baseFilter = new ArrayList<>();
         currentMap = new HashMap<>();
+
         fill();
     }
 }
