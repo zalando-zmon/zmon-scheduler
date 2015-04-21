@@ -21,11 +21,18 @@ public class YamlEntityAdapter extends EntityAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(YamlEntityAdapter.class);
 
     private String fileName;
+    private String type = null;
 
     private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
     static {
         mapper.setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
+    }
+
+    public YamlEntityAdapter(String name, String fileName, String type) {
+        super(name);
+        this.fileName = fileName;
+        this.type = type;
     }
 
     public YamlEntityAdapter(String name, String fileName) {
@@ -41,6 +48,9 @@ public class YamlEntityAdapter extends EntityAdapter {
 
             for(Map<String,Object> m : list) {
                 Entity e = new Entity((String)m.get("id"), getName());
+                if(type!=null) {
+                    m.put("type", type);
+                }
                 e.addProperties(m);
                 entityList.add(e);
             }

@@ -40,6 +40,10 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
             EntityServiceAdapter e = new EntityServiceAdapter(config.entity_service_url(), config.entity_service_user(), config.entity_service_password(), metrics);
             register(e);
         }
+
+        if(config.dummy_cities()!=null && !config.dummy_cities().equals("")) {
+            register(new YamlEntityAdapter("dummy-cities",config.dummy_cities(),"city"));
+        }
     }
 
     @Autowired(required=false)
@@ -48,6 +52,10 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
 
         if(config.enable_global_entity()) {
             register(new GlobalAdapter());
+        }
+
+        if(config.dummy_cities()!=null && !config.dummy_cities().equals("")) {
+            register(new YamlEntityAdapter("dummy-cities",config.dummy_cities(),"city"));
         }
 
         if(zConfig.cmdb != null && zConfig.cmdb.url != null) {
