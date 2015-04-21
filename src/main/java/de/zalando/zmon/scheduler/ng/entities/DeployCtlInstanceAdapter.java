@@ -51,6 +51,7 @@ public class DeployCtlInstanceAdapter extends EntityAdapter {
         RestTemplate rt = new RestTemplate();
         HttpEntity<String> request = new HttpEntity<>(getWithAuth());
 
+        LOG.info("Querying deployctl with credentials {}", user);
         Timer.Context tC = timer.time();
         BaseEntityList list = rt.postForObject(url, request, BaseEntityList.class);
         LOG.info("DeployCtlInstance Adapter used: {}ms", tC.stop() / 1000000);

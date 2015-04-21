@@ -77,7 +77,7 @@ public class DefaultAlertSource extends AlertSource {
 
         AlertDefinitions defs;
         if(null!=user && !"".equals(user)) {
-            LOG.info("Querying alerts with credentials");
+            LOG.info("Querying alerts with credentials {}", user);
             HttpEntity<String> request = new HttpEntity<>(getWithAuth());
             ResponseEntity<AlertDefinitions> response;
             Timer.Context ct = timer.time();

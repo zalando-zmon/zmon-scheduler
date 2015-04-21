@@ -62,7 +62,7 @@ public class DefaultCheckSource extends CheckSource {
 
         CheckDefinitions defs;
         if(null!=user && !"".equals(user)) {
-            LOG.info("Querying checks with credentials");
+            LOG.info("Querying checks with credentials {}", user);
             HttpEntity<String> request = new HttpEntity<>(getWithAuth());
             ResponseEntity<CheckDefinitions> response;
             response = rt.exchange(url, HttpMethod.GET, request, CheckDefinitions.class);
