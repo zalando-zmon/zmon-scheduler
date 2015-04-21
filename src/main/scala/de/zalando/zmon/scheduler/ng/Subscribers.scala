@@ -3,6 +3,7 @@ package de.zalando.zmon.scheduler.ng
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository
 import org.slf4j.LoggerFactory
+import redis.clients.jedis.exceptions.JedisConnectionException
 import redis.clients.jedis.{Jedis, JedisPubSub}
 
 /**
@@ -19,8 +20,9 @@ object RedisInstantEvalSubscriber {
 
 class RedisInstantEvalSubscriber(val scheduler : Scheduler, val config : SchedulerConfig, val alertRepo: AlertRepository) extends JedisPubSub with Runnable {
 
-  val jedisSub = new Jedis(config.redis_host, config.redis_port)
-  val jedis= new Jedis(config.redis_host, config.redis_port)
+  var jedisSub = new Jedis(config.redis_host, config.redis_port)
+  var jedis = new Jedis(config.redis_host, config.redis_port)
+
   val threat = new Thread(this)
   threat.start()
 
@@ -33,11 +35,16 @@ class RedisInstantEvalSubscriber(val scheduler : Scheduler, val config : Schedul
 
   override def onMessage(channel : String, message : String) : Unit = {
     RedisInstantEvalSubscriber.LOG.info("received instant eval request: " + channel + " : " + message )
-    val request = jedis.hget(config.redis_instant_eval_requests, message)
-    val node = RedisInstantEvalSubscriber.mapper.readTree(request)
-    if(node.has("alert_definition_id")) {
-      val alertId = node.get("alert_definition_id").asInt()
-      scheduler.executeImmediate(alertRepo.get(alertId).getCheckDefinitionId)
+    try {
+      val request = jedis.hget(config.redis_instant_eval_requests, message)
+      val node = RedisInstantEvalSubscriber.mapper.readTree(request)
+      if(node.has("alert_definition_id")) {
+        val alertId = node.get("alert_definition_id").asInt()
+        scheduler.executeImmediate(alertRepo.get(alertId).getCheckDefinitionId)
+      }
+    }
+    catch {
+      case e : JedisConnectionException => jedis = new Jedis(config.redis_host, config.redis_port)
     }
   }
 }
@@ -49,8 +56,8 @@ object RedisDownTimeSubscriber {
 
 class RedisDownTimeSubscriber(val scheduler : Scheduler, val config : SchedulerConfig, val alertRepo: AlertRepository ) extends JedisPubSub with Runnable {
 
-  val jedisSub = new Jedis(config.redis_host, config.redis_port)
-  val jedis= new Jedis(config.redis_host, config.redis_port)
+  var jedisSub = new Jedis(config.redis_host, config.redis_port)
+  var jedis= new Jedis(config.redis_host, config.redis_port)
   val threat = new Thread(this)
   threat.start()
 
@@ -63,11 +70,16 @@ class RedisDownTimeSubscriber(val scheduler : Scheduler, val config : SchedulerC
 
   override def onMessage(channel : String, message : String) : Unit = {
     RedisDownTimeSubscriber.LOG.info("received downtime request: " + channel + " : " + message )
-    val request = jedis.hget(config.redis_downtime_requests, message)
-    val node = RedisDownTimeSubscriber.mapper.readTree(request)
-    if(node.has("alert_definition_id")) {
-      val alertId = node.get("alert_definition_id").asInt()
-      scheduler.executeImmediate(alertRepo.get(alertId).getCheckDefinitionId)
+    try {
+      val request = jedis.hget(config.redis_downtime_requests, message)
+      val node = RedisDownTimeSubscriber.mapper.readTree(request)
+      if (node.has("alert_definition_id")) {
+        val alertId = node.get("alert_definition_id").asInt()
+        scheduler.executeImmediate(alertRepo.get(alertId).getCheckDefinitionId)
+      }
+    }
+    catch {
+      case e : JedisConnectionException => jedis = new Jedis(config.redis_host, config.redis_port)
     }
   }
 }
