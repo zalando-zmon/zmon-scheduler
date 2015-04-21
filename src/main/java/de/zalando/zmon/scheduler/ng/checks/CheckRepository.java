@@ -60,6 +60,9 @@ public class CheckRepository extends CachedRepository<Integer, CheckSourceRegist
 
         for(String name : registry.getSourceNames()) {
             for(CheckDefinition cd: registry.get(name).getCollection()) {
+                if(cd.getInterval()<5L) {
+                    cd.setInterval(5L);
+                }
                 m.put(cd.getId(), cd);
             }
         }
