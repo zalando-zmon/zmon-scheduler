@@ -4,6 +4,7 @@ import java.util
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Profile
+import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Component
 
 import scala.beans.BeanProperty
@@ -34,7 +35,7 @@ class ZalandoAlertConfig {
 }
 
 @Component
-@Profile(Array("zalando"))
+@Configuration
 @ConfigurationProperties(prefix = "scheduler")
 class SchedulerConfig {
   @BeanProperty var last_run_persist = SchedulePersistType.DISABLED
@@ -52,6 +53,16 @@ class SchedulerConfig {
 
   @BeanProperty var redis_host : String = ""
   @BeanProperty var redis_port : Int = 6379
+
+  // the entity service provides entities to run checks against ( it is part of the controller )
+  @BeanProperty var entity_service_url: String = null
+  @BeanProperty var entity_service_user: String = null
+  @BeanProperty var entity_service_password: String = null
+
+  // Using the zmon controller as a source for alerts and checks
+  @BeanProperty var controller_url: String = null
+  @BeanProperty var controller_user: String = null
+  @BeanProperty var controller_password: String = null
 
   @BeanProperty var redis_downtime_pubsub : String = ""
   @BeanProperty var redis_downtime_requests : String = ""

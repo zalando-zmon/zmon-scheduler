@@ -1,6 +1,7 @@
 package de.zalando.zmon.scheduler.ng.checks;
 
 import com.codahale.metrics.MetricRegistry;
+import de.zalando.zmon.scheduler.ng.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.SourceRegistry;
 import de.zalando.zmon.scheduler.ng.ZalandoCheckConfig;
 import de.zalando.zmon.scheduler.ng.ZalandoControllerConfig;
@@ -17,17 +18,18 @@ import java.util.Map;
 @Component
 public class CheckSourceRegistry extends SourceRegistry<CheckSource> {
 
-    public CheckSourceRegistry() {
-
-    }
-
     public CheckSourceRegistry(MetricRegistry metrics) {
 
     }
 
-    @Autowired
-    public CheckSourceRegistry(ZalandoCheckConfig config) {
+    @Autowired(required=false)
+    public CheckSourceRegistry(SchedulerConfig config) {
+        DefaultCheckSource source = new DefaultCheckSource("check-source", config.controller_url()+"/rest/api/v1/checks/all-active-check-definitions",config.controller_user(),config.controller_password());
+        register(source);
+    }
 
+    @Autowired(required=false)
+    public CheckSourceRegistry(ZalandoCheckConfig config) {
 
         if(config.controller()!=null && config.controller().getUrl()!=null && !"".equals(config.controller().url())) {
             ZalandoControllerConfig conf = config.controller();

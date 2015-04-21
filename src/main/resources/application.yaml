@@ -24,4 +24,8 @@ scheduler:
   disable_persisted_schedule: true
   enable_global_entity: true
   task_writer_type: REDIS
+  entity_service_url: http://localhost:33400/
+  entity_service_user:
+  entity_service_password:
+  controller_url: http://localhost:33400/
 

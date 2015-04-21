@@ -27,12 +27,22 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
         this.metrics = metrics;
     }
 
+    @Autowired(required=false)
     public EntityAdapterRegistry(SchedulerConfig config, MetricRegistry metrics) {
         this.metrics = metrics;
         register(EMPTY_ADAPTER);
+
+        if(config.enable_global_entity()) {
+            register(new GlobalAdapter());
+        }
+
+        if(config.entity_service_url() !=null) {
+            EntityServiceAdapter e = new EntityServiceAdapter(config.entity_service_url(), config.entity_service_user(), config.entity_service_password(), metrics);
+            register(e);
+        }
     }
 
-    @Autowired
+    @Autowired(required=false)
     public EntityAdapterRegistry(SchedulerConfig config, ZalandoConfig zConfig, MetricRegistry metrics) {
         this.metrics = metrics;
 

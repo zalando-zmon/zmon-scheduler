@@ -245,7 +245,14 @@ object SchedulePersister {
   mapper.registerModule(DefaultScalaModule)
 
   def loadSchedule(): Map[Integer, Long] = {
-    mapper.readValue(new File("schedule.json"), new TypeReference[Map[Integer,Long]] {})
+    try {
+      mapper.readValue(new File("schedule.json"), new TypeReference[Map[Integer, Long]] {})
+    }
+    catch {
+      case e: Exception => {
+        return Map[Integer,Long]()
+      }
+    }
   }
 
   def writeSchedule( schedule : collection.concurrent.Map[Integer, Long]) = {
