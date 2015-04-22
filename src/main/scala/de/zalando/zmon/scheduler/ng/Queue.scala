@@ -161,7 +161,7 @@ class QueueSelector(writer : QueueWriter)(implicit val config : SchedulerConfig,
 
     var queue : String = null
     for(s <- selectors) {
-      if(null != queue) {
+      if(null == queue) {
         queue = s.getQueue()
       }
     }
@@ -170,7 +170,7 @@ class QueueSelector(writer : QueueWriter)(implicit val config : SchedulerConfig,
       queue = config.default_queue
     }
 
-    writer.exec(config.default_queue, command)
+    writer.exec(queue, command)
   }
 }
 
