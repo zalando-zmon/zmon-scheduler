@@ -48,8 +48,16 @@ public class EntityServiceAdapter extends EntityAdapter {
     @Override
     public Collection<Entity> getCollection() {
         RestTemplate rt = new RestTemplate();
-        HttpEntity<String> request = new HttpEntity<>(getWithAuth());
-        LOG.info("Querying entity service with credentials {}", user);
+        HttpEntity<String> request;
+
+        if(user!=null && !user.equals("")) {
+            LOG.info("Querying entity service with credentials {}", user);
+            request = new HttpEntity<>(getWithAuth());
+        }
+        else {
+            LOG.info("Querying entity service");
+            request = new HttpEntity<>(new HttpHeaders());
+        }
 
         Timer.Context tC = timer.time();
         ResponseEntity<BaseEntityList> response = rt.exchange(url + "/rest/api/v1/entities/", HttpMethod.GET, request, BaseEntityList.class);
