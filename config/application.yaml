@@ -1,3 +1,6 @@
+server:
+  port: 8085
+
 endpoints:
   enabled: false
   metrics:
@@ -20,7 +23,7 @@ scheduler:
   last_run_persist: DISABLED
   check_detail_metrics: true
   thread_count: 8
-  check_filter: [1,13,12,30,307,259]
+  check_filter: [1,13,12,30,307,259,10,32]
   disable_persisted_schedule: true
   enable_global_entity: true
   task_writer_type: REDIS
