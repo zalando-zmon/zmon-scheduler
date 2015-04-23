@@ -8,8 +8,8 @@ RUN mkdir /app/dummy_data
 WORKDIR /app
 
 ADD target/zmon-scheduler-ng-1.0-SNAPSHOT.jar /app/zmon-scheduler-ng.jar
-ADD src/main/resources/application.yaml /app/config/application.yaml
-ADD src/main/resources/application-zalando.yaml /app/config/application.yaml
+ADD config/application.yaml /app/config/application.yaml
+ADD config/application-zalando.yaml /app/config/application.yaml
 
 EXPOSE 8085
 
