@@ -47,6 +47,9 @@ object CommandWriter {
       alertArg.name = alertDef.getName
       alertArg.notifications = alertDef.getNotifications
       alertArg.period = alertDef.getPeriod
+      if(alertArg.period==null) {
+        alertArg.period="";
+      }
       alertArg.team = alertDef.getTeam
       alertArg.responsible_team = alertDef.getResponsibleTeam
       alertArg.parameters = alertDef.getParameters
