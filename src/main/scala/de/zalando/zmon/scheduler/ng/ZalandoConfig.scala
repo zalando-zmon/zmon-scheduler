@@ -47,6 +47,7 @@ class SchedulerConfig {
   @BeanProperty var entity_base_filter: java.util.List[util.Map[String,String]] = new util.ArrayList[util.Map[String,String]]()
 
   @BeanProperty var default_queue : String = "zmon:queue:default"
+  @BeanProperty var trial_run_queue : String = "zmon:queue:default"
   @BeanProperty var enable_global_entity : Boolean = false
 
   @BeanProperty var task_writer_type = TaskWriterType.ARRAY_LIST
@@ -68,6 +69,8 @@ class SchedulerConfig {
   @BeanProperty var redis_downtime_requests : String = ""
   @BeanProperty var redis_instant_eval_pubsub : String = ""
   @BeanProperty var redis_instant_eval_requests : String = ""
+  @BeanProperty var redis_trialrun_pubsub : String = "zmon:trial_run:pubsub"
+  @BeanProperty var redis_trialrun_requests : String = "zmon:trial_run:requests"
 
   @BeanProperty var dummy_cities = "dummy_data/cities.json"
 

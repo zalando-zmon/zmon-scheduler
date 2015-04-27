@@ -16,11 +16,11 @@ import java.util.Base64;
 public class CeleryWriter {
 
     private static final ObjectMapper mapper = new ObjectMapper();
+    private static final JsonNode EMPTY_NODE = mapper.createObjectNode();
+
     private static final Logger LOG = LoggerFactory.getLogger(CeleryWriter.class);
 
-    private final JsonNode EMPTY_NODE = mapper.createObjectNode();
-
-    public String asCeleryTask(CeleryBody task) {
+    public static String asCeleryTask(CeleryBody task) {
         final ObjectNode node = mapper.createObjectNode();
         node.set("headers", EMPTY_NODE);
         node.put("content-type", "application-json");

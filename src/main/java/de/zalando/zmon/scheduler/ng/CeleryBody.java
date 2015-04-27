@@ -1,6 +1,5 @@
 package de.zalando.zmon.scheduler.ng;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import de.zalando.zmon.scheduler.ng.alerts.Parameter;
 
 import java.util.ArrayList;
@@ -44,6 +43,29 @@ public class CeleryBody {
         public String name;
         public Map<String, Parameter> parameters;
         public int check_id;
+        public List<Map<String,String>> entities_map;
+        public String responsible_team;
+        public int priority = 1;
+        public String team;
+    }
+
+    public static class TrialRunCeleryCommand {
+        public String check_id;
+        public Long interval;
+        public Map<String, Object> entity;
+        public String check_name;
+        public String command;
+        public double schedule_time;
+    }
+
+    public static class TrialRunCeleryAlertArg {
+        public String period;
+        public List<String> notifications = new ArrayList<>();
+        public String id;
+        public String condition;
+        public String name;
+        public Map<String, Parameter> parameters;
+        public String check_id;
         public List<Map<String,String>> entities_map;
         public String responsible_team;
         public int priority = 1;
@@ -152,4 +174,4 @@ public class CeleryBody {
 
   }
 }
- */
+*/

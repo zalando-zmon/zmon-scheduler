@@ -2,7 +2,7 @@ package de.zalando.zmon.scheduler.ng
 
 import java.util.concurrent.atomic.AtomicLong
 
-import de.zalando.zmon.scheduler.ng.CeleryBody.{CeleryAlertArg, CeleryCommandArg}
+import de.zalando.zmon.scheduler.ng.CeleryBody.{TrialRunCeleryAlertArg, TrialRunCeleryCommand, CeleryAlertArg, CeleryCommandArg}
 import de.zalando.zmon.scheduler.ng.entities.Entity
 
 import scala.collection.mutable.ArrayBuffer
@@ -15,6 +15,47 @@ import scala.collection.mutable.ArrayBuffer
 object CommandWriter {
 
   val counter = new AtomicLong()
+
+  def writeTrialRun(entity : Entity, request: TrialRunRequest): String = {
+    val body = new CeleryBody()
+
+    body.expires = "2015-12-31T00:00:00.000+00:00"
+    body.id="check-TR:"+request.id+"-"+entity.getId+"-"+System.currentTimeMillis()
+
+    body.timelimit.add(request.interval)
+    body.timelimit.add(request.interval * 2L)
+
+    val command = new TrialRunCeleryCommand()
+    command.check_id = "TR:"+request.id
+    command.check_name = request.name
+    command.interval = request.interval
+    command.command = request.check_command
+    command.entity = entity.getProperties
+    body.args.add(command)
+
+    val alertList : java.util.List[TrialRunCeleryAlertArg] = new java.util.ArrayList[TrialRunCeleryAlertArg]();
+    body.args.add(alertList)
+
+    val alertArg = new TrialRunCeleryAlertArg()
+    alertList.add(alertArg)
+
+    alertArg.id = "TR:" + request.id
+    alertArg.check_id = "TR:" + request.id
+    alertArg.condition = request.alert_condition
+    alertArg.name = request.name
+    alertArg.period = request.period
+    if(alertArg.period==null) {
+      alertArg.period="";
+    }
+    alertArg.team = "TRIAL RUN"
+    alertArg.responsible_team = "TRIAL RUN"
+    alertArg.parameters = request.parameters
+    alertArg.entities_map = request.entities
+
+    body.task = "trial_run"
+
+    CeleryWriter.asCeleryTask(body)
+  }
 
   def write(entity : Entity, check : Check, alerts : ArrayBuffer[Alert]): String = {
     val body = new CeleryBody()
@@ -58,7 +99,6 @@ object CommandWriter {
       alertList.add(alertArg)
     }
 
-    val writer = new CeleryWriter()
-    writer.asCeleryTask(body)
+    CeleryWriter.asCeleryTask(body)
   }
 }

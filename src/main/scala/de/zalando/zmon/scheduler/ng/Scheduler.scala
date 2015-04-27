@@ -16,6 +16,7 @@ import de.zalando.zmon.scheduler.ng.entities.{EntityRepository, Entity, EntityAd
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
+import redis.clients.jedis.Jedis
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -230,6 +231,7 @@ class SchedulerFactory {
 
     val instantEvalListener = new RedisInstantEvalSubscriber(s, schedulerConfig, alertRepo)
     val downtimeEvalListener = new RedisDownTimeSubscriber(s, schedulerConfig, alertRepo)
+    val trialRunSubscriber = new TrialRunSubscriber(s, schedulerConfig)
 
     s
   }
@@ -330,5 +332,53 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
     }
 
     schedule(id, startDelay)
+  }
+
+  private def getEntitiesForTrialRun(includeFilter : java.util.List[java.util.Map[String,String]], excludeFilters : java.util.List[java.util.Map[String,String]]): ArrayBuffer[Entity] = {
+    val entityList : ArrayBuffer[Entity] = new ArrayBuffer[Entity]()
+    for ( e <- entityRepo.get() ) {
+      for( oneFilter <- includeFilter) {
+        if (filter.overlaps(oneFilter, e.getFilterProperties)) {
+          if(excludeFilters!=null && excludeFilters.size()>0) {
+            var exclude = false
+            for(exFilter <- excludeFilters) {
+              if(filter.overlaps(exFilter, e.getFilterProperties)) {
+                exclude=true
+              }
+            }
+            if(!exclude) {
+              entityList.add(e)
+            }
+          }
+          else {
+            entityList.add(e)
+          }
+        }
+      }
+    }
+    entityList
+  }
+
+  def scheduleTrialRun(request  : TrialRunRequest) : Unit = {
+    val entities = getEntitiesForTrialRun(request.entities, request.entities_exclude)
+
+    var jedis : Jedis = null;
+    try {
+      jedis = new Jedis(schedulerConfig.redis_host, schedulerConfig.redis_port)
+      val redisEntityKey = "zmon:trial_run:" + request.id
+      for (entity <- entities) {
+        jedis.sadd(redisEntityKey, entity.getId)
+      }
+
+      for (entity <- entities) {
+        val command = CommandWriter.writeTrialRun(entity, request)
+        queueSelector.execute(command, schedulerConfig.trial_run_queue)(entity)
+      }
+    }
+    finally {
+      if(null!=jedis) {
+        jedis.close()
+      }
+    }
   }
 }

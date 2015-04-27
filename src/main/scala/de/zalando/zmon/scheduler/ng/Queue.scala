@@ -117,6 +117,7 @@ abstract class Selector() {
 
 class RepoSelector(implicit val config : SchedulerConfig ) extends Selector {
   override def getQueue()(implicit entity : Entity, check: Check, alerts : ArrayBuffer[Alert]) : String = {
+    if(null==check) return null
     for((k, v) <- config.queue_mapping_by_url) {
       if(check.getCheckDef().getSourceUrl().startsWith(k)) {
         return v
@@ -136,6 +137,7 @@ class HardCodedSelector(implicit val config: SchedulerConfig) extends Selector {
   }
 
   override def getQueue()(implicit entity : Entity, check: Check, alerts : ArrayBuffer[Alert]) : String = {
+    if(null == check) return null
     mapById.getOrElse(check.id, null)
   }
 }
@@ -154,12 +156,28 @@ class PropertyQueueSelector(implicit val config: SchedulerConfig) extends Select
 }
 
 class QueueSelector(writer : QueueWriter)(implicit val config : SchedulerConfig, val metrics : MetricRegistry) {
-  val selectors : List[Selector] = List(new RepoSelector(), new HardCodedSelector(), new PropertyQueueSelector())
+  var propertySelector = new PropertyQueueSelector()
+  val selectors : List[Selector] = List(new RepoSelector(), new HardCodedSelector(), propertySelector)
+
+
+  def execute(command : String, targetQueue : String = null)(implicit entity : Entity) : Unit = {
+    var queue = targetQueue
+    if(null==queue) {
+      queue = propertySelector.getQueue()(entity, null, null)
+    }
+
+    if(null == queue) {
+      queue = config.default_queue
+    }
+
+    writer.exec(queue, command)
+  }
 
   def execute()(implicit entity : Entity, check: Check, alerts : ArrayBuffer[Alert]) : Unit = {
     val command = CommandWriter.write(entity, check, alerts)
 
     var queue : String = null
+
     for(s <- selectors) {
       if(null == queue) {
         queue = s.getQueue()
