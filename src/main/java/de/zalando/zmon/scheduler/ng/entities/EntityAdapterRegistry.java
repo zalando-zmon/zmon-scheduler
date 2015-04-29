@@ -77,6 +77,11 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
             DDSClusterAdapter dds = new DDSClusterAdapter(zConfig.ddscluster.url, metrics);
             register(dds);
         }
+
+        if(zConfig.ddsdatabase != null && zConfig.ddsdatabase.url != null) {
+            DDSDatabaseAdapter dds = new DDSDatabaseAdapter(zConfig.ddsdatabase.url, metrics);
+            register(dds);
+        }
     }
 
 }

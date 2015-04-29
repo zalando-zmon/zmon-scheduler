@@ -67,13 +67,16 @@ public class ZalandoConfig {
     }
 
     public static class DdsCluster extends BaseAdapterConfig {
+    }
 
+    public static class DdsDatabase extends BaseAdapterConfig {
     }
 
     public Entityservice entityservice;
     public Cmdb cmdb;
     public DeployCtl deployctl;
     public DdsCluster ddscluster;
+    public DdsDatabase ddsdatabase;
 
     public DeployCtl getDeployctl() {
         return deployctl;
@@ -105,5 +108,13 @@ public class ZalandoConfig {
 
     public void setDdscluster(DdsCluster ddscluster) {
         this.ddscluster = ddscluster;
+    }
+
+    public DdsDatabase getDdsdatabase() {
+        return ddsdatabase;
+    }
+
+    public void setDdsdatabase(DdsDatabase ddsdatabase) {
+        this.ddsdatabase = ddsdatabase;
     }
 }

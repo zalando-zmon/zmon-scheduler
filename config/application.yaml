@@ -23,7 +23,7 @@ scheduler:
   last_run_persist: DISABLED
   check_detail_metrics: true
   thread_count: 8
-  check_filter: [1,13,12,30,307,259,10,32]
+  check_filter: [1,13,12,30,307,259,10,32,1034,1249,317]
   disable_persisted_schedule: true
   enable_global_entity: true
   task_writer_type: REDIS
