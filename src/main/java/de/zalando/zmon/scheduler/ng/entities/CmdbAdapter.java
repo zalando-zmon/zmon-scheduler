@@ -86,6 +86,17 @@ public class CmdbAdapter extends EntityAdapter {
                 }
             }
 
+            if(base.containsKey("teams")) {
+                List<Map<String, String>> teams = (List<Map<String, String>>) base.get("teams");
+                List<String> teamString = new ArrayList<>();
+                if(teams!=null) {
+                    for(Map<String, String> team : teams) {
+                        teamString.add(team.get("name"));
+                    }
+                }
+                base.put("team", teamString);
+            }
+
             base.put("host", hostName);
             base.put("type", "host");
 

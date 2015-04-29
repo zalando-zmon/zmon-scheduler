@@ -36,7 +36,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
             register(new GlobalAdapter());
         }
 
-        if(config.entity_service_url() !=null) {
+        if(config.entity_service_url() !=null && !config.entity_service_url().equals("")) {
             EntityServiceAdapter e = new EntityServiceAdapter(config.entity_service_url(), config.entity_service_user(), config.entity_service_password(), metrics);
             register(e);
         }
