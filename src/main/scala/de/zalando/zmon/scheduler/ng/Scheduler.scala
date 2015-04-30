@@ -223,6 +223,9 @@ class SchedulerFactory {
                      (implicit schedulerConfig : SchedulerConfig, metrics: MetricRegistry) : Scheduler = {
     SchedulerFactory.LOG.info("Createing scheduler instance")
     val s = new Scheduler(alertRepo, checkRepo, entityRepo, queueSelector)
+
+    SchedulerFactory.LOG.info("Check ID filter: " + schedulerConfig.check_filter)
+
     SchedulerFactory.LOG.info("Initial scheduling of all checks")
     for(cd <- checkRepo.get()) {
       s.scheduleCheck(cd.getId)
@@ -286,7 +289,7 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
   service.scheduleAtFixedRate(new SchedulePersister(scheduledChecks), 5, 15, TimeUnit.SECONDS)
 
   def viableCheck(id : Integer) : Boolean = {
-    if(!schedulerConfig.check_filter.isEmpty) {
+    if(schedulerConfig.check_filter != null && !schedulerConfig.check_filter.isEmpty) {
       if(!schedulerConfig.check_filter.contains(id)) {
         return false
       }
