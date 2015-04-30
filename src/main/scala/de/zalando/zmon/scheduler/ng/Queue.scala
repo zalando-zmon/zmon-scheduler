@@ -43,6 +43,7 @@ abstract class QueueWriter(metrics : MetricRegistry) {
   def exec(queue : String, command : String ): Unit = {
     write(queue, command)
     queueMetrics.mark(queue)
+    queueMetrics.incThroughput(command.length)
   }
 
   protected def write(queue: String, command : String) : Unit = {}
@@ -158,7 +159,7 @@ class PropertyQueueSelector(implicit val config: SchedulerConfig) extends Select
 class QueueSelector(writer : QueueWriter)(implicit val config : SchedulerConfig, val metrics : MetricRegistry) {
   var propertySelector = new PropertyQueueSelector()
   val selectors : List[Selector] = List(new RepoSelector(), new HardCodedSelector(), propertySelector)
-
+  val serializer = new CommandSerializer(config.task_serializer)
 
   def execute(command : String, targetQueue : String = null)(implicit entity : Entity) : Unit = {
     var queue = targetQueue
@@ -174,7 +175,7 @@ class QueueSelector(writer : QueueWriter)(implicit val config : SchedulerConfig,
   }
 
   def execute()(implicit entity : Entity, check: Check, alerts : ArrayBuffer[Alert]) : Unit = {
-    val command = CommandWriter.write(entity, check, alerts)
+    val command = serializer.write(entity, check, alerts)
 
     var queue : String = null
 
@@ -194,6 +195,11 @@ class QueueSelector(writer : QueueWriter)(implicit val config : SchedulerConfig,
 
 class QueueMetrics(val metrics : MetricRegistry) {
   private val meters : TrieMap[String, Meter] = new TrieMap[String, Meter]()
+  private val throughputMeter = metrics.meter("scheduler.byte-throughput")
+
+  def incThroughput(l : Int) : Unit = {
+    throughputMeter.mark(l)
+  }
 
   def mark(q : String): Unit = {
     if(meters.contains(q)) {

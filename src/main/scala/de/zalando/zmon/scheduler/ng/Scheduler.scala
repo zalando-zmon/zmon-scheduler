@@ -286,6 +286,7 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
 
   private val service = new ScheduledThreadPoolExecutor(schedulerConfig.thread_count)
   private val scheduledChecks = scala.collection.concurrent.TrieMap[Integer, ScheduledCheck]()
+  private val taskSerializer = new CommandSerializer(schedulerConfig.task_serializer)
 
   implicit val schedulerMetrics = new SchedulerMetrics()
   val lastScheduleAtStartup = SchedulePersister.loadSchedule()
@@ -378,7 +379,7 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
       }
 
       for (entity <- entities) {
-        val command = CommandWriter.writeTrialRun(entity, request)
+        val command = taskSerializer.writeTrialRun(entity, request)
         queueSelector.execute(command, schedulerConfig.trial_run_queue)(entity)
       }
     }

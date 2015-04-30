@@ -12,9 +12,9 @@ import scala.collection.mutable.ArrayBuffer
  */
 
 
-object CommandWriter {
+class CommandSerializer(val serializerType : TaskSerializerType) {
 
-  val counter = new AtomicLong()
+  val writer = CeleryWriter.create(serializerType)
 
   def writeTrialRun(entity : Entity, request: TrialRunRequest): String = {
     val body = new CeleryBody()
@@ -44,8 +44,8 @@ object CommandWriter {
     alertArg.condition = request.alert_condition
     alertArg.name = request.name
     alertArg.period = request.period
-    if(alertArg.period==null) {
-      alertArg.period="";
+    if(alertArg.period == null) {
+      alertArg.period = "";
     }
     alertArg.team = "TRIAL RUN"
     alertArg.responsible_team = "TRIAL RUN"
@@ -54,7 +54,7 @@ object CommandWriter {
 
     body.task = "trial_run"
 
-    CeleryWriter.asCeleryTask(body)
+    writer.asCeleryTask(body)
   }
 
   def write(entity : Entity, check : Check, alerts : ArrayBuffer[Alert]): String = {
@@ -88,8 +88,8 @@ object CommandWriter {
       alertArg.name = alertDef.getName
       alertArg.notifications = alertDef.getNotifications
       alertArg.period = alertDef.getPeriod
-      if(alertArg.period==null) {
-        alertArg.period="";
+      if(alertArg.period == null) {
+        alertArg.period = "";
       }
       alertArg.team = alertDef.getTeam
       alertArg.responsible_team = alertDef.getResponsibleTeam
@@ -99,6 +99,6 @@ object CommandWriter {
       alertList.add(alertArg)
     }
 
-    CeleryWriter.asCeleryTask(body)
+    writer.asCeleryTask(body)
   }
 }
