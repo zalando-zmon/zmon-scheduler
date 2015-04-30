@@ -29,6 +29,10 @@ import org.springframework.context.annotation.Configuration
 object filter {
   def overlaps(filter: java.util.Map[String, String], entity : java.util.Map[String, Object]) : Boolean = {
       for ((k,v) <- filter) {
+        if(v==null) {
+          Scheduler.LOG.error("Filtering for null value with key: " + k);
+        }
+
         if (!entity.containsKey(k)) {
           return false
         }

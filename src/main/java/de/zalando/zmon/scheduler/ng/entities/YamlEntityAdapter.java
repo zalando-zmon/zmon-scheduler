@@ -18,15 +18,27 @@ import java.util.Map;
  */
 public class YamlEntityAdapter extends EntityAdapter {
 
+    public interface IdGenerator {
+        String f(Map<String, Object> e);
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(YamlEntityAdapter.class);
 
     private String fileName;
     private String type = null;
+    private IdGenerator idGenerator = m -> (String) m.get("id");
 
     private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
     static {
         mapper.setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
+    }
+
+    public YamlEntityAdapter(String name, String fileName, String type, IdGenerator g) {
+        super(name);
+        this.fileName = fileName;
+        this.type = type;
+        this.idGenerator = g;
     }
 
     public YamlEntityAdapter(String name, String fileName, String type) {
@@ -47,7 +59,9 @@ public class YamlEntityAdapter extends EntityAdapter {
             List<Entity> entityList = new ArrayList<>();
 
             for(Map<String,Object> m : list) {
-                Entity e = new Entity((String)m.get("id"), getName());
+                String id = idGenerator.f(m);
+                if(null==id || id.equals("")) continue;
+                Entity e = new Entity(id, getName());
                 if(type!=null) {
                     m.put("type", type);
                 }

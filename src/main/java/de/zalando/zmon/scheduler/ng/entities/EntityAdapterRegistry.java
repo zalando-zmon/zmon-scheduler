@@ -55,7 +55,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
         }
 
         if(config.dummy_cities()!=null && !config.dummy_cities().equals("")) {
-            register(new YamlEntityAdapter("dummy-cities",config.dummy_cities(),"city"));
+            register(new YamlEntityAdapter("dummy-cities",config.dummy_cities(),"city", m -> (m.get("country")+"-"+m.get("city"))));
         }
 
         if(zConfig.cmdb != null && zConfig.cmdb.url != null) {
