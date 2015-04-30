@@ -37,11 +37,9 @@ public abstract class CeleryWriter {
         public String asCeleryTask(CeleryBody task) {
             final ObjectNode node = mapper.createObjectNode();
             node.set("headers", EMPTY_NODE);
-            node.put("content-type", "application-json");
-            node.put("content-encoding", "utf-8");
 
             ObjectNode properties = node.putObject("properties");
-            properties.put("body_encoding","base64");
+            properties.put("body_encoding", "base64");
             properties.put("correlation_id", task.id);
 
             ObjectNode deliveryInfo = properties.putObject("delivery_info");
