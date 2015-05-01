@@ -78,7 +78,7 @@ class JedisQueueWriter(host : String, port : Int = 6379, metrics : MetricRegistr
   override def write(queue: String, command : Array[Byte]) : Unit = {
     val jedis = jedisPool.getResource
     try {
-      jedis.rpush(queue.asInstanceOf[Array[Byte]], command)
+      jedis.rpush(queue.getBytes, command)
     }
     finally {
       jedisPool.returnResource(jedis)

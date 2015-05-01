@@ -77,10 +77,10 @@ public abstract class CeleryWriter {
 
             try {
                 String bodyBytes = mapper.writeValueAsString(task);
-                byte[] compressed = Snappy.compress(bodyBytes.getBytes("UTF-8"));
-                node.put("body", compressed);
+                byte[] compressed = Snappy.compress(bodyBytes.getBytes());
+                node.put("body", compressed); // will be written to base64 by jackson
 
-                return mapper.writeValueAsBytes(node);
+                return mapper.writeValueAsString(node).getBytes();
             } catch (JsonProcessingException e) {
                 LOG.error("Serialize failed: {}", task);
                 return null;
@@ -108,7 +108,7 @@ public abstract class CeleryWriter {
 
             try {
                 node.putPOJO("body", task);
-                return mapper.writeValueAsBytes(node);
+                return mapper.writeValueAsString(node).getBytes();
             } catch (JsonProcessingException e) {
                 LOG.error("Serialize failed: {}", task);
                 return null;
@@ -134,7 +134,7 @@ public abstract class CeleryWriter {
             try {
                 node.putPOJO("body", task);
 
-                byte[] result = mapper.writeValueAsBytes(node);
+                byte[] result = mapper.writeValueAsString(node).getBytes();
                 byte[] compressed = Snappy.compress(result);
 
                 return compressed;
