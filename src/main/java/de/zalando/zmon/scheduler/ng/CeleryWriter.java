@@ -77,9 +77,9 @@ public abstract class CeleryWriter {
             deliveryInfo.put("exchange", "zmon");
 
             try {
-                byte[] bodyBytes = mapper.writeValueAsBytes(task);
-                byte[] compressed = Snappy.compress(bodyBytes);
-                node.put("body", new String(compressed));
+                String bodyBytes = mapper.writeValueAsString(task);
+                byte[] compressed = Snappy.compress(bodyBytes.getBytes("UTF-8"));
+                node.put("body", new String(compressed, "UTF-8"));
 
                 String result = mapper.writeValueAsString(node);
                 return result;
@@ -137,10 +137,10 @@ public abstract class CeleryWriter {
             try {
                 node.putPOJO("body", task);
 
-                byte[] result = mapper.writeValueAsBytes(node);
-                byte[] compressed = Snappy.compress(result);
+                String result = mapper.writeValueAsString(node);
+                byte[] compressed = Snappy.compress(result.getBytes("UTF-8"));
 
-                return new String(compressed);
+                return new String(compressed, "UTF-8");
             } catch (JsonProcessingException e) {
                 LOG.error("Serialize failed: {}", task);
                 return null;
