@@ -34,7 +34,7 @@ public abstract class CeleryWriter {
 
     private static class ClassicSerializer extends CeleryWriter {
         @Override
-        public String asCeleryTask(CeleryBody task) {
+        public byte[] asCeleryTask(CeleryBody task) {
             final ObjectNode node = mapper.createObjectNode();
             node.set("headers", EMPTY_NODE);
 
@@ -52,8 +52,7 @@ public abstract class CeleryWriter {
                 String encoded = Base64.getEncoder().encodeToString(bodyString.getBytes(StandardCharsets.UTF_8));
                 node.put("body", encoded);
 
-                String result = mapper.writeValueAsString(node);
-                return result;
+                return mapper.writeValueAsBytes(node);
             } catch (JsonProcessingException e) {
                 LOG.error("Serialize failed: {}", task);
                 return null;
@@ -63,7 +62,7 @@ public abstract class CeleryWriter {
 
     private static class CompressedBodySerializer extends CeleryWriter {
         @Override
-        public String asCeleryTask(CeleryBody task) {
+        public byte[] asCeleryTask(CeleryBody task) {
             final ObjectNode node = mapper.createObjectNode();
             node.set("headers", EMPTY_NODE);
 
@@ -79,10 +78,9 @@ public abstract class CeleryWriter {
             try {
                 String bodyBytes = mapper.writeValueAsString(task);
                 byte[] compressed = Snappy.compress(bodyBytes.getBytes("UTF-8"));
-                node.put("body", new String(compressed, "UTF-8"));
+                node.put("body", compressed);
 
-                String result = mapper.writeValueAsString(node);
-                return result;
+                return mapper.writeValueAsBytes(node);
             } catch (JsonProcessingException e) {
                 LOG.error("Serialize failed: {}", task);
                 return null;
@@ -96,7 +94,7 @@ public abstract class CeleryWriter {
 
     private static class PlainWriter extends CeleryWriter {
         @Override
-        public String asCeleryTask(CeleryBody task) {
+        public byte[] asCeleryTask(CeleryBody task) {
             final ObjectNode node = mapper.createObjectNode();
             node.set("headers", EMPTY_NODE);
             ObjectNode properties = node.putObject("properties");
@@ -110,8 +108,7 @@ public abstract class CeleryWriter {
 
             try {
                 node.putPOJO("body", task);
-                String result = mapper.writeValueAsString(node);
-                return result;
+                return mapper.writeValueAsBytes(node);
             } catch (JsonProcessingException e) {
                 LOG.error("Serialize failed: {}", task);
                 return null;
@@ -121,7 +118,7 @@ public abstract class CeleryWriter {
 
     private static class CompressedNestedWriter extends CeleryWriter {
         @Override
-        public String asCeleryTask(CeleryBody task) {
+        public byte[] asCeleryTask(CeleryBody task) {
             final ObjectNode node = mapper.createObjectNode();
             node.set("headers", EMPTY_NODE);
 
@@ -137,10 +134,10 @@ public abstract class CeleryWriter {
             try {
                 node.putPOJO("body", task);
 
-                String result = mapper.writeValueAsString(node);
-                byte[] compressed = Snappy.compress(result.getBytes("UTF-8"));
+                byte[] result = mapper.writeValueAsBytes(node);
+                byte[] compressed = Snappy.compress(result);
 
-                return new String(compressed, "UTF-8");
+                return compressed;
             } catch (JsonProcessingException e) {
                 LOG.error("Serialize failed: {}", task);
                 return null;
@@ -152,5 +149,5 @@ public abstract class CeleryWriter {
         }
     }
 
-    public abstract String asCeleryTask(CeleryBody task);
+    public abstract byte[] asCeleryTask(CeleryBody task);
 }

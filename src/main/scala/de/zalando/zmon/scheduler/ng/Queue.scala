@@ -40,30 +40,30 @@ object WriterFactory {
 abstract class QueueWriter(metrics : MetricRegistry) {
   private val queueMetrics = new QueueMetrics(metrics)
 
-  def exec(queue : String, command : String ): Unit = {
+  def exec(queue : String, command : Array[Byte] ): Unit = {
     write(queue, command)
     queueMetrics.mark(queue)
     queueMetrics.incThroughput(command.length)
   }
 
-  protected def write(queue: String, command : String) : Unit = {}
+  protected def write(queue: String, command : Array[Byte]) : Unit = {}
 }
 
 class ArrayQueueWriter(metrics : MetricRegistry) extends QueueWriter(metrics) {
-  val tasks = new mutable.HashMap[String, ArrayBuffer[String]]()
+  val tasks = new mutable.HashMap[String, ArrayBuffer[Array[Byte]]]()
 
-  override def write(queue : String, command : String): Unit = {
+  override def write(queue : String, command : Array[Byte]): Unit = {
     this.synchronized {
       var l = tasks.getOrElse(queue,null)
       if(null==l) {
-        l = new ArrayBuffer[String]()
+        l = new ArrayBuffer[Array[Byte]]()
         tasks.put(queue, l)
       }
       l.add(command)
     }
   }
 
-  def getTasks(queue : String): ArrayBuffer[String] = {
+  def getTasks(queue : String): ArrayBuffer[Array[Byte]] = {
     tasks.getOrElse(queue, null)
   }
 }
@@ -75,10 +75,10 @@ class JedisQueueWriter(host : String, port : Int = 6379, metrics : MetricRegistr
 
   private val jedisPool = new JedisPool(jc, host, port)
 
-  override def write(queue: String, command : String) : Unit = {
+  override def write(queue: String, command : Array[Byte]) : Unit = {
     val jedis = jedisPool.getResource
     try {
-      jedis.rpush(queue, command)
+      jedis.rpush(queue.asInstanceOf[Array[Byte]], command)
     }
     finally {
       jedisPool.returnResource(jedis)
@@ -92,7 +92,7 @@ object LogQueueWriter {
 
 class LogQueueWriter(metrics : MetricRegistry) extends QueueWriter(metrics) {
 
-  override def write(queue : String, command :String ): Unit = {
+  override def write(queue : String, command : Array[Byte] ): Unit = {
     LogQueueWriter.LOG.info("q: " + queue + " command: " + command)
   }
 }
@@ -161,7 +161,7 @@ class QueueSelector(writer : QueueWriter)(implicit val config : SchedulerConfig,
   val selectors : List[Selector] = List(new RepoSelector(), new HardCodedSelector(), propertySelector)
   val serializer = new CommandSerializer(config.task_serializer)
 
-  def execute(command : String, targetQueue : String = null)(implicit entity : Entity) : Unit = {
+  def execute(command : Array[Byte], targetQueue : String = null)(implicit entity : Entity) : Unit = {
     var queue = targetQueue
     if(null==queue) {
       queue = propertySelector.getQueue()(entity, null, null)

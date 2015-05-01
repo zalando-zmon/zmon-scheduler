@@ -16,7 +16,7 @@ class CommandSerializer(val serializerType : TaskSerializerType) {
 
   val writer = CeleryWriter.create(serializerType)
 
-  def writeTrialRun(entity : Entity, request: TrialRunRequest): String = {
+  def writeTrialRun(entity : Entity, request: TrialRunRequest): Array[Byte] = {
     val body = new CeleryBody()
 
     body.expires = "2015-12-31T00:00:00.000+00:00"
@@ -57,7 +57,7 @@ class CommandSerializer(val serializerType : TaskSerializerType) {
     writer.asCeleryTask(body)
   }
 
-  def write(entity : Entity, check : Check, alerts : ArrayBuffer[Alert]): String = {
+  def write(entity : Entity, check : Check, alerts : ArrayBuffer[Alert]): Array[Byte] = {
     val body = new CeleryBody()
     val checkDef = check.getCheckDef()
 
