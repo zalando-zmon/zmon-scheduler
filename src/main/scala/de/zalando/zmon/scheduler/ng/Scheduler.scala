@@ -38,6 +38,9 @@ object filter {
         }
 
         val eV = entity.get(k)
+        if(null==eV) {
+          Scheduler.LOG.error("Filtering for entity null value with key: " + k);
+        }
         eV match {
           case x : java.util.Collection[String] =>
             if(!x.contains(v)) {
