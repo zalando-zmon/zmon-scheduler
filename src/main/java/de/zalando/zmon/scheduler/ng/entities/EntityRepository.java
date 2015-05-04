@@ -25,6 +25,31 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
 
         for(String name : registry.getSourceNames()) {
             for(Entity e: registry.get(name).getCollection()) {
+
+                // try to map dc code and external ip if host is known ( relies on ordering of adapters :( and does not work for entity service )
+                Map<String, Object> p = e.getProperties();
+                if(p.containsKey("host") && !p.containsKey("external_ip")) {
+                    String host = (String) p.get("host");
+                    Entity hostEntity = m.get(host);
+                    if(null != hostEntity) {
+                        String externalIp = (String)hostEntity.getProperties().get("external_ip");
+                        if(null != externalIp) {
+                            e.addProperty("external_ip", externalIp);
+                        }
+                    }
+                }
+
+                if(p.containsKey("host") && !p.containsKey("data_center_code")) {
+                    String host = (String) p.get("host");
+                    Entity hostEntity = m.get(host);
+                    if(null != hostEntity) {
+                        String dataCenterCode = (String)hostEntity.getProperties().get("data_center_code");
+                        if(null != dataCenterCode) {
+                            e.addProperty("data_center_code", dataCenterCode);
+                        }
+                    }
+                }
+
                 if(baseFilter.size()>0) {
                     for(Map<String,String> f : baseFilter) {
                         if (filter.overlaps(f, e.getFilterProperties())) {

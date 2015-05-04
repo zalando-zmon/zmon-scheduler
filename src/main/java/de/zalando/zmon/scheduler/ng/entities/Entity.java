@@ -53,6 +53,16 @@ public class Entity {
         }
     }
 
+    public void addProperty(String key, Object value) {
+        properties.put(key, value);
+        if(value instanceof String) {
+            filterProperties.put(key, value);
+        }
+        else if(value instanceof Integer) {
+            filterProperties.put(key, value);
+        }
+    }
+
     public void addProperties(Map<String, Object> valueMap) {
         properties.putAll(valueMap);
         addFilterProperties(valueMap);

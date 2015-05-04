@@ -27,7 +27,7 @@ public class DeployCtlInstanceAdapter extends EntityAdapter {
     private static class BaseEntity extends HashMap<String, Object> {}
     private static class BaseEntityList extends ArrayList<BaseEntity> {}
 
-    private static final List<String> FIELDS = Arrays.asList("environment","host","instance","path","project","project_organization","project_type","url","current:load_balancer_status");
+    private static final List<String> FIELDS = Arrays.asList("environment","host","instance","path","project","project_organization","project_type","url","load_balancer_status");
     private static final List<String> ZOMCAT_TYPES = Arrays.asList("maven-war","maven-pom","maven-grails-app");
     
     public DeployCtlInstanceAdapter(String url, String user, String password, MetricRegistry metrics) {
@@ -62,7 +62,17 @@ public class DeployCtlInstanceAdapter extends EntityAdapter {
             if(!base.get("status").equals("ALLOCATED")) continue;
             if(base.get("instance").equals("9999")) continue;
 
-            Entity entity = new Entity(base.get("host")+":"+base.get("instance"),"DeployCtlInstanceAdapter");
+            Entity entity = new Entity(base.get("host")+":"+base.get("instance"), "DeployCtlInstanceAdapter");
+
+            if(base.containsKey("current")) {
+                Map<String, Object> current = (Map<String, Object>) base.get("current");
+                if(null != current) {
+                    String lbStatus = (String) current.get("load_balancer_status");
+                    if(null != lbStatus) {
+                        base.put("load_balancer_status", lbStatus);
+                    }
+                }
+            }
 
             Set<String> baseKeys = new HashSet<>(base.keySet());
             for(String k : baseKeys) {
