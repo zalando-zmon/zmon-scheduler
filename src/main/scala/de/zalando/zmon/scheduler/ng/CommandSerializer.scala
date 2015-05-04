@@ -1,5 +1,7 @@
 package de.zalando.zmon.scheduler.ng
 
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.concurrent.atomic.AtomicLong
 
 import de.zalando.zmon.scheduler.ng.CeleryBody.{TrialRunCeleryAlertArg, TrialRunCeleryCommand, CeleryAlertArg, CeleryCommandArg}
@@ -16,10 +18,17 @@ class CommandSerializer(val serializerType : TaskSerializerType) {
 
   val writer = CeleryWriter.create(serializerType)
 
+  val dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+
+  def expiresTime(interval : Long) : String = {
+    val exp = new Date(System.currentTimeMillis()+(interval * 1000L))
+    LocalDateFormatter.get().format(exp)
+  }
+
   def writeTrialRun(entity : Entity, request: TrialRunRequest): Array[Byte] = {
     val body = new CeleryBody()
 
-    body.expires = "2015-12-31T00:00:00.000+00:00"
+    body.expires = expiresTime(request.interval)// "2015-12-31T00:00:00.000+00:00"
     body.id="check-TR:"+request.id+"-"+entity.getId+"-"+System.currentTimeMillis()
 
     body.timelimit.add(request.interval)
@@ -61,7 +70,7 @@ class CommandSerializer(val serializerType : TaskSerializerType) {
     val body = new CeleryBody()
     val checkDef = check.getCheckDef()
 
-    body.expires = "2015-12-31T00:00:00.000+00:00"
+    body.expires = expiresTime(checkDef.getInterval)// "2015-12-31T00:00:00.000+00:00"
     body.id="check-"+check.id+"-"+entity.getId+"-"+System.currentTimeMillis()
 
     body.timelimit.add(checkDef.getInterval)
