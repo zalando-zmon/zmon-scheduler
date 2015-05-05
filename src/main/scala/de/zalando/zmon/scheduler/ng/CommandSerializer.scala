@@ -2,7 +2,6 @@ package de.zalando.zmon.scheduler.ng
 
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.concurrent.atomic.AtomicLong
 
 import de.zalando.zmon.scheduler.ng.CeleryBody.{TrialRunCeleryAlertArg, TrialRunCeleryCommand, CeleryAlertArg, CeleryCommandArg}
 import de.zalando.zmon.scheduler.ng.entities.Entity

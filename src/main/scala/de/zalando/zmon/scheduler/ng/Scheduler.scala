@@ -140,7 +140,11 @@ class ScheduledCheck(val id : Integer,
         // set last run to roughly last execution during first scheduling
         lastRun = System.currentTimeMillis() - (check.getCheckDef.getInterval * 1000L - delay * 1000L)
       }
-      if(taskFuture != null) taskFuture.cancel(false) // this should only happen for imidiate evaluation triggered by UI
+
+      if(taskFuture != null) {
+        taskFuture.cancel(false) // this should only happen for immediate evaluation triggered by UI or interval change
+      }
+
       taskFuture = service.scheduleAtFixedRate(this, delay, check.getCheckDef.getInterval, TimeUnit.SECONDS)
     }
   }
@@ -195,7 +199,7 @@ class ScheduledCheck(val id : Integer,
       runCheck()
     }
     catch {
-      case e : Exception => ScheduledCheck.LOG.error("", e)
+      case e : Exception => ScheduledCheck.LOG.error("Error in execution of chechk", e)
     }
   }
 }
@@ -308,7 +312,7 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
   def schedule(id: Integer, delay: Long) : Long = {
     this.synchronized {
       var scheduledCheck = scheduledChecks.getOrElse(id, null)
-      if(scheduledCheck==null){
+      if(scheduledCheck == null){
         scheduledCheck = new ScheduledCheck(id, queueSelector, checkRepo, alertRepo, entityRepo)
         scheduledChecks.put(id, scheduledCheck)
       }
@@ -320,9 +324,13 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
 
   def executeImmediate(id : Integer): Unit = {
     if(!viableCheck(id)) return
-
-    val lastRun = schedule(id, 0)
-    Scheduler.LOG.info("Schedule for immediate execution: " + id + " last run: " + ((System.currentTimeMillis()-lastRun)/1000)+"s ago")
+    try {
+      val lastRun = schedule(id, 0)
+      Scheduler.LOG.info("Schedule for immediate execution: " + id + " last run: " + ((System.currentTimeMillis() - lastRun) / 1000) + "s ago")
+    }
+    catch {
+      case ex : Exception => Scheduler.LOG.error("Unexpected exception in execImmediate", ex)
+    }
   }
 
   def scheduleCheck(id : Integer): Unit = {
