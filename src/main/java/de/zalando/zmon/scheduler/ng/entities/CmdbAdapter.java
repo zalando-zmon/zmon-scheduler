@@ -21,7 +21,7 @@ public class CmdbAdapter extends EntityAdapter {
     private final MetricRegistry metrics;
     private final Timer timer;
 
-    private static final List<String> FIELDS = Arrays.asList("teams","data_center_code","host","host_role_id","role_name","type","external_ip","internal_ip","virt_type","physcial_machine");
+    private static final List<String> FIELDS = Arrays.asList("teams","data_center_code","host","host_role_id","role_name","type","external_ip","internal_ip","virt_type","physcial_machine","physical_machine_model");
 
     private static final Logger LOG = LoggerFactory.getLogger(CmdbAdapter.class);
 
@@ -73,8 +73,8 @@ public class CmdbAdapter extends EntityAdapter {
                     base.put("data_center_code", physicalMachine.get("data_center_code"));
                 }
 
-                if(null != physicalMachine && physicalMachine.containsKey("physical_machine_model")) {
-                    base.put("model", physicalMachine.get("physical_machine_model"));
+                if(null != physicalMachine && physicalMachine.containsKey("model")) {
+                    base.put("physical_machine_model", physicalMachine.get("model"));
                 }
                 base.remove("physical_machine");
             }
