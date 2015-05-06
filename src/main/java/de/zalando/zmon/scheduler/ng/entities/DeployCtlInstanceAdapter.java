@@ -53,7 +53,9 @@ public class DeployCtlInstanceAdapter extends EntityAdapter {
 
         LOG.info("Querying deployctl with credentials {}", user);
         Timer.Context tC = timer.time();
-        BaseEntityList list = rt.postForObject(url, request, BaseEntityList.class);
+        BaseEntityList list = rt.postForObject(url +"/live", request, BaseEntityList.class);
+        BaseEntityList listBeta = rt.postForObject(url + "/beta", request, BaseEntityList.class);
+        list.addAll(listBeta);
         LOG.info("DeployCtlInstance Adapter used: {}ms", tC.stop() / 1000000);
 
         List<Entity> entities = new ArrayList<>();
