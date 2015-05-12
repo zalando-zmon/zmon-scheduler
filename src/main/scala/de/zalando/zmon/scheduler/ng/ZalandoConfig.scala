@@ -44,7 +44,8 @@ class SchedulerConfig {
 
   @BeanProperty var check_filter : java.util.List[Integer] = new util.ArrayList[Integer]()
 
-  @BeanProperty var entity_base_filter: java.util.List[util.Map[String,String]] = new util.ArrayList[util.Map[String,String]]()
+  @BeanProperty var entity_base_filter: java.util.List[util.Map[String,String]] = null
+  @BeanProperty var entity_base_filter_str: String = null
 
   @BeanProperty var default_queue : String = "zmon:queue:default"
   @BeanProperty var trial_run_queue : String = "zmon:queue:default"
@@ -72,7 +73,7 @@ class SchedulerConfig {
   @BeanProperty var redis_trialrun_pubsub : String = "zmon:trial_run:pubsub"
   @BeanProperty var redis_trialrun_requests : String = "zmon:trial_run:requests"
 
-  @BeanProperty var dummy_cities = "dummy_data/cities.json"
+  @BeanProperty var dummy_cities : String = null // "dummy_data/cities.json"
 
   // Mapping based on check url prefix
   @BeanProperty var queue_mapping_by_url : java.util.Map[String, String] = new java.util.HashMap[String,String]()

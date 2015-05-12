@@ -1,11 +1,16 @@
 package de.zalando.zmon.scheduler.ng.entities;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.zalando.zmon.scheduler.ng.CachedRepository;
 import de.zalando.zmon.scheduler.ng.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.filter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +22,8 @@ import java.util.Map;
 @Component
 public class EntityRepository extends CachedRepository<String, EntityAdapterRegistry, Entity> {
 
-    private final List<Map<String,String>> baseFilter;
+    private List<Map<String,String>> baseFilter = null;
+    private static final Logger LOG = LoggerFactory.getLogger(EntityRepository.class);
 
     @Override
     protected void fill() {
@@ -50,7 +56,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
                     }
                 }
 
-                if(baseFilter.size()>0) {
+                if(null != baseFilter && baseFilter.size()>0) {
                     for(Map<String,String> f : baseFilter) {
                         if (filter.overlaps(f, e.getFilterProperties())) {
                             m.put(e.getId(), e);
@@ -82,7 +88,17 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     public EntityRepository(EntityAdapterRegistry registry, SchedulerConfig config) {
         super(registry);
 
-        baseFilter = config.entity_base_filter();
+        if(config.entity_base_filter()==null && config.entity_base_filter_str()!=null) {
+            ObjectMapper m = new ObjectMapper();
+            try {
+                baseFilter = m.readValue(config.entity_base_filter_str(), new TypeReference<List<Map<String,String>>>() {});
+            } catch (IOException e) {
+                LOG.error("failed to read string for base config", e);
+            }
+        }
+        else {
+            baseFilter = config.entity_base_filter();
+        }
 
         currentMap = new HashMap<>();
         fill();
