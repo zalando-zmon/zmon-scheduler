@@ -81,6 +81,7 @@ class CommandSerializer(val serializerType : TaskSerializerType) {
     command.interval = checkDef.getInterval
     command.command = checkDef.getCommand
     command.entity = entity.getProperties
+    command.schedule_time = (System.currentTimeMillis().asInstanceOf[Double]) / 1000.0;
     body.args.add(command)
 
     val alertList : java.util.List[CeleryAlertArg] = new java.util.ArrayList[CeleryAlertArg]();
