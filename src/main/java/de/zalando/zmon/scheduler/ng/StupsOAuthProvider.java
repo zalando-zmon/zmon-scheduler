@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 /**
  * Created by jmussler on 5/11/15.
  */
-@Component
+
 public class StupsOAuthProvider {
 
     private static Logger LOG = LoggerFactory.getLogger(StupsOAuthProvider.class);
