@@ -23,6 +23,7 @@ import java.util.Map;
 public class EntityRepository extends CachedRepository<String, EntityAdapterRegistry, Entity> {
 
     private List<Map<String,String>> baseFilter = null;
+    private final String skipField;
     private static final Logger LOG = LoggerFactory.getLogger(EntityRepository.class);
 
     @Override
@@ -56,7 +57,10 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
                     }
                 }
 
-                if(null != baseFilter && baseFilter.size()>0) {
+                if(null != skipField && e.getFilterProperties().containsKey(skipField)) {
+                    // SKIP ( use this for DC vs AWS Distinction as legacy entities do not have skipField set )
+                }
+                else if(null != baseFilter && baseFilter.size()>0) {
                     for(Map<String,String> f : baseFilter) {
                         if (filter.overlaps(f, e.getFilterProperties())) {
                             m.put(e.getId(), e);
@@ -88,6 +92,8 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     public EntityRepository(EntityAdapterRegistry registry, SchedulerConfig config) {
         super(registry);
 
+        this.skipField = config.entity_skip_on_field();
+
         if(config.entity_base_filter()==null && config.entity_base_filter_str()!=null) {
             ObjectMapper m = new ObjectMapper();
             try {
@@ -106,6 +112,8 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
 
     public EntityRepository(EntityAdapterRegistry registry) {
         super(registry);
+
+        skipField = null;
 
         baseFilter = new ArrayList<>();
         currentMap = new HashMap<>();

@@ -44,6 +44,7 @@ class SchedulerConfig {
 
   @BeanProperty var check_filter : java.util.List[Integer] = new util.ArrayList[Integer]()
 
+  @BeanProperty var entity_skip_on_field: String = null
   @BeanProperty var entity_base_filter: java.util.List[util.Map[String,String]] = null
   @BeanProperty var entity_base_filter_str: String = null
 
