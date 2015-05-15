@@ -16,6 +16,7 @@ object RedisSubscriber {
 }
 
 abstract class RedisSubscriber(val host : String, val port : Int,  val pubSubKey : String) extends JedisPubSub with Runnable {
+  RedisSubscriber.LOG.info("Subscribing on host: " + host + " port: " + port)
   var jedisSub = new Jedis(host, port)
   var jedis= new Jedis(host, port)
 
