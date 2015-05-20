@@ -162,11 +162,11 @@ class ScheduledCheck(val id : Integer,
     // ScheduledCheck.LOG.info("Scheduling: " + id + " after: " + ((System.currentTimeMillis()-lastRun)/1000.0))
 
     lastRun = System.currentTimeMillis()
+    selector.execute()(entity, check, alerts)
+
     if(checkMeter != null) {
       checkMeter.mark()
     }
-
-    selector.execute()(entity, check, alerts)
     metrics.totalChecks.mark()
   }
 
@@ -199,7 +199,10 @@ class ScheduledCheck(val id : Integer,
       runCheck()
     }
     catch {
-      case e : Exception => ScheduledCheck.LOG.error("Error in execution of chechk", e)
+      case e : Exception => {
+        metrics.errorCount.mark()
+        ScheduledCheck.LOG.error("Error in execution of chechk", e)
+      }
     }
   }
 }
@@ -253,6 +256,7 @@ class SchedulerFactory {
 
 class SchedulerMetrics(implicit val metrics : MetricRegistry) {
   val totalChecks = metrics.meter("scheduler.total-checks")
+  val errorCount = metrics.meter("scheduler.total-errors")
 }
 
 object SchedulePersister {
