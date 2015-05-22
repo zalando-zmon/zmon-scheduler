@@ -81,6 +81,7 @@ class SchedulerConfig {
   @BeanProperty var instant_eval_http_url : String = null
 
   // used to enable polling for trial runs via http with DC id
+  @BeanProperty var trial_run_forward : Boolean = true
   @BeanProperty var trial_run_http_url : String = null
 
   @BeanProperty var enable_trail_run : Boolean = true

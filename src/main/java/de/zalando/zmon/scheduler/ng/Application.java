@@ -98,8 +98,21 @@ public class Application {
     }
 
     @RequestMapping(value="/api/v1/instant-evaluations/", method=RequestMethod.GET)
-    Collection<String> getKnownForwardDCs() {
+    Collection<String> getKnownInstantEvalForwardDCs() {
         return instantEvalForwarder.getKnwonDCs();
+    }
+
+    @Autowired
+    private TrialRunForwarder trialRunForwarder;
+
+    @RequestMapping(value="/api/v1/trial-runs/{dc}/", method=RequestMethod.GET)
+    Collection<TrialRunRequest> getPendingTrialRuns(@PathVariable(value="dc") String dcId) {
+        return trialRunForwarder.getRequests(dcId);
+    }
+
+    @RequestMapping(value="/api/v1/trial-runs/", method=RequestMethod.GET)
+    Collection<String> getKnownTrialRunDCs() {
+        return trialRunForwarder.getKnwonDCs();
     }
 
     @RequestMapping(value="/api/v1/trigger-check/{id}", method=RequestMethod.GET)

@@ -233,7 +233,12 @@ class SchedulerFactory {
 
   @Bean
   @Autowired
-  def createScheduler(alertRepo : AlertRepository, checkRepo: CheckRepository, entityRepo : EntityRepository, queueSelector : QueueSelector, instantForwarder : InstantEvalForwarder)
+  def createScheduler(alertRepo : AlertRepository,
+                      checkRepo: CheckRepository,
+                      entityRepo : EntityRepository,
+                      queueSelector : QueueSelector,
+                      instantForwarder : InstantEvalForwarder,
+                      trialRunForwarder : TrialRunForwarder)
                      (implicit schedulerConfig : SchedulerConfig, metrics: MetricRegistry) : Scheduler = {
     SchedulerFactory.LOG.info("Createing scheduler instance")
     val s = new Scheduler(alertRepo, checkRepo, entityRepo, queueSelector)
@@ -255,11 +260,23 @@ class SchedulerFactory {
     }
 
     if(schedulerConfig.enable_trail_run) {
-      val trialRunSubscriber = new TrialRunSubscriber(s, schedulerConfig)
+      val trialRunSubscriber = new TrialRunSubscriber(s, schedulerConfig, trialRunForwarder)
     }
 
     if(schedulerConfig.instant_eval_forward) {
       entityRepo.registerListener(instantForwarder)
+    }
+
+    if(schedulerConfig.trial_run_forward) {
+      entityRepo.registerListener(trialRunForwarder)
+    }
+
+    if(schedulerConfig.trial_run_http_url!=null) {
+      val trialRunPoller = new TrialRunHttpSubscriber(s, schedulerConfig);
+    }
+
+    if(schedulerConfig.instant_eval_http_url!=null) {
+      val instantEvalPoller = new InstantEvalHttpSubscriber(s, schedulerConfig);
     }
 
     s
