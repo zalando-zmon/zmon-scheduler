@@ -4,5 +4,7 @@ package de.zalando.zmon.scheduler.ng.entities;
  * Created by jmussler on 4/17/15.
  */
 public interface EntityChangeListener {
-    void notifyEntityChange(EntityRepository repo, String entityId);
+    void notifyEntityChange(EntityRepository repo, Entity e);
+    void notifyEntityRemove(EntityRepository repo, Entity e);
+    void notifyEntityAdd(EntityRepository repo, Entity e);
 }

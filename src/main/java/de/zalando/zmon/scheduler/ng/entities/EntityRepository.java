@@ -3,6 +3,7 @@ package de.zalando.zmon.scheduler.ng.entities;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.zalando.zmon.scheduler.ng.CachedRepository;
+import de.zalando.zmon.scheduler.ng.InstantEvalForwarder;
 import de.zalando.zmon.scheduler.ng.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.filter;
 import org.slf4j.Logger;
@@ -10,11 +11,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.swing.event.ChangeListener;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by jmussler on 4/7/15.
@@ -25,6 +25,20 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     private List<Map<String,String>> baseFilter = null;
     private final String skipField;
     private static final Logger LOG = LoggerFactory.getLogger(EntityRepository.class);
+
+    private List<EntityChangeListener> changeListeners = new ArrayList<>();
+
+    public synchronized void registerListener(EntityChangeListener l) {
+        Map<String, Entity> m = currentMap;
+        for(String k : m.keySet()) {
+            l.notifyEntityAdd(this, m.get(k));
+        }
+        changeListeners.add(l);
+    }
+
+    private synchronized List<EntityChangeListener> getCurrentListeners() {
+        return new ArrayList<>(changeListeners);
+    }
 
     @Override
     protected void fill() {
@@ -73,8 +87,28 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
             }
         }
 
-        // TODO build cleanup of old entities here, or notify something responsible
+        List<EntityChangeListener> currentListeners = getCurrentListeners();
+
+        Set<String> currentIds = currentMap.keySet();
+        Set<String> futureIds = m.keySet();
+        Set<String> removedIds = currentIds.stream().filter(x->!futureIds.contains(x)).collect(Collectors.toSet());
+
+        // removing with old entity map still in place, so executed code on same thread sees entities
+        for(String k : removedIds) {
+            for(EntityChangeListener l : currentListeners) {
+                l.notifyEntityRemove(this, currentMap.get(k));
+            }
+        }
+        Set<String> addedIds = futureIds.stream().filter(x->!currentIds.contains(x)).collect(Collectors.toSet());
+
         currentMap = m;
+
+        // doing this after the switch, so code executed in this thread during notification will see proper entity map
+        for(String k : removedIds) {
+            for(EntityChangeListener l : currentListeners) {
+                l.notifyEntityAdd(this, currentMap.get(k));
+            }
+        }
     }
 
     private static final Entity NULL_ENTITY;

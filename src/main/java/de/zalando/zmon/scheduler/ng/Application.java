@@ -89,6 +89,19 @@ public class Application {
         return alertSourceRegistry.get(name).getCollection();
     }
 
+    @Autowired
+    private InstantEvalForwarder instantEvalForwarder;
+
+    @RequestMapping(value="/api/v1/instant-evaluations/{dc}/", method=RequestMethod.GET)
+    Collection<Integer> getPendingInstantEvaluations(@PathVariable(value="dc") String dcId) {
+        return instantEvalForwarder.getRequests(dcId);
+    }
+
+    @RequestMapping(value="/api/v1/instant-evaluations/", method=RequestMethod.GET)
+    Collection<String> getKnownForwardDCs() {
+        return instantEvalForwarder.getKnwonDCs();
+    }
+
     @RequestMapping(value="/api/v1/trigger-check/{id}", method=RequestMethod.GET)
     void triggerInstantEval(@PathVariable(value="id") int checkId) {
         scheduler.executeImmediate(checkId);

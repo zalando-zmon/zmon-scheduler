@@ -233,7 +233,7 @@ class SchedulerFactory {
 
   @Bean
   @Autowired
-  def createScheduler(alertRepo : AlertRepository, checkRepo: CheckRepository, entityRepo : EntityRepository, queueSelector : QueueSelector)
+  def createScheduler(alertRepo : AlertRepository, checkRepo: CheckRepository, entityRepo : EntityRepository, queueSelector : QueueSelector, instantForwarder : InstantEvalForwarder)
                      (implicit schedulerConfig : SchedulerConfig, metrics: MetricRegistry) : Scheduler = {
     SchedulerFactory.LOG.info("Createing scheduler instance")
     val s = new Scheduler(alertRepo, checkRepo, entityRepo, queueSelector)
@@ -246,9 +246,21 @@ class SchedulerFactory {
     }
     SchedulerFactory.LOG.info("Initial scheduling of all checks done")
 
-    val instantEvalListener = new RedisInstantEvalSubscriber(s, schedulerConfig, alertRepo)
-    val downtimeEvalListener = new RedisDownTimeSubscriber(s, schedulerConfig, alertRepo)
-    val trialRunSubscriber = new TrialRunSubscriber(s, schedulerConfig)
+    if(schedulerConfig.enable_instant_eval) {
+      val instantEvalListener = new RedisInstantEvalSubscriber(s, schedulerConfig, alertRepo, instantForwarder)
+    }
+
+    if(schedulerConfig.enable_downtime_redis_sub) {
+      val downtimeEvalListener = new RedisDownTimeSubscriber(s, schedulerConfig, alertRepo)
+    }
+
+    if(schedulerConfig.enable_trail_run) {
+      val trialRunSubscriber = new TrialRunSubscriber(s, schedulerConfig)
+    }
+
+    if(schedulerConfig.instant_eval_forward) {
+      entityRepo.registerListener(instantForwarder)
+    }
 
     s
   }
@@ -333,7 +345,7 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
       Scheduler.LOG.info("Schedule for immediate execution: " + id + " last run: " + ((System.currentTimeMillis() - lastRun) / 1000) + "s ago")
     }
     catch {
-      case ex : Exception => Scheduler.LOG.error("Unexpected exception in execImmediate", ex)
+      case ex : Exception => Scheduler.LOG.error("Unexpected exception in execImmediate for check_id: " + id, ex)
     }
   }
 

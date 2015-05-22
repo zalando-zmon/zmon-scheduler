@@ -24,9 +24,16 @@ abstract class RedisSubscriber(val host : String, val port : Int,  val pubSubKey
   thread.start()
 
   override def run() : Unit = {
-    if(pubSubKey != null && !pubSubKey.equals("")) {
-      RedisSubscriber.LOG.info("start listening to " + pubSubKey)
-      jedisSub.subscribe(this, pubSubKey)
+    while ( true ) {
+      try {
+        if (pubSubKey != null && !pubSubKey.equals("")) {
+          RedisSubscriber.LOG.info("start listening to " + pubSubKey)
+          jedisSub.subscribe(this, pubSubKey)
+        }
+      }
+      catch {
+        case e: JedisConnectionException => jedisSub = new Jedis(host, port)
+      }
     }
   }
 
@@ -49,7 +56,7 @@ object RedisInstantEvalSubscriber {
   val LOG = LoggerFactory.getLogger(RedisInstantEvalSubscriber.getClass)
 }
 
-class RedisInstantEvalSubscriber(val scheduler : Scheduler, val config : SchedulerConfig, val alertRepo: AlertRepository) extends JedisPubSub with Runnable {
+class RedisInstantEvalSubscriber(val scheduler : Scheduler, val config : SchedulerConfig, val alertRepo: AlertRepository, val forwarder: InstantEvalForwarder) extends JedisPubSub with Runnable {
 
   var jedisSub = new Jedis(config.redis_host, config.redis_port)
   var jedis = new Jedis(config.redis_host, config.redis_port)
@@ -69,10 +76,13 @@ class RedisInstantEvalSubscriber(val scheduler : Scheduler, val config : Schedul
     try {
       val request = jedis.hget(config.redis_instant_eval_requests, message)
       val node = RedisInstantEvalSubscriber.mapper.readTree(request)
+
       if(node.has("alert_definition_id")) {
         val alertId = node.get("alert_definition_id").asInt()
         scheduler.executeImmediate(alertRepo.get(alertId).getCheckDefinitionId)
+        forwarder.forwardRequest(alertRepo.get(alertId).getCheckDefinitionId)
       }
+
     }
     catch {
       case e : JedisConnectionException => jedis = new Jedis(config.redis_host, config.redis_port)
