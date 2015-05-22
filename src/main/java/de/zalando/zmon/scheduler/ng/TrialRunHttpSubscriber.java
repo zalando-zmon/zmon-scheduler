@@ -21,10 +21,10 @@ public class TrialRunHttpSubscriber implements Runnable {
     private final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
 
     public TrialRunHttpSubscriber(Scheduler scheduler, SchedulerConfig config) {
-        url = config.instant_eval_http_url();
+        url = config.trial_run_http_url();
         this.scheduler = scheduler;
         if(url!=null && !url.equals("")) {
-            executor.scheduleAtFixedRate(this, 60, 60, TimeUnit.SECONDS);
+            executor.scheduleAtFixedRate(this, 60, 5, TimeUnit.SECONDS);
         }
     }
 
