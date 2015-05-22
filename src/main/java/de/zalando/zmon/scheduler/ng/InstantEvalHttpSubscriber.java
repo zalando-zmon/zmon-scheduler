@@ -29,7 +29,7 @@ public class InstantEvalHttpSubscriber implements Runnable {
         url = config.instant_eval_http_url();
         this.scheduler = scheduler;
         if(url!=null && !url.equals("")) {
-            executor.scheduleAtFixedRate(this, 60, 60, TimeUnit.SECONDS);
+            executor.scheduleAtFixedRate(this, 60, 5, TimeUnit.SECONDS);
         }
     }
 

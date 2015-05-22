@@ -104,7 +104,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
         currentMap = m;
 
         // doing this after the switch, so code executed in this thread during notification will see proper entity map
-        for(String k : removedIds) {
+        for(String k : addedIds) {
             for(EntityChangeListener l : currentListeners) {
                 l.notifyEntityAdd(this, currentMap.get(k));
             }
