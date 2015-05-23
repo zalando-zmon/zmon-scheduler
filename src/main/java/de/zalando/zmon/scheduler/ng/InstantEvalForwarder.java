@@ -41,9 +41,9 @@ public class InstantEvalForwarder implements EntityChangeListener {
     public void notifyEntityRemove(EntityRepository repo, Entity e) {
         if(e.getFilterProperties().get("type").equals("local")) {
             // local entities depict remote DCs
-            if(!pendingTasks.containsKey(e.getId())) {
+            if(pendingTasks.containsKey(e.getId())) {
                 synchronized(this) {
-                    if(!pendingTasks.containsKey(e.getId())) {
+                    if(pendingTasks.containsKey(e.getId())) {
                         pendingTasks.remove(e.getId());
                     }
                 }

@@ -55,9 +55,9 @@ public class TrialRunForwarder implements EntityChangeListener {
     public void notifyEntityRemove(EntityRepository repo, Entity e) {
         if(e.getFilterProperties().get("type").equals("local")) {
             // local entities depict remote DCs
-            if(!pendingTrialRuns.containsKey(e.getId())) {
+            if(pendingTrialRuns.containsKey(e.getId())) {
                 synchronized(this) {
-                    if(!pendingTrialRuns.containsKey(e.getId())) {
+                    if(pendingTrialRuns.containsKey(e.getId())) {
                         pendingTrialRuns.remove(e.getId());
                     }
                 }
