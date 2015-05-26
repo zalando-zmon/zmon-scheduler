@@ -29,6 +29,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     private List<EntityChangeListener> changeListeners = new ArrayList<>();
 
     public synchronized void registerListener(EntityChangeListener l) {
+        LOG.info("Registering entity change listener ({})", l.getClass());
         Map<String, Entity> m = currentMap;
         for(String k : m.keySet()) {
             l.notifyEntityAdd(this, m.get(k));
