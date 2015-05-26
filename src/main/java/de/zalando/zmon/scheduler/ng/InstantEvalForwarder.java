@@ -13,7 +13,7 @@ import java.util.*;
 @Component
 public class InstantEvalForwarder implements EntityChangeListener {
 
-    private final Map<String, List<Integer>> pendingTasks = new HashMap<>();
+    private final Map<String, Set<Integer>> pendingTasks = new HashMap<>();
 
     public void forwardRequest(int checkId) {
         synchronized(this) {
@@ -69,7 +69,7 @@ public class InstantEvalForwarder implements EntityChangeListener {
             if(!pendingTasks.containsKey(e.getId())) {
                 synchronized(this) {
                     if(!pendingTasks.containsKey(e.getId())) {
-                        pendingTasks.put(e.getId(), new ArrayList<>());
+                        pendingTasks.put(e.getId(), new HashSet<>());
                     }
                 }
             }

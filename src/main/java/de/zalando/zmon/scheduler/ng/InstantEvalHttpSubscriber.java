@@ -27,6 +27,7 @@ public class InstantEvalHttpSubscriber implements Runnable {
 
     public InstantEvalHttpSubscriber(Scheduler scheduler, SchedulerConfig config) {
         url = config.instant_eval_http_url();
+        LOG.info("Subscribing for instant evaluations: {}", url);
         this.scheduler = scheduler;
         if(url!=null && !url.equals("")) {
             executor.scheduleAtFixedRate(this, 60, 5, TimeUnit.SECONDS);
@@ -43,6 +44,7 @@ public class InstantEvalHttpSubscriber implements Runnable {
             ResponseEntity<List<Integer>> response = rt.exchange(url, HttpMethod.GET, request, new ParameterizedTypeReference<List<Integer>>() {});
 
             for( Integer checkId : response.getBody()) {
+                LOG.info("Received instant evaluation request: {}", checkId);
                 scheduler.executeImmediate(checkId);
             }
         }

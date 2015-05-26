@@ -27,6 +27,7 @@ public class TrialRunHttpSubscriber implements Runnable {
 
     public TrialRunHttpSubscriber(Scheduler scheduler, SchedulerConfig config) {
         url = config.trial_run_http_url();
+        LOG.info("Subscribing for trial runs: {}", url);
         this.scheduler = scheduler;
         if(url!=null && !url.equals("")) {
             executor.scheduleAtFixedRate(this, 60, 5, TimeUnit.SECONDS);
@@ -44,6 +45,7 @@ public class TrialRunHttpSubscriber implements Runnable {
             });
 
             for (TrialRunRequest trialRunRequest : response.getBody()) {
+                LOG.info("Received trial run request: {}", trialRunRequest.entities_exclude);
                 scheduler.scheduleTrialRun(trialRunRequest);
             }
         }
