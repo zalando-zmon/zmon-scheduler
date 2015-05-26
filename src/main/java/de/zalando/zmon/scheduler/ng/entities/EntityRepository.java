@@ -93,6 +93,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
         Set<String> currentIds = currentMap.keySet();
         Set<String> futureIds = m.keySet();
         Set<String> removedIds = currentIds.stream().filter(x->!futureIds.contains(x)).collect(Collectors.toSet());
+        LOG.info("Number of entities removed: {}", removedIds.size());
 
         // removing with old entity map still in place, so executed code on same thread sees entities
         for(String k : removedIds) {
@@ -101,7 +102,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
             }
         }
         Set<String> addedIds = futureIds.stream().filter(x->!currentIds.contains(x)).collect(Collectors.toSet());
-
+        LOG.info("Numberof entities added: {}", addedIds.size());
         currentMap = m;
 
         // doing this after the switch, so code executed in this thread during notification will see proper entity map
@@ -110,6 +111,8 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
                 l.notifyEntityAdd(this, currentMap.get(k));
             }
         }
+
+        LOG.info("Entity Repository refreshed: {} known entities", currentMap.size());
     }
 
     private static final Entity NULL_ENTITY;
