@@ -23,8 +23,14 @@ public class InstantEvalForwarder implements EntityChangeListener {
         }
     }
 
+    private static final List<Integer> EMPTY_LIST = new ArrayList<>(0);
+
     public List<Integer> getRequests(String dcId) {
         synchronized(this) {
+            if(!pendingTasks.containsKey(dcId)) {
+                return EMPTY_LIST;
+            }
+
             List<Integer> taskIds = new ArrayList<>(pendingTasks.get(dcId));
             pendingTasks.get(dcId).clear();
             return taskIds;

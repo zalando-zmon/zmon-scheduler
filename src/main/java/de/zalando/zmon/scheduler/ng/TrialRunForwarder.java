@@ -23,8 +23,14 @@ public class TrialRunForwarder implements EntityChangeListener {
         }
     }
 
+    private final static List<TrialRunRequest> EMPTY_LIST = new ArrayList<>(0);
+
     public List<TrialRunRequest> getRequests(String dcId) {
         synchronized(this) {
+            if(!pendingTrialRuns.containsKey(dcId)) {
+                return EMPTY_LIST;
+            }
+
             List<TrialRunRequest> trialRuns = new ArrayList<>(pendingTrialRuns.get(dcId));
             pendingTrialRuns.get(dcId).clear();
             return trialRuns;
