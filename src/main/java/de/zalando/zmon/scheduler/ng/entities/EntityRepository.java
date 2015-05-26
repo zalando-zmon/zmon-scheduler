@@ -33,7 +33,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
 
     public synchronized void registerListener(EntityChangeListener l) {
         LOG.info("Registering entity change listener ({}, {})", l.getClass(), currentMap.size());
-        Map<String, Entity> m = currentMap;
+        Map<String, Entity> m = unfilteredEntities;
         for(String k : m.keySet()) {
             l.notifyEntityAdd(this, m.get(k));
         }
@@ -110,7 +110,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
 
         Set<String> addedIds = futureIds.stream().filter(x->!currentIds.contains(x)).collect(Collectors.toSet());
         LOG.info("Numberof entities added globaly: {}", addedIds.size());
-        
+
         currentMap = m;
         unfilteredEntities = mUnfiltered;
 
