@@ -29,7 +29,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     private List<EntityChangeListener> changeListeners = new ArrayList<>();
 
     public synchronized void registerListener(EntityChangeListener l) {
-        LOG.info("Registering entity change listener ({})", l.getClass());
+        LOG.info("Registering entity change listener ({}, {})", l.getClass(), currentMap.size());
         Map<String, Entity> m = currentMap;
         for(String k : m.keySet()) {
             l.notifyEntityAdd(this, m.get(k));
@@ -42,7 +42,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     }
 
     @Override
-    protected void fill() {
+    protected synchronized void fill() {
         Map<String, Entity> m = new HashMap<>();
 
         for(String name : registry.getSourceNames()) {
