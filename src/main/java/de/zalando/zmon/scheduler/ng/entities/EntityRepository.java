@@ -22,11 +22,14 @@ import java.util.stream.Collectors;
 @Component
 public class EntityRepository extends CachedRepository<String, EntityAdapterRegistry, Entity> {
 
-    private List<Map<String,String>> baseFilter = null;
-    private final String skipField;
     private static final Logger LOG = LoggerFactory.getLogger(EntityRepository.class);
 
-    private List<EntityChangeListener> changeListeners = new ArrayList<>();
+    private List<Map<String,String>> baseFilter = null;
+    private final String skipField;
+    private final List<EntityChangeListener> changeListeners = new ArrayList<>();
+
+    // Need this to write globally aware change listener
+    private Map<String, Entity> unfilteredEntities;
 
     public synchronized void registerListener(EntityChangeListener l) {
         LOG.info("Registering entity change listener ({}, {})", l.getClass(), currentMap.size());
@@ -44,6 +47,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     @Override
     protected synchronized void fill() {
         Map<String, Entity> m = new HashMap<>();
+        Map<String, Entity> mUnfiltered = new HashMap<>();
 
         for(String name : registry.getSourceNames()) {
             for(Entity e: registry.get(name).getCollection()) {
@@ -85,34 +89,38 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
                 else {
                     m.put(e.getId(), e);
                 }
+
+                mUnfiltered.put(e.getId(), e);
             }
         }
 
         List<EntityChangeListener> currentListeners = getCurrentListeners();
 
-        Set<String> currentIds = currentMap.keySet();
-        Set<String> futureIds = m.keySet();
+        Set<String> currentIds = unfilteredEntities.keySet();
+        Set<String> futureIds = mUnfiltered.keySet();
         Set<String> removedIds = currentIds.stream().filter(x->!futureIds.contains(x)).collect(Collectors.toSet());
-        LOG.info("Number of entities removed: {}", removedIds.size());
+        LOG.info("Number of entities removed globaly: {}", removedIds.size());
 
-        // removing with old entity map still in place, so executed code on same thread sees entities
+        // now using unfiltered, thus code should solely rely on passed entity
         for(String k : removedIds) {
             for(EntityChangeListener l : currentListeners) {
-                l.notifyEntityRemove(this, currentMap.get(k));
+                l.notifyEntityRemove(this, unfilteredEntities.get(k));
             }
         }
-        Set<String> addedIds = futureIds.stream().filter(x->!currentIds.contains(x)).collect(Collectors.toSet());
-        LOG.info("Numberof entities added: {}", addedIds.size());
-        currentMap = m;
 
-        // doing this after the switch, so code executed in this thread during notification will see proper entity map
+        Set<String> addedIds = futureIds.stream().filter(x->!currentIds.contains(x)).collect(Collectors.toSet());
+        LOG.info("Numberof entities added globaly: {}", addedIds.size());
+        
+        currentMap = m;
+        unfilteredEntities = mUnfiltered;
+
         for(String k : addedIds) {
             for(EntityChangeListener l : currentListeners) {
-                l.notifyEntityAdd(this, currentMap.get(k));
+                l.notifyEntityAdd(this, unfilteredEntities.get(k));
             }
         }
 
-        LOG.info("Entity Repository refreshed: {} known entities", currentMap.size());
+        LOG.info("Entity Repository refreshed: {} known filtered entities / {} total", currentMap.size(), unfilteredEntities.size());
     }
 
     private static final Entity NULL_ENTITY;
@@ -145,6 +153,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
         }
 
         currentMap = new HashMap<>();
+        unfilteredEntities = new HashMap<>();
         fill();
     }
 
@@ -155,6 +164,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
 
         baseFilter = new ArrayList<>();
         currentMap = new HashMap<>();
+        unfilteredEntities = new HashMap<>();
 
         fill();
     }
