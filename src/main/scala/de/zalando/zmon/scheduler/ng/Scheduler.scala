@@ -413,6 +413,7 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
 
   def scheduleTrialRun(request  : TrialRunRequest) : Unit = {
     val entities = getEntitiesForTrialRun(request.entities, request.entities_exclude)
+    Scheduler.LOG.info("Trial run matched entities: " + entities.size())
 
     var jedis : Jedis = null;
     try {
