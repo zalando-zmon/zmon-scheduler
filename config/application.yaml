@@ -19,8 +19,8 @@ scheduler:
   redis_downtime_requests: "zmon:downtime_schedule:requests"
   redis_instant_eval_pubsub: "zmon:alert_evaluation:pubsub"
   redis_instant_eval_requests: "zmon:alert_evaluation:requests"
-  instant_eval_forward: true
-  trial_run_forward: true
+  instant_eval_forward: false
+  trial_run_forward: false 
   default_queue: "zmon:queue:default"
   last_run_persist: DISABLED
   check_detail_metrics: true
