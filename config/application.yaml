@@ -33,4 +33,5 @@ scheduler:
   entity_service_user:
   entity_service_password:
   controller_url: http://localhost:8080/
+  entity_properties_key: "zmon:entity:properties"
 
