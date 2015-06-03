@@ -100,4 +100,7 @@ class SchedulerConfig {
   @BeanProperty var queue_property_mapping : java.util.Map[String,java.util.List[java.util.Map[String,String]]] = new util.HashMap[String,java.util.List[java.util.Map[String,String]]]()
 
   @BeanProperty var task_serializer : TaskSerializerType = TaskSerializerType.COMPRESSED_NESTED
+
+  @BeanProperty var entity_properties_key : String = null
+
 }

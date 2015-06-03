@@ -10,6 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.xerial.snappy.Snappy;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import javax.swing.event.ChangeListener;
 import java.io.IOException;
@@ -31,6 +34,9 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     // Need this to write globally aware change listener
     private Map<String, Entity> unfilteredEntities;
 
+    private JedisPool redisPool = null;
+    private String redis_properties_key = null;
+
     public synchronized void registerListener(EntityChangeListener l) {
         LOG.info("Registering entity change listener ({}, {})", l.getClass(), currentMap.size());
         Map<String, Entity> m = unfilteredEntities;
@@ -42,6 +48,51 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
 
     private synchronized List<EntityChangeListener> getCurrentListeners() {
         return new ArrayList<>(changeListeners);
+    }
+
+    private void createAutoCompleteData() {
+        if(redisPool==null || redis_properties_key == null || redis_properties_key.equals("")) {
+            return;
+        }
+
+        try {
+            Map<String, Map<String, Set<Object>>> typeMap = new HashMap<>();
+            for (Entity e : unfilteredEntities.values()) {
+                String type = (String) e.getFilterProperties().get("type");
+                if (null != type) {
+                    Map<String, Set<Object>> typeData = typeMap.get(type);
+                    if (null == typeData) {
+                        typeData = new HashMap<>();
+                        typeMap.put(type, typeData);
+                    }
+
+                    for (String k : e.getFilterProperties().keySet()) {
+                        Set<Object> values = typeData.get(k);
+                        if (null == values) {
+                            values = new HashSet<>();
+                            typeData.put(k, values);
+                        }
+                        values.add(e.getFilterProperties().get(k));
+                    }
+                }
+            }
+
+            typeMap.remove("GLOBAL");
+
+            ObjectMapper mapper = new ObjectMapper();
+            String v = mapper.writeValueAsString(typeMap);
+            Jedis jedis = redisPool.getResource();
+
+            try {
+                jedis.set(redis_properties_key.getBytes(), Snappy.compress(v.getBytes("UTF-8")));
+            }
+            finally {
+                redisPool.returnResource(jedis);
+            }
+        }
+        catch(Exception ex) {
+            LOG.error("Error during generating auto complete data");
+        }
     }
 
     @Override
@@ -120,6 +171,8 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
             }
         }
 
+        createAutoCompleteData();
+
         LOG.info("Entity Repository refreshed: {} known filtered entities / {} total", currentMap.size(), unfilteredEntities.size());
     }
 
@@ -139,6 +192,11 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
         super(registry);
 
         this.skipField = config.entity_skip_on_field();
+
+        if(config.entity_properties_key()!=null && !"".equals(config.entity_properties_key())) {
+            this.redisPool = new JedisPool(config.redis_host(), config.redis_port());
+            this.redis_properties_key = config.entity_properties_key();
+        }
 
         if(config.entity_base_filter()==null && config.entity_base_filter_str()!=null) {
             ObjectMapper m = new ObjectMapper();
