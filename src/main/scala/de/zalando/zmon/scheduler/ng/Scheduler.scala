@@ -213,10 +213,12 @@ object SchedulerFactory {
 
 class CheckChangedListener(val scheduler : Scheduler) extends CheckChangeListener {
   override def notifyNewCheck(repo: CheckRepository, checkId: Int): Unit = {
+    Scheduler.LOG.info("New check discovered: " + checkId)
     scheduler.schedule(checkId, 0)
   }
 
   override def notifyCheckIntervalChange(repo: CheckRepository, checkId: Int): Unit = {
+    Scheduler.LOG.info("Check interval changed: " + checkId);
     scheduler.executeImmediate(checkId)
   }
 }
@@ -334,6 +336,7 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
   service.scheduleAtFixedRate(new SchedulePersister(scheduledChecks), 5, 15, TimeUnit.SECONDS)
 
   def viableCheck(id : Integer) : Boolean = {
+    if(0 == id) return false;
     if(schedulerConfig.check_filter != null && !schedulerConfig.check_filter.isEmpty) {
       if(!schedulerConfig.check_filter.contains(id)) {
         return false

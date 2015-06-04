@@ -19,6 +19,8 @@ public abstract class CachedRepository<I, S, T> implements Runnable {
     protected S registry;
     protected static final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
 
+    private long lastUpdated = 0;
+
     public CachedRepository(S r) {
         registry = r;
         executor.scheduleAtFixedRate(this,180,60, TimeUnit.SECONDS);
@@ -28,13 +30,18 @@ public abstract class CachedRepository<I, S, T> implements Runnable {
 
     abstract protected void fill();
 
+    public long getLastUpdated() {
+        return lastUpdated;
+    }
+
     public void run() {
         try {
-            LOG.info("scheduling update of: {}",registry.getClass());
+            LOG.info("scheduling update of: {}", registry.getClass());
             fill();
+            lastUpdated = System.currentTimeMillis();
         }
         catch(Exception e) {
-            LOG.error("", e);
+            LOG.error("Error during refresh of {}", registry.getClass(), e);
         }
     }
 

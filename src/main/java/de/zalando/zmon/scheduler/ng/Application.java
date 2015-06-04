@@ -11,11 +11,14 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.zalando.zmon.scheduler.ng.alerts.AlertDefinition;
+import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
 import de.zalando.zmon.scheduler.ng.alerts.AlertSourceRegistry;
 import de.zalando.zmon.scheduler.ng.checks.CheckDefinition;
+import de.zalando.zmon.scheduler.ng.checks.CheckRepository;
 import de.zalando.zmon.scheduler.ng.checks.CheckSourceRegistry;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
 import de.zalando.zmon.scheduler.ng.entities.EntityAdapterRegistry;
+import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,6 +123,25 @@ public class Application {
         scheduler.executeImmediate(checkId);
     }
 
+
+    @Autowired
+    AlertRepository alertRepo;
+
+    @Autowired
+    CheckRepository checkRepo;
+
+    @Autowired
+    EntityRepository entityRepo;
+
+    @RequestMapping(value="/api/v1/repository-updates", method= RequestMethod.GET)
+    JsonNode getUpdateStatus() {
+        ObjectNode node = mapper.createObjectNode();
+        node.put("alert-repo", alertRepo.getLastUpdated());
+        node.put("check-repo", checkRepo.getLastUpdated());
+        node.put("entity-repo", entityRepo.getLastUpdated());
+        return node;
+    }
+
     private static class Test2 {
         public String fieldName = "name";
         public String fieldFirstName ="FirstName";
@@ -130,7 +152,7 @@ public class Application {
     }
 
     @RequestMapping(value="/api/v1/test", method=RequestMethod.GET)
-    Test1 sgetTestObject() {
+    Test1 getTestObject() {
         return new Test1();
     }
 
