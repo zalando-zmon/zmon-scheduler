@@ -124,16 +124,6 @@ class ScheduledCheck(val id : Integer,
 
   private var taskFuture : ScheduledFuture[_] = null
 
-  def getAlerts(): mutable.MutableList[Alert] = {
-    val alerts = collection.mutable.MutableList[Alert]()
-
-    for(ad <- alertRepo.getByCheckId(id)) {
-      alerts += new Alert(ad.getId, alertRepo)
-    }
-
-    alerts
-  }
-
   def schedule(service : ScheduledExecutorService, delay: Long): Unit = {
     this.synchronized {
       if(taskFuture == null && delay > 0) {
@@ -171,6 +161,16 @@ class ScheduledCheck(val id : Integer,
   }
 
   val lastRunEntities : mutable.ArrayBuffer[Entity]= new ArrayBuffer[Entity]()
+
+  def getAlerts(): mutable.MutableList[Alert] = {
+    val alerts = collection.mutable.MutableList[Alert]()
+
+    for(ad <- alertRepo.getByCheckId(id)) {
+      alerts += new Alert(ad.getId, alertRepo)
+    }
+
+    alerts
+  }
 
   def runCheck(dryRun : Boolean = false) : mutable.ArrayBuffer[Entity] = {
     lastRunEntities.clear()
