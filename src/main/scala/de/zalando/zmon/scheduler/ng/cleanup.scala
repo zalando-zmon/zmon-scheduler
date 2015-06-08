@@ -76,7 +76,7 @@ class SingleEntityCleanup(val config: SchedulerConfig, val alertRepo: AlertRepos
           }
           catch {
             case ex : Exception => {
-              SingleEntityCleanup.LOG.error("Error during cleanup of entity: ", entity.getId, ex);
+              SingleEntityCleanup.LOG.error("Error during cleanup of entity: " + entity.getId, ex);
             }
           }
           finally {
