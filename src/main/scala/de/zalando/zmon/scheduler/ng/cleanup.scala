@@ -63,15 +63,20 @@ class SingleEntityCleanup(val config: SchedulerConfig, val alertRepo: AlertRepos
 
         if (!viableAlerts.isEmpty) {
           val jedis = pool.getResource
-          jedis.del("zmon:checks:"+check.id+":"+entity.getId)
-          checksCleaned += 1
-
           try {
+            jedis.del("zmon:checks:"+check.id+":"+entity.getId)
+            checksCleaned += 1
+
             for(alert <- viableAlerts) {
               jedis.srem("zmon:alerts:" + alert.id, entity.getId)
               jedis.del("zmon:alerts:" + alert.id + ":" + entity.getId)
               jedis.hdel("zmon:alerts:"+ alert.id + ":entities", entity.getId)
               alertsCleaned+=1
+            }
+          }
+          catch {
+            case ex : Exception => {
+              SingleEntityCleanup.LOG.error("Error during cleanup of entity: ", entity.getId, ex);
             }
           }
           finally {
@@ -82,7 +87,6 @@ class SingleEntityCleanup(val config: SchedulerConfig, val alertRepo: AlertRepos
     }
 
     SingleEntityCleanup.LOG.info("Cleanup entity: " + entity.getId + " checks: " + checksCleaned + " alerts: " + alertsCleaned)
-
   }
 
   def notifyEntityChange(repo: EntityRepository, e: Entity) : Unit = {}
