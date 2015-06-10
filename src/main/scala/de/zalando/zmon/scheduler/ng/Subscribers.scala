@@ -3,9 +3,10 @@ package de.zalando.zmon.scheduler.ng
 import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.slf4j.LoggerFactory
 import redis.clients.jedis.exceptions.JedisConnectionException
-import redis.clients.jedis.{Jedis, JedisPubSub}
+import redis.clients.jedis.{JedisPool, Jedis, JedisPubSub}
 
 /**
  * Created by jmussler on 4/20/15.
@@ -17,8 +18,12 @@ object RedisSubscriber {
 
 abstract class RedisSubscriber(val host : String, val port : Int,  val pubSubKey : String) extends JedisPubSub with Runnable {
   RedisSubscriber.LOG.info("Subscribing on host: " + host + " port: " + port)
+
+  val poolConfig = new GenericObjectPoolConfig()
+  poolConfig.setTestOnBorrow(true)
+
+  val jedisPool = new JedisPool(poolConfig, host, port)
   var jedisSub = new Jedis(host, port)
-  var jedis= new Jedis(host, port)
 
   val thread = new Thread(this)
   thread.start()
@@ -37,18 +42,27 @@ abstract class RedisSubscriber(val host : String, val port : Int,  val pubSubKey
     }
   }
 
-  def handleMessage(channel: String, message: String) : Unit
+  def handleMessage(jedis : Jedis, channel: String, message: String) : Unit
 
   override def onMessage(channel : String, message : String) : Unit = {
     RedisSubscriber.LOG.info("received channel: " + channel + " message: " + message )
+    var jedis = jedisPool.getResource()
     try {
-      handleMessage(channel, message)
+      handleMessage(jedis, channel, message)
     }
     catch {
-      case e : JedisConnectionException => jedis = new Jedis(host, port)
+      case e : JedisConnectionException => {
+        jedisPool.returnBrokenResource(jedis)
+        jedis = null
+      }
+      case e: Exception => RedisSubscriber.LOG.error("Error in subscription to " + pubSubKey, e)
+    }
+    finally {
+      if(null!=jedis) {
+        jedisPool.returnResource(jedis)
+      }
     }
   }
-
 }
 
 object RedisInstantEvalSubscriber {
@@ -56,36 +70,18 @@ object RedisInstantEvalSubscriber {
   val LOG = LoggerFactory.getLogger(RedisInstantEvalSubscriber.getClass)
 }
 
-class RedisInstantEvalSubscriber(val scheduler : Scheduler, val config : SchedulerConfig, val alertRepo: AlertRepository, val forwarder: InstantEvalForwarder) extends JedisPubSub with Runnable {
+class RedisInstantEvalSubscriber(val scheduler : Scheduler, val config : SchedulerConfig, val alertRepo: AlertRepository, val forwarder: InstantEvalForwarder) extends RedisSubscriber(config.redis_host, config.redis_port, config.redis_instant_eval_pubsub) {
 
-  var jedisSub = new Jedis(config.redis_host, config.redis_port)
-  var jedis = new Jedis(config.redis_host, config.redis_port)
-
-  val thread = new Thread(this)
-  thread.start()
-
-  override def run() : Unit = {
-    if(config.redis_instant_eval_pubsub!=null && !config.redis_instant_eval_pubsub.equals("")) {
-      RedisInstantEvalSubscriber.LOG.info("start listening to instant evaluation")
-      jedisSub.subscribe(this, config.redis_instant_eval_pubsub)
-    }
-  }
-
-  override def onMessage(channel : String, message : String) : Unit = {
+  override def handleMessage(jedis: Jedis, channel : String, message : String) : Unit = {
     RedisInstantEvalSubscriber.LOG.info("received instant eval request: " + channel + " : " + message )
-    try {
-      val request = jedis.hget(config.redis_instant_eval_requests, message)
-      val node = RedisInstantEvalSubscriber.mapper.readTree(request)
 
-      if(node.has("alert_definition_id")) {
-        val alertId = node.get("alert_definition_id").asInt()
-        scheduler.executeImmediate(alertRepo.get(alertId).getCheckDefinitionId)
-        forwarder.forwardRequest(alertRepo.get(alertId).getCheckDefinitionId)
-      }
+    val request = jedis.hget(config.redis_instant_eval_requests, message)
+    val node = RedisInstantEvalSubscriber.mapper.readTree(request)
 
-    }
-    catch {
-      case e : JedisConnectionException => jedis = new Jedis(config.redis_host, config.redis_port)
+    if(node.has("alert_definition_id")) {
+      val alertId = node.get("alert_definition_id").asInt()
+      scheduler.executeImmediate(alertRepo.get(alertId).getCheckDefinitionId)
+      forwarder.forwardRequest(alertRepo.get(alertId).getCheckDefinitionId)
     }
   }
 }
@@ -96,7 +92,7 @@ object SubscriberMapper {
 
 class RedisDownTimeSubscriber(val scheduler : Scheduler, val config : SchedulerConfig, val alertRepo: AlertRepository ) extends RedisSubscriber(config.redis_host, config.redis_port, config.redis_downtime_requests) {
 
-  override def handleMessage(channel: String, message : String ): Unit = {
+  override def handleMessage(jedis : Jedis, channel: String, message : String ): Unit = {
     val request = jedis.hget(config.redis_downtime_requests, message)
     val node = SubscriberMapper.mapper.readTree(request)
     if (node.has("alert_definition_id")) {
@@ -107,7 +103,7 @@ class RedisDownTimeSubscriber(val scheduler : Scheduler, val config : SchedulerC
 }
 
 class TrialRunSubscriber(val scheduler : Scheduler, val config: SchedulerConfig, val forwarder : TrialRunForwarder) extends RedisSubscriber(config.redis_host, config.redis_port, config.redis_trialrun_pubsub) {
-  def handleMessage(channel : String, message : String) : Unit = {
+  def handleMessage(jedis : Jedis, channel : String, message : String) : Unit = {
     val requestJson = jedis.hget(config.redis_trialrun_requests, message)
     val request : TrialRunRequest = SubscriberMapper.mapper.readValue(requestJson, new TypeReference[TrialRunRequest] {})
     scheduler.scheduleTrialRun(request)

@@ -3,6 +3,7 @@ package de.zalando.zmon.scheduler.ng
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository
 import de.zalando.zmon.scheduler.ng.checks.CheckRepository
 import de.zalando.zmon.scheduler.ng.entities.{Entity, EntityChangeListener, EntityRepository}
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.{Bean, Configuration}
@@ -34,7 +35,9 @@ class SingleEntityCleanupFactory {
 
 class SingleEntityCleanup(val config: SchedulerConfig, val alertRepo: AlertRepository, val checkRepo: CheckRepository, val entityRepository: EntityRepository) extends EntityChangeListener {
 
-  val pool = new JedisPool(config.redis_host, config.redis_port)
+  val poolConfig = new GenericObjectPoolConfig()
+  poolConfig.setTestOnBorrow(true)
+  val pool = new JedisPool(poolConfig, config.redis_host, config.redis_port)
 
   def getAlerts(id : Int): mutable.MutableList[Alert] = {
     val alerts = collection.mutable.MutableList[Alert]()
