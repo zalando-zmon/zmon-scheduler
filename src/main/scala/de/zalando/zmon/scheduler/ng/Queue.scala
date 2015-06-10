@@ -178,8 +178,8 @@ class QueueSelector(writer : QueueWriter)(implicit val config : SchedulerConfig,
     writer.exec(queue, command)
   }
 
-  def execute()(implicit entity : Entity, check: Check, alerts : ArrayBuffer[Alert]) : Unit = {
-    val command = serializer.write(entity, check, alerts)
+  def execute()(implicit entity : Entity, check: Check, alerts : ArrayBuffer[Alert], scheduledTime : Long) : Unit = {
+    val command = serializer.write(entity, check, alerts, scheduledTime)
 
     var queue : String = null
 

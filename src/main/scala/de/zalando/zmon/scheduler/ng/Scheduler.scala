@@ -149,10 +149,7 @@ class ScheduledCheck(val id : Integer,
       return
     }
 
-    // ScheduledCheck.LOG.info("Scheduling: " + id + " after: " + ((System.currentTimeMillis()-lastRun)/1000.0))
-
-    lastRun = System.currentTimeMillis()
-    selector.execute()(entity, check, alerts)
+    selector.execute()(entity, check, alerts, lastRun)
 
     if(checkMeter != null) {
       checkMeter.mark()
@@ -174,6 +171,7 @@ class ScheduledCheck(val id : Integer,
 
   def runCheck(dryRun : Boolean = false) : mutable.ArrayBuffer[Entity] = {
     lastRunEntities.clear()
+    var setLastRun = false
 
     for (entity <- entityRepo.get()) {
       if (check.matchEntity(entity)) {
@@ -185,7 +183,14 @@ class ScheduledCheck(val id : Integer,
         }
 
         if (!viableAlerts.isEmpty) {
-          if(!dryRun) execute(entity, viableAlerts)
+          if(!dryRun) {
+            if(!setLastRun) {
+              // use new last run time across all commands, to allow syncing data retrieved time stamp on worker side
+              lastRun = System.currentTimeMillis()
+              setLastRun=true
+            }
+            execute(entity, viableAlerts)
+          }
           lastRunEntities.add(entity)
         }
       }

@@ -65,7 +65,7 @@ class CommandSerializer(val serializerType : TaskSerializerType) {
     writer.asCeleryTask(body)
   }
 
-  def write(entity : Entity, check : Check, alerts : ArrayBuffer[Alert]): Array[Byte] = {
+  def write(entity : Entity, check : Check, alerts : ArrayBuffer[Alert], scheduledTime : Long ): Array[Byte] = {
     val body = new CeleryBody()
     val checkDef = check.getCheckDef()
 
@@ -81,7 +81,7 @@ class CommandSerializer(val serializerType : TaskSerializerType) {
     command.interval = checkDef.getInterval
     command.command = checkDef.getCommand
     command.entity = entity.getProperties
-    command.schedule_time = (System.currentTimeMillis().asInstanceOf[Double]) / 1000.0;
+    command.schedule_time = (scheduledTime.asInstanceOf[Double]) / 1000.0;
     body.args.add(command)
 
     val alertList : java.util.List[CeleryAlertArg] = new java.util.ArrayList[CeleryAlertArg]();
