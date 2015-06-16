@@ -332,6 +332,7 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
                (implicit val schedulerConfig: SchedulerConfig, val metrics: MetricRegistry) {
 
   private val service = new ScheduledThreadPoolExecutor(schedulerConfig.thread_count)
+  private val shortIntervalService = new ScheduledThreadPoolExecutor(schedulerConfig.thread_count)
   private val scheduledChecks = scala.collection.concurrent.TrieMap[Integer, ScheduledCheck]()
   private val taskSerializer = new CommandSerializer(schedulerConfig.task_serializer)
 
@@ -353,12 +354,17 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
   def schedule(id: Integer, delay: Long) : Long = {
     this.synchronized {
       var scheduledCheck = scheduledChecks.getOrElse(id, null)
-      if(scheduledCheck == null){
+      if (scheduledCheck == null) {
         scheduledCheck = new ScheduledCheck(id, queueSelector, checkRepo, alertRepo, entityRepo)
         scheduledChecks.put(id, scheduledCheck)
       }
       val result = scheduledCheck.lastRun
-      scheduledCheck.schedule(service, delay)
+      if (checkRepo.get(id).getInterval < 30) {
+        scheduledCheck.schedule(shortIntervalService, delay)
+      }
+      else {
+        scheduledCheck.schedule(service, delay)
+      }
       return result
     }
   }
