@@ -3,3 +3,21 @@
   interval: 5
   entities:
     - type: "host"
+- id: 2
+  name: "Zmon Scheduler Group"
+  interval: 10
+  entities:
+    - type: instance
+      application_id: zmon-scheduler
+- id: 3
+  name: "Zmon Live Schedulers"
+  interval: 10
+  entities:
+    - type: instance
+      environment: live
+- id: 4
+  name: "Zmon Base Scheduler Group"
+  interval: 10
+  entities:
+    - type: instance
+      application_id: zmon-scheduler

@@ -10,9 +10,9 @@ import org.scalatest._
  * Created by jmussler on 4/17/15.
  */
 class YamlAdapterTest extends FlatSpec with Matchers {
-  val ea = new YamlEntityAdapter("yaml-entites","dummy_data/entities.yaml")
-  val cs = new YamlCheckSource("yaml-checks","dummy_data/checks.yaml")
-  val as = new YamlAlertSource("yaml-alerts","dummy_data/alerts.yaml")
+  val ea = new YamlEntityAdapter("yaml-entites", "dummy_data/entities.yaml")
+  val cs = new YamlCheckSource("yaml-checks", "dummy_data/checks.yaml")
+  val as = new YamlAlertSource("yaml-alerts", "dummy_data/alerts.yaml")
 
   implicit val metrics = new MetricRegistry()
 

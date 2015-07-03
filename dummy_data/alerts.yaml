@@ -3,6 +3,15 @@
   name: "Alert 1"
   entities: []
 - id: 2
-  check_definition_id: 1
+  check_definition_id: 2
   name: "Alert 2"
   entities: []
+- id: 3
+  check_definiton_id: 3
+  name: "Live ZMON Schedulers"
+  entities: []
+- id: 4
+  check_definition_id: 4
+  name: "Live Alert filter"
+  entities:
+    - environment: live
