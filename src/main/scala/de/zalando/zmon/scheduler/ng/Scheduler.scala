@@ -367,7 +367,7 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
   val lastScheduleAtStartup = SchedulePersister.loadSchedule()
 
   service.scheduleAtFixedRate(new SchedulePersister(scheduledChecks), 5, 15, TimeUnit.SECONDS)
-  service.scheduleAtFixedRate(new RedisMetricsUpdater(schedulerConfig, schedulerMetrics), 5, 10, TimeUnit.SECONDS)
+  service.scheduleAtFixedRate(new RedisMetricsUpdater(schedulerConfig, schedulerMetrics), 5, 1, TimeUnit.SECONDS)
 
   def viableCheck(id : Integer) : Boolean = {
     if(0 == id) return false;
