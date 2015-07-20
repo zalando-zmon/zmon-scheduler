@@ -2,6 +2,7 @@ package de.zalando.zmon.scheduler.ng
 
 import java.util
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Profile
 import org.springframework.context.annotation.Configuration
@@ -103,4 +104,6 @@ class SchedulerConfig {
 
   @BeanProperty var entity_properties_key : String = null
 
+  @Value("${server.port}")
+  @BeanProperty var server_port : String = null
 }

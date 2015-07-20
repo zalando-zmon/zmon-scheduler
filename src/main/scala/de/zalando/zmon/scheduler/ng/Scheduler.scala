@@ -2,6 +2,7 @@ package de.zalando.zmon.scheduler.ng
 
 import java.io.{FileWriter, OutputStreamWriter}
 import java.io.File
+import java.net.InetAddress
 import java.util.concurrent.{ScheduledExecutorService, ScheduledFuture, TimeUnit, ScheduledThreadPoolExecutor}
 
 import com.codahale.metrics.{Meter, MetricRegistry}
@@ -334,6 +335,26 @@ object Scheduler {
   val LOG = LoggerFactory.getLogger(Scheduler.getClass())
 }
 
+class RedisMetricsUpdater(val config : SchedulerConfig, val metrics : SchedulerMetrics) extends Runnable {
+  val name = "s-p"+config.server_port+"."+InetAddress.getLocalHost.getHostName()
+
+  override def run(): Unit = {
+    try {
+      val jedis = new Jedis(config.redis_host, config.redis_port);
+      val p = jedis.pipelined()
+      p.sadd("zmon:metrics", name)
+      p.set("zmon:metrics:" + name + ":checks.count", metrics.totalChecks.getCount + "")
+      p.set("zmon:metrics:" + name + ":ts", System.currentTimeMillis()/1000 + "")
+      p.sync()
+    }
+    catch {
+      case e: Exception => {
+        Scheduler.LOG.error("", e)
+      }
+    }
+  }
+}
+
 class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository, val entityRepo : EntityRepository, val queueSelector : QueueSelector)
                (implicit val schedulerConfig: SchedulerConfig, val metrics: MetricRegistry) {
 
@@ -346,6 +367,7 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
   val lastScheduleAtStartup = SchedulePersister.loadSchedule()
 
   service.scheduleAtFixedRate(new SchedulePersister(scheduledChecks), 5, 15, TimeUnit.SECONDS)
+  service.scheduleAtFixedRate(new RedisMetricsUpdater(schedulerConfig, schedulerMetrics), 5, 10, TimeUnit.SECONDS)
 
   def viableCheck(id : Integer) : Boolean = {
     if(0 == id) return false;
