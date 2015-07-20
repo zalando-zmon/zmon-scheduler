@@ -343,7 +343,7 @@ class RedisMetricsUpdater(val config : SchedulerConfig, val metrics : SchedulerM
       val jedis = new Jedis(config.redis_host, config.redis_port);
       val p = jedis.pipelined()
       p.sadd("zmon:metrics", name)
-      p.set("zmon:metrics:" + name + ":checks.count", metrics.totalChecks.getCount + "")
+      p.set("zmon:metrics:" + name + ":check.count", metrics.totalChecks.getCount + "")
       p.set("zmon:metrics:" + name + ":ts", System.currentTimeMillis()/1000 + "")
       p.sync()
     }
