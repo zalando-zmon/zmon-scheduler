@@ -89,7 +89,7 @@ class SingleEntityCleanup(val config: SchedulerConfig, val alertRepo: AlertRepos
       }
     }
 
-    // SingleEntityCleanup.LOG.info("Cleanup entity: " + entity.getId + " checks: " + checksCleaned + " alerts: " + alertsCleaned)
+    SingleEntityCleanup.LOG.info("Cleanup entity: " + entity.getId + " checks: " + checksCleaned + " alerts: " + alertsCleaned)
   }
 
   def notifyEntityChange(repo: EntityRepository, e: Entity) : Unit = {}
