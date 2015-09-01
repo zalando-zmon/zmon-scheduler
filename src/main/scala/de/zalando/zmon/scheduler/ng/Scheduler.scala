@@ -174,7 +174,7 @@ class ScheduledCheck(val id : Integer,
     lastRunEntities.clear()
     var setLastRun = false
 
-    if(check.getCheckDef().getInterval <=15 && (System.currentTimeMillis() - lastRun < (check.getCheckDef().getInterval*750L))) {
+    if(check.getCheckDef().getInterval <= 15 && (System.currentTimeMillis() - lastRun < (check.getCheckDef().getInterval * 750L))) {
       // for low interval checks on trial basis skip executions too close to each other (75% of interval)
       // this is only appearing at points where all intervals mix up in huge batch of tasks ( e.g. 180 mark or 300 mark )
       return new ArrayBuffer[Entity]()
@@ -213,7 +213,7 @@ class ScheduledCheck(val id : Integer,
     catch {
       case e : Exception => {
         metrics.errorCount.mark()
-        ScheduledCheck.LOG.error("Error in execution of chechk", e)
+        ScheduledCheck.LOG.error("Error in execution of check:" + id, e)
       }
     }
   }

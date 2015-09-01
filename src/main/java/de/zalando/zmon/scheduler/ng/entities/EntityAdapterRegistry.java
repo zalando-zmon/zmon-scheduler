@@ -68,6 +68,11 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
             register(d);
         }
 
+        if(zConfig.projects != null && zConfig.projects.url != null) {
+            DeployCtlProjectAdapter d = new DeployCtlProjectAdapter(zConfig.projects.url, zConfig.projects.user, zConfig.projects.password, metrics);
+            register(d);
+        }
+
         if(zConfig.entityservice != null && zConfig.entityservice.url != null) {
             EntityServiceAdapter e = new EntityServiceAdapter(zConfig.entityservice.url, zConfig.entityservice.user, zConfig.entityservice.password, metrics);
             register(e);
@@ -83,5 +88,4 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
             register(dds);
         }
     }
-
 }

@@ -75,8 +75,17 @@ public class ZalandoConfig {
     public Entityservice entityservice;
     public Cmdb cmdb;
     public DeployCtl deployctl;
+    public DeployCtl projects;
     public DdsCluster ddscluster;
     public DdsDatabase ddsdatabase;
+
+    public DeployCtl getProjects() {
+        return projects;
+    }
+
+    public void setProjects(DeployCtl projects) {
+        this.projects = projects;
+    }
 
     public DeployCtl getDeployctl() {
         return deployctl;
