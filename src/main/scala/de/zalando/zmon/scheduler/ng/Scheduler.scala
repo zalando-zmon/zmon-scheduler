@@ -174,7 +174,13 @@ class ScheduledCheck(val id : Integer,
     lastRunEntities.clear()
     var setLastRun = false
 
-    if(check.getCheckDef().getInterval <= 15 && (System.currentTimeMillis() - lastRun < (check.getCheckDef().getInterval * 750L))) {
+    val checkDef = check.getCheckDef()
+    if(null==checkDef) {
+      Scheduler.LOG.error("Probably inactive/deleted check still scheduled: " + check.id)
+      return new ArrayBuffer[Entity]()
+    }
+
+    if(checkDef.getInterval <= 15 && (System.currentTimeMillis() - lastRun < (checkDef.getInterval * 750L))) {
       // for low interval checks on trial basis skip executions too close to each other (75% of interval)
       // this is only appearing at points where all intervals mix up in huge batch of tasks ( e.g. 180 mark or 300 mark )
       return new ArrayBuffer[Entity]()
