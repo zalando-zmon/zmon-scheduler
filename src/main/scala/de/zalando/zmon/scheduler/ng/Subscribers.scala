@@ -105,6 +105,7 @@ class RedisDownTimeSubscriber(val scheduler : Scheduler, val config : SchedulerC
 class TrialRunSubscriber(val scheduler : Scheduler, val config: SchedulerConfig, val forwarder : TrialRunForwarder) extends RedisSubscriber(config.redis_host, config.redis_port, config.redis_trialrun_pubsub) {
   def handleMessage(jedis : Jedis, channel : String, message : String) : Unit = {
     val requestJson = jedis.hget(config.redis_trialrun_requests, message)
+    jedis.hdel(config.redis_trialrun_requests, message);
     val request : TrialRunRequest = SubscriberMapper.mapper.readValue(requestJson, new TypeReference[TrialRunRequest] {})
     scheduler.scheduleTrialRun(request)
     forwarder.forwardRequest(request)
