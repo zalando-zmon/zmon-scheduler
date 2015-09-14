@@ -434,9 +434,9 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
     schedule(id, startDelay)
   }
 
-  private def getEntitiesForTrialRun(includeFilter : java.util.List[java.util.Map[String,String]], excludeFilters : java.util.List[java.util.Map[String,String]]): ArrayBuffer[Entity] = {
+  private def getEntitiesForTrialRun(entityBase: java.util.Collection[Entity], includeFilter : java.util.List[java.util.Map[String,String]], excludeFilters : java.util.List[java.util.Map[String,String]]): ArrayBuffer[Entity] = {
     val entityList : ArrayBuffer[Entity] = new ArrayBuffer[Entity]()
-    for ( e <- entityRepo.get() ) {
+    for ( e <- entityBase ) {
       for( oneFilter <- includeFilter) {
         if (filter.overlaps(oneFilter, e.getFilterProperties)) {
           if(excludeFilters!=null && excludeFilters.size()>0) {
@@ -460,18 +460,19 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
   }
 
   def scheduleTrialRun(request  : TrialRunRequest) : Unit = {
-    val entities = getEntitiesForTrialRun(request.entities, request.entities_exclude)
-    Scheduler.LOG.info("Trial run matched entities: " + entities.size())
+    val entitiesGlobal = getEntitiesForTrialRun(entityRepo.getUnfiltered(), request.entities, request.entities_exclude)
+    val entitiesLocal = getEntitiesForTrialRun(entityRepo.get(), request.entities, request.entities_exclude)
+    Scheduler.LOG.info("Trial run matched entities: global=" + entitiesGlobal.size+" local="+entitiesLocal.size)
 
     var jedis : Jedis = null;
     try {
       jedis = new Jedis(schedulerConfig.redis_host, schedulerConfig.redis_port)
       val redisEntityKey = "zmon:trial_run:" + request.id
-      for (entity <- entities) {
+      for (entity <- entitiesGlobal) {
         jedis.sadd(redisEntityKey, entity.getId)
       }
 
-      for (entity <- entities) {
+      for (entity <- entitiesLocal) {
         val command = taskSerializer.writeTrialRun(entity, request)
         queueSelector.execute(command, schedulerConfig.trial_run_queue)(entity)
       }

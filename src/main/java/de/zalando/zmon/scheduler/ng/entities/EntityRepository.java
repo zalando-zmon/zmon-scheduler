@@ -95,6 +95,10 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
         }
     }
 
+    public Collection<Entity> getUnfiltered() {
+        return unfilteredEntities.values();
+    }
+
     @Override
     protected synchronized void fill() {
         Map<String, Entity> m = new HashMap<>();
