@@ -51,11 +51,12 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     }
 
     private void createAutoCompleteData() {
-        if(redisPool==null || redis_properties_key == null || redis_properties_key.equals("")) {
+        if(redisPool == null || redis_properties_key == null || redis_properties_key.equals("")) {
             return;
         }
 
         try {
+            LOG.info("Creating auto complete data for front end");
             Map<String, Map<String, Set<Object>>> typeMap = new HashMap<>();
             for (Entity e : unfilteredEntities.values()) {
                 String type = (String) e.getFilterProperties().get("type");
@@ -89,6 +90,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
             finally {
                 redisPool.returnResource(jedis);
             }
+            LOG.info("Done writing auto complete data for front end");
         }
         catch(Exception ex) {
             LOG.error("Error during generating auto complete data");
