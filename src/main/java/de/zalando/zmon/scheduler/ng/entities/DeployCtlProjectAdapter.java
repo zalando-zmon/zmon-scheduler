@@ -66,7 +66,7 @@ public class DeployCtlProjectAdapter extends EntityAdapter {
                 continue;
             }
 
-            Entity entity = new Entity(base.get("group")+":"+base.get("name"), "DeployCtlProjectAdapter");
+            Entity entity = new Entity(((String)base.get("group")).replace(".","_")+":"+base.get("name"), "DeployCtlProjectAdapter");
 
             Set<String> baseKeys = new HashSet<>(base.keySet());
             for(String k : baseKeys) {
