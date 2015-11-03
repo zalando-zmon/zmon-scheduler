@@ -83,6 +83,7 @@ public class DeployCtlProjectAdapter extends EntityAdapter {
             }
 
             base.put("type", "project");
+            base.put("deployable", "true");
 
             if(!base.containsKey("organization") || null==base.get("organization")) {
                 base.put("team", "UNKNOWN_TEAM");
