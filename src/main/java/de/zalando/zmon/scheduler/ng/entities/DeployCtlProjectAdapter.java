@@ -27,7 +27,7 @@ public class DeployCtlProjectAdapter extends EntityAdapter {
     private static class BaseEntity extends HashMap<String, Object> {}
     private static class BaseEntityList extends ArrayList<BaseEntity> {}
 
-    private static final List<String> FIELDS = Arrays.asList("environment","host","instance","path","project","project_organization","project_type","url","load_balancer_status");
+    private static final List<String> FIELDS = Arrays.asList("organization","group","type","deployable","name","type","project_type");
     private static final List<String> ZOMCAT_TYPES = Arrays.asList("maven-war","maven-pom","maven-grails-app");
 
     public DeployCtlProjectAdapter(String url, String user, String password, MetricRegistry metrics) {
@@ -36,7 +36,7 @@ public class DeployCtlProjectAdapter extends EntityAdapter {
         this.user = user;
         this.password = password;
         this.metrics = metrics;
-        this.timer = metrics.timer("entity-adapter.deployctlinstances");
+        this.timer = metrics.timer("entity-adapter.deployctlprojects");
     }
 
     private HttpHeaders getWithAuth() {
@@ -62,17 +62,11 @@ public class DeployCtlProjectAdapter extends EntityAdapter {
 
         for(BaseEntity base : list) {
 
-            Entity entity = new Entity(base.get("host")+":"+base.get("instance"), "DeployCtlInstanceAdapter");
-
-            if(base.containsKey("current")) {
-                Map<String, Object> current = (Map<String, Object>) base.get("current");
-                if(null != current) {
-                    String lbStatus = (String) current.get("load_balancer_status");
-                    if(null != lbStatus) {
-                        base.put("load_balancer_status", lbStatus);
-                    }
-                }
+            if(!base.containsKey("deployable") || (!(boolean)base.get("deployable"))) {
+                continue;
             }
+
+            Entity entity = new Entity(base.get("group")+":"+base.get("name"), "DeployCtlProjectAdapter");
 
             Set<String> baseKeys = new HashSet<>(base.keySet());
             for(String k : baseKeys) {
@@ -81,17 +75,21 @@ public class DeployCtlProjectAdapter extends EntityAdapter {
                 }
             }
 
-            base.put("type","project");
-
-            if(ZOMCAT_TYPES.contains(base.get("project_type"))) {
+            if(ZOMCAT_TYPES.contains(base.get("type"))) {
                 base.put("instance_type", "zomcat");
             }
             else {
-                base.put("instance_type", base.get("project_type"));
+                base.put("instance_type", base.get("type"));
             }
 
-            base.put("environment", Environments.getNormalized((String) base.get("environment")));
-            base.put("team", Teams.getNormalizedTeam((String) base.get("project_organization")));
+            base.put("type", "project");
+
+            if(!base.containsKey("organization") || null==base.get("organization")) {
+                base.put("team", "UNKNOWN_TEAM");
+            }
+            else {
+                base.put("team", Teams.getNormalizedTeam((String) base.get("organization")));
+            }
 
             entity.addProperties(base);
             entities.add(entity);
