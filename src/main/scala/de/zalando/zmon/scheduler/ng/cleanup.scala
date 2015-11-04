@@ -1,5 +1,7 @@
 package de.zalando.zmon.scheduler.ng
 
+import java.util.concurrent.{TimeUnit, ScheduledThreadPoolExecutor}
+
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository
 import de.zalando.zmon.scheduler.ng.checks.CheckRepository
 import de.zalando.zmon.scheduler.ng.entities.{Entity, EntityChangeListener, EntityRepository}
@@ -33,11 +35,7 @@ class SingleEntityCleanupFactory {
   }
 }
 
-class SingleEntityCleanup(val config: SchedulerConfig, val alertRepo: AlertRepository, val checkRepo: CheckRepository, val entityRepository: EntityRepository) extends EntityChangeListener {
-
-  val poolConfig = new GenericObjectPoolConfig()
-  poolConfig.setTestOnBorrow(true)
-  val pool = new JedisPool(poolConfig, config.redis_host, config.redis_port)
+class CleanupTask(val pool: JedisPool, val entity : Entity, val config: SchedulerConfig, val alertRepo: AlertRepository, val checkRepo: CheckRepository, val entityRepository: EntityRepository) extends Runnable {
 
   def getAlerts(id : Int): mutable.MutableList[Alert] = {
     val alerts = collection.mutable.MutableList[Alert]()
@@ -49,7 +47,7 @@ class SingleEntityCleanup(val config: SchedulerConfig, val alertRepo: AlertRepos
     alerts
   }
 
-  def notifyEntityRemove(repo: EntityRepository, entity: Entity) : Unit = {
+  override def run(): Unit = {
 
     var checksCleaned = 0;
     var alertsCleaned = 0;
@@ -67,13 +65,13 @@ class SingleEntityCleanup(val config: SchedulerConfig, val alertRepo: AlertRepos
         if (!viableAlerts.isEmpty) {
           val jedis = pool.getResource
           try {
-            jedis.del("zmon:checks:"+check.id+":"+entity.getId)
+            jedis.del("zmon:checks:" + check.id + ":" + entity.getId)
             checksCleaned += 1
 
             for(alert <- viableAlerts) {
               jedis.srem("zmon:alerts:" + alert.id, entity.getId)
               jedis.del("zmon:alerts:" + alert.id + ":" + entity.getId)
-              jedis.hdel("zmon:alerts:"+ alert.id + ":entities", entity.getId)
+              jedis.hdel("zmon:alerts:" + alert.id + ":entities", entity.getId)
               alertsCleaned+=1
             }
           }
@@ -90,6 +88,20 @@ class SingleEntityCleanup(val config: SchedulerConfig, val alertRepo: AlertRepos
     }
 
     SingleEntityCleanup.LOG.info("Cleanup entity: " + entity.getId + " checks: " + checksCleaned + " alerts: " + alertsCleaned)
+  }
+}
+
+class SingleEntityCleanup(val config: SchedulerConfig, val alertRepo: AlertRepository, val checkRepo: CheckRepository, val entityRepository: EntityRepository) extends EntityChangeListener {
+
+  val poolConfig = new GenericObjectPoolConfig()
+  poolConfig.setTestOnBorrow(true)
+  val pool = new JedisPool(poolConfig, config.redis_host, config.redis_port)
+
+  val executor = new ScheduledThreadPoolExecutor(1);
+
+  // Delay cleanup task to avoid race condition with remote workers/schedulers that can still report feedback
+  def notifyEntityRemove(repo: EntityRepository, entity: Entity) : Unit = {
+    executor.schedule(new CleanupTask(pool, entity, config, alertRepo, checkRepo, entityRepository), 120, TimeUnit.SECONDS)
   }
 
   def notifyEntityChange(repo: EntityRepository, e: Entity) : Unit = {}
