@@ -434,6 +434,19 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
     schedule(id, startDelay)
   }
 
+  def queryKnownEntities(filter: java.util.List[java.util.Map[String,String]], excludeFilter: java.util.List[java.util.Map[String,String]], applyBaseFilter : Boolean ) : ArrayBuffer[Entity] = {
+    var entities : ArrayBuffer[Entity]= null
+
+    if(applyBaseFilter) {
+      entities = getEntitiesForTrialRun(entityRepo.get(), filter, excludeFilter)
+    }
+    else {
+      entities = getEntitiesForTrialRun(entityRepo.getUnfiltered(), filter, excludeFilter)
+    }
+
+    entities
+  }
+
   private def getEntitiesForTrialRun(entityBase: java.util.Collection[Entity], includeFilter : java.util.List[java.util.Map[String,String]], excludeFilters : java.util.List[java.util.Map[String,String]]): ArrayBuffer[Entity] = {
     val entityList : ArrayBuffer[Entity] = new ArrayBuffer[Entity]()
     for ( e <- entityBase ) {

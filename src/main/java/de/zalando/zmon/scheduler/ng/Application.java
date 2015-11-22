@@ -31,9 +31,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.bind.annotation.*;
+import scala.collection.mutable.ArrayBuffer;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @EnableAutoConfiguration
@@ -121,6 +123,13 @@ public class Application {
     @RequestMapping(value="/api/v1/trigger-check/{id}", method=RequestMethod.GET)
     void triggerInstantEval(@PathVariable(value="id") int checkId) {
         scheduler.executeImmediate(checkId);
+    }
+
+    @RequestMapping(value="/api/v1/entities", method=RequestMethod.GET)
+    ArrayBuffer<Entity> triggerInstantEval(@RequestParam(value="filter", required = true) List<Map<String, String>> filter,
+                            @RequestParam(value="exclude_filter", defaultValue = "") List<Map<String, String>> excludeFilter,
+                            @RequestParam(value="local", defaultValue ="false") boolean baseFilter) {
+        return scheduler.queryKnownEntities(filter, excludeFilter, baseFilter);
     }
 
 
