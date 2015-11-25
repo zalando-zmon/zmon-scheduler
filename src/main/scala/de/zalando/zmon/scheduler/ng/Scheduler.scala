@@ -3,6 +3,7 @@ package de.zalando.zmon.scheduler.ng
 import java.io.{FileWriter, OutputStreamWriter}
 import java.io.File
 import java.net.InetAddress
+import java.util
 import java.util.concurrent.{ScheduledExecutorService, ScheduledFuture, TimeUnit, ScheduledThreadPoolExecutor}
 
 import com.codahale.metrics.{Meter, MetricRegistry}
@@ -434,7 +435,7 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
     schedule(id, startDelay)
   }
 
-  def queryKnownEntities(filter: java.util.List[java.util.Map[String,String]], excludeFilter: java.util.List[java.util.Map[String,String]], applyBaseFilter : Boolean ) : ArrayBuffer[Entity] = {
+  def queryKnownEntities(filter: java.util.List[java.util.Map[String,String]], excludeFilter: java.util.List[java.util.Map[String,String]], applyBaseFilter : Boolean ) : util.List[Entity] = {
     var entities : ArrayBuffer[Entity]= null
 
     if(applyBaseFilter) {
@@ -444,7 +445,7 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
       entities = getEntitiesForTrialRun(entityRepo.getUnfiltered(), filter, excludeFilter)
     }
 
-    entities
+    return bufferAsJavaList(entities)
   }
 
   private def getEntitiesForTrialRun(entityBase: java.util.Collection[Entity], includeFilter : java.util.List[java.util.Map[String,String]], excludeFilters : java.util.List[java.util.Map[String,String]]): ArrayBuffer[Entity] = {
