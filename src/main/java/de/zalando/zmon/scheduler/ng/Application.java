@@ -126,7 +126,7 @@ public class Application {
     }
 
     @RequestMapping(value="/api/v1/entities", method=RequestMethod.GET)
-    ArrayBuffer<Entity> triggerInstantEval(@RequestParam(value="filter", required = true) List<Map<String, String>> filter,
+    ArrayBuffer<Entity> queryKnownEntities(@RequestParam(value="filter", required = true) List<Map<String, String>> filter,
                             @RequestParam(value="exclude_filter", defaultValue = "") List<Map<String, String>> excludeFilter,
                             @RequestParam(value="local", defaultValue ="false") boolean baseFilter) {
         return scheduler.queryKnownEntities(filter, excludeFilter, baseFilter);
