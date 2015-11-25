@@ -5,6 +5,7 @@ package de.zalando.zmon.scheduler.ng;
  */
 
 import com.codahale.metrics.MetricRegistry;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -28,6 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.*;
 import scala.collection.mutable.ArrayBuffer;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -121,9 +123,16 @@ public class Application {
     }
 
     @RequestMapping(value="/api/v1/entities", method=RequestMethod.GET)
-    ArrayBuffer<Entity> queryKnownEntities(@RequestParam(value="filter", required = true) List<Map<String, String>> filter,
-                            @RequestParam(value="exclude_filter", defaultValue = "") List<Map<String, String>> excludeFilter,
-                            @RequestParam(value="local", defaultValue ="false") boolean baseFilter) {
+    ArrayBuffer<Entity> queryKnownEntities(@RequestParam(value="filter", required = true) String sFilter,
+                            @RequestParam(value="exclude_filter", defaultValue = "") String sExcludeFilter,
+                            @RequestParam(value="local", defaultValue ="false") boolean baseFilter) throws IOException {
+
+        List<Map<String,String>> filter = mapper.readValue(sFilter, new TypeReference<List<Map<String,String>>>() {
+        });
+
+        List<Map<String,String>> excludeFilter = mapper.readValue(sExcludeFilter, new TypeReference<List<Map<String,String>>>() {
+        });
+
         return scheduler.queryKnownEntities(filter, excludeFilter, baseFilter);
     }
 
