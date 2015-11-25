@@ -37,16 +37,16 @@ class YamlAdapterTest extends FlatSpec with Matchers {
 
   val check1 = new ScheduledCheck(1, selector, checkRepo, alertRepo, entityRepo)
 
-  "Entities" should "contain 2 entites" in {
-    ea.getCollection.size() should be (2)
+  "Entities" should "contain 5 entites" in {
+    ea.getCollection.size() should be (5)
   }
 
-  "Checks" should "contain 1 checks" in {
-    cs.getCollection.size() should be (1)
+  "Checks" should "contain 4 checks" in {
+    cs.getCollection.size() should be (4)
   }
 
-  "Alerts" should "contain 2 alerts" in {
-    as.getCollection.size() should be (2)
+  "Alerts" should "contain 4 alerts" in {
+    as.getCollection.size() should be (4)
   }
 
   "Check 1" should "match 2 entities" in {

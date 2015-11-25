@@ -7,7 +7,7 @@
   name: "Alert 2"
   entities: []
 - id: 3
-  check_definiton_id: 3
+  check_definition_id: 3
   name: "Live ZMON Schedulers"
   entities: []
 - id: 4
