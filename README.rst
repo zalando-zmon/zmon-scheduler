@@ -17,3 +17,12 @@ Running Unit Tests
 
     $ ./mvnw clean test
 
+Running Locally
+===============
+
+.. code-block:: bash
+
+    $ ./mvnw clean install
+    $ java -jar target/zmon-scheduler-ng-1.0-SNAPSHOT.jar
+
+
