@@ -24,7 +24,7 @@ public class CheckSourceRegistry extends SourceRegistry<CheckSource> {
 
     @Autowired(required=false)
     public CheckSourceRegistry(SchedulerConfig config) {
-        DefaultCheckSource source = new DefaultCheckSource("check-source", config.controller_url()+"/api/v1/checks/all-active-check-definitions",config.controller_user(),config.controller_password(), config.controller_token());
+        DefaultCheckSource source = new DefaultCheckSource("check-source", config.controller_url()+ (config.urls_without_rest() ? "" : "/rest") + "/api/v1/checks/all-active-check-definitions",config.controller_user(),config.controller_password(), config.controller_token());
         register(source);
     }
 

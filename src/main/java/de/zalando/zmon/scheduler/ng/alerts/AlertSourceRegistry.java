@@ -32,7 +32,7 @@ public class AlertSourceRegistry extends SourceRegistry<AlertSource> {
         this.metrics = metrics;
 
         final DefaultAlertSource source = new DefaultAlertSource("alert-source",
-                config.controller_url() + "/api/v1/checks/all-active-alert-definitions", config.controller_user(),
+                config.controller_url() + (config.urls_without_rest() ? "" : "/rest") + "/api/v1/checks/all-active-alert-definitions", config.controller_user(),
                 config.controller_password(), config.controller_token(), metrics);
         register(source);
     }
