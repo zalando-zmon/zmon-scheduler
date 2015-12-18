@@ -13,4 +13,4 @@ ADD scm-source.json /scm-source.json
 
 EXPOSE 8085
 
-CMD ["java","-jar","zmon-scheduler-ng.jar"]
+CMD java $JAVA_OPTS $(java-dynamic-memory-opts) -jar zmon-scheduler-ng.jar
