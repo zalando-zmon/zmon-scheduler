@@ -1,23 +1,24 @@
 package de.zalando.zmon.scheduler.ng.alerts;
 
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import de.zalando.zmon.scheduler.ng.checks.CheckDefinition;
-import de.zalando.zmon.scheduler.ng.checks.CheckDefinitions;
+import java.util.Base64;
+import java.util.Collection;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Base64;
-import java.util.Collection;
-import java.util.List;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
 /**
  * Created by jmussler on 4/7/15.
@@ -30,8 +31,9 @@ public class DefaultAlertSource extends AlertSource {
     private final String url;
     private final String user;
     private final String password;
+    private final String token;
 
-    private final static Logger LOG = LoggerFactory.getLogger(DefaultAlertSource.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultAlertSource.class);
 
     private static final ObjectMapper mapper = createObjectMapper();
 
@@ -41,29 +43,46 @@ public class DefaultAlertSource extends AlertSource {
         return m;
     }
 
-    public DefaultAlertSource(String name, String url, String user, String password, MetricRegistry metrics) {
+    public DefaultAlertSource(final String name, final String url, final String user, final String password,
+            final String token, final MetricRegistry metrics) {
         super(name);
         this.metrics = metrics;
         this.user = user;
         this.url = url;
         this.password = password;
-        this.timer = metrics.timer("alert-adapter."+name);
+        this.token = token;
+        this.timer = metrics.timer("alert-adapter." + name);
     }
 
-    public DefaultAlertSource(String name, String url, MetricRegistry metrics) {
+    public DefaultAlertSource(final String name, final String url, final MetricRegistry metrics) {
         super(name);
         this.metrics = metrics;
         this.user = null;
         this.url = url;
         this.password = null;
-        this.timer = metrics.timer("alert-adapter."+name);
+        this.token = null;
+        this.timer = metrics.timer("alert-adapter." + name);
     }
 
-
     private HttpHeaders getWithAuth() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Basic " + Base64.getEncoder().encodeToString((user+":"+password).getBytes()));
+        final HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Basic " + Base64.getEncoder().encodeToString((user + ":" + password).getBytes()));
         return headers;
+    }
+
+    private HttpHeaders getWithOAuth2() {
+        final HttpHeaders headers = new HttpHeaders();
+        final String bearerToken = token;
+        headers.add("Authorization", "Bearer " + bearerToken);
+        return headers;
+    }
+
+    private HttpHeaders getAuthenticationHeader() {
+        if (token != null) {
+            return getWithOAuth2();
+        }
+
+        return getWithAuth();
     }
 
     @Override
@@ -76,9 +95,10 @@ public class DefaultAlertSource extends AlertSource {
         rt.getMessageConverters().add(converter);
 
         AlertDefinitions defs;
-        if(null!=user && !"".equals(user)) {
+        if (null != user && !"".equals(user)) {
             LOG.info("Querying alerts with credentials {}", user);
-            HttpEntity<String> request = new HttpEntity<>(getWithAuth());
+
+            final HttpEntity<String> request = new HttpEntity<>(getAuthenticationHeader());
             ResponseEntity<AlertDefinitions> response;
             Timer.Context ct = timer.time();
             response = rt.exchange(url, HttpMethod.GET, request, AlertDefinitions.class);
@@ -86,13 +106,14 @@ public class DefaultAlertSource extends AlertSource {
             defs = response.getBody();
         } else {
             LOG.info("Querying without credentials");
+
             Timer.Context ct = timer.time();
             defs = rt.getForObject(url, AlertDefinitions.class);
             ct.stop();
         }
+
         LOG.info("Got {} alerts from {}", defs.getAlertDefinitions().size(), getName());
 
         return defs.getAlertDefinitions();
     }
 }
-

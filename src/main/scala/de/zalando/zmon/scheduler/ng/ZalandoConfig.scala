@@ -19,6 +19,7 @@ class ZalandoControllerConfig {
   @BeanProperty var refresh : Int = 0;
   @BeanProperty var user : String = null;
   @BeanProperty var password : String = null;
+  @BeanProperty var token : String = null;
 }
 
 @Component
@@ -39,6 +40,7 @@ class ZalandoAlertConfig {
 @Configuration
 @ConfigurationProperties(prefix = "scheduler")
 class SchedulerConfig {
+  @BeanProperty var controller : ZalandoControllerConfig = null
   @BeanProperty var last_run_persist = SchedulePersistType.DISABLED
   @BeanProperty var check_detail_metrics = false
   @BeanProperty var thread_count = 8
@@ -67,6 +69,7 @@ class SchedulerConfig {
   @BeanProperty var controller_url: String = null
   @BeanProperty var controller_user: String = null
   @BeanProperty var controller_password: String = null
+  @BeanProperty var controller_token: String = null
 
   @BeanProperty var enable_downtime_redis_sub : Boolean = true
   @BeanProperty var redis_downtime_pubsub : String = ""
