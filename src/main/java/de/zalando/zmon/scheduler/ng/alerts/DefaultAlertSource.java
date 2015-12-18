@@ -78,7 +78,7 @@ public class DefaultAlertSource extends AlertSource {
     }
 
     private HttpHeaders getAuthenticationHeader() {
-        if (token != null) {
+        if (null != token && !"".equals(token)) {
             return getWithOAuth2();
         }
 
