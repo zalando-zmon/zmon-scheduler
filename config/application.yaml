@@ -14,7 +14,7 @@ spring:
 
 scheduler:
   redis_host: "localhost"
-  redis_port: 38086
+  redis_port: 6379
   redis_downtime_pubsub: "zmon:downtime_schedule:pubsub"
   redis_downtime_requests: "zmon:downtime_schedule:requests"
   redis_instant_eval_pubsub: "zmon:alert_evaluation:pubsub"
@@ -29,9 +29,9 @@ scheduler:
   disable_persisted_schedule: true
   enable_global_entity: true
   task_writer_type: REDIS
-  entity_service_url: http://localhost:38080/
+  entity_service_url: http://localhost:8080/
   entity_service_user:
   entity_service_password:
-  controller_url: http://localhost:38080/
+  controller_url: http://localhost:8080/
   entity_properties_key: "zmon:entity:properties"
 
