@@ -60,10 +60,13 @@ class SchedulerConfig {
   @BeanProperty var redis_host : String = ""
   @BeanProperty var redis_port : Int = 6379
 
+  @BeanProperty var urls_without_rest : Boolean = false
+
   // the entity service provides entities to run checks against ( it is part of the controller )
   @BeanProperty var entity_service_url: String = null
   @BeanProperty var entity_service_user: String = null
   @BeanProperty var entity_service_password: String = null
+  @BeanProperty var entity_service_token: String = null
 
   // Using the zmon controller as a source for alerts and checks
   @BeanProperty var controller_url: String = null

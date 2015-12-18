@@ -21,17 +21,19 @@ public class EntityServiceAdapter extends EntityAdapter {
     private String url;
     private String user;
     private String password;
+    private String token;
 
     private final MetricRegistry metrics;
     private final Timer timer;
 
     private static final Logger LOG = LoggerFactory.getLogger(EntityServiceAdapter.class);
 
-    public EntityServiceAdapter(String url, String user, String password, MetricRegistry metrics) {
+    public EntityServiceAdapter(String url, String user, String password, String token, MetricRegistry metrics) {
         super("EntityServiceAdapter");
         this.url = url;
         this.user = user;
         this.password = password;
+        this.token = token;
         this.metrics = metrics;
         this.timer = metrics.timer("entity-adapter.entity-service");
     }
@@ -41,7 +43,13 @@ public class EntityServiceAdapter extends EntityAdapter {
 
     private HttpHeaders getWithAuth() {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Basic " + Base64.getEncoder().encodeToString((user+":"+password).getBytes()));
+
+        if (token != null) {
+            headers.add("Authorization", "Bearer " + token);
+        } else {
+            headers.add("Authorization", "Basic " + Base64.getEncoder().encodeToString((user + ":" + password).getBytes()));
+        }
+
         return headers;
     }
 
@@ -50,7 +58,7 @@ public class EntityServiceAdapter extends EntityAdapter {
         RestTemplate rt = new RestTemplate();
         HttpEntity<String> request;
 
-        if(user!=null && !user.equals("")) {
+        if((user!=null && !user.equals("")) || (token!=null && !"".equals(token))) {
             LOG.info("Querying entity service with credentials {}", user);
             request = new HttpEntity<>(getWithAuth());
         }
@@ -60,7 +68,7 @@ public class EntityServiceAdapter extends EntityAdapter {
         }
 
         Timer.Context tC = timer.time();
-        ResponseEntity<BaseEntityList> response = rt.exchange(url + "/rest/api/v1/entities/", HttpMethod.GET, request, BaseEntityList.class);
+        ResponseEntity<BaseEntityList> response = rt.exchange(url + "/api/v1/entities/", HttpMethod.GET, request, BaseEntityList.class);
         LOG.info("Entity Service Adapter used: {}ms", tC.stop() / 1000000);
 
         BaseEntityList list = response.getBody();

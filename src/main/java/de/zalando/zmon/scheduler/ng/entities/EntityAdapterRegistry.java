@@ -37,7 +37,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
         }
 
         if(config.entity_service_url() !=null && !config.entity_service_url().equals("")) {
-            EntityServiceAdapter e = new EntityServiceAdapter(config.entity_service_url(), config.entity_service_user(), config.entity_service_password(), metrics);
+            EntityServiceAdapter e = new EntityServiceAdapter(config.entity_service_url() + (config.urls_without_rest() ? "" : "/rest"), config.entity_service_user(), config.entity_service_password(), config.entity_service_token(), metrics);
             register(e);
         }
 
@@ -74,7 +74,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
         }
 
         if(zConfig.entityservice != null && zConfig.entityservice.url != null) {
-            EntityServiceAdapter e = new EntityServiceAdapter(zConfig.entityservice.url, zConfig.entityservice.user, zConfig.entityservice.password, metrics);
+            EntityServiceAdapter e = new EntityServiceAdapter(zConfig.entityservice.url + (config.urls_without_rest() ? "" : "/rest"), zConfig.entityservice.user, zConfig.entityservice.password, zConfig.entityservice.token, metrics);
             register(e);
         }
 
