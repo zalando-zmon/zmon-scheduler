@@ -24,17 +24,17 @@ public class CheckSourceRegistry extends SourceRegistry<CheckSource> {
 
     @Autowired(required=false)
     public CheckSourceRegistry(SchedulerConfig config) {
-        DefaultCheckSource source = new DefaultCheckSource("check-source", config.controller_url()+"/rest/api/v1/checks/all-active-check-definitions",config.controller_user(),config.controller_password());
+        DefaultCheckSource source = new DefaultCheckSource("check-source", config.controller_url()+"/api/v1/checks/all-active-check-definitions",config.controller_user(),config.controller_password(), config.controller_token());
         register(source);
     }
 
     @Autowired(required=false)
-    public CheckSourceRegistry(ZalandoCheckConfig config) {
+    public CheckSourceRegistry(ZalandoCheckConfig config, SchedulerConfig schedulerConfig) {
 
         if(config.controller()!=null && config.controller().getUrl()!=null && !"".equals(config.controller().url())) {
             ZalandoControllerConfig conf = config.controller();
 
-            DefaultCheckSource source = new DefaultCheckSource(conf.name(), conf.url(), conf.user(), conf.password());
+            DefaultCheckSource source = new DefaultCheckSource(conf.name(), conf.url(), conf.user(), conf.password(), schedulerConfig.controller_token());
             register(source);
         }
     }

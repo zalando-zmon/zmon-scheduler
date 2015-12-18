@@ -24,6 +24,7 @@ public class DefaultCheckSource extends CheckSource {
     private String url;
     private String user;
     private String password;
+    private String token;
 
     public DefaultCheckSource(String name, String url) {
         super(name);
@@ -38,16 +39,21 @@ public class DefaultCheckSource extends CheckSource {
         return m;
     }
 
-    public DefaultCheckSource(String name, String url, String user, String password) {
+    public DefaultCheckSource(String name, String url, String user, String password, String token) {
         super(name);
         this.url = url;
         this.user = user;
         this.password = password;
+        this.token = token;
     }
 
     private HttpHeaders getWithAuth() {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Basic " + Base64.getEncoder().encodeToString((user+":"+password).getBytes()));
+        if (token != null) {
+         headers.add("Authorization", "Bearer " + token);
+        } else {
+            headers.add("Authorization", "Basic " + Base64.getEncoder().encodeToString((user + ":" + password).getBytes()));
+        }
         return headers;
     }
 
@@ -61,7 +67,7 @@ public class DefaultCheckSource extends CheckSource {
         rt.getMessageConverters().add(converter);
 
         CheckDefinitions defs;
-        if(null!=user && !"".equals(user)) {
+        if((null!=user && !"".equals(user)) || (null != token && !"".equals(token))) {
             LOG.info("Querying checks with credentials {}", user);
             HttpEntity<String> request = new HttpEntity<>(getWithAuth());
             ResponseEntity<CheckDefinitions> response;

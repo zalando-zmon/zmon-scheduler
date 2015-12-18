@@ -1,5 +1,7 @@
 package de.zalando.zmon.scheduler.ng.alerts;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Component;
@@ -16,6 +18,8 @@ import de.zalando.zmon.scheduler.ng.ZalandoControllerConfig;
  */
 @Component
 public class AlertSourceRegistry extends SourceRegistry<AlertSource> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AlertSourceRegistry.class);
 
     private final MetricRegistry metrics;
 
@@ -37,6 +41,8 @@ public class AlertSourceRegistry extends SourceRegistry<AlertSource> {
     public AlertSourceRegistry(final ZalandoAlertConfig zConfig, final SchedulerConfig config,
             final MetricRegistry metrics) {
         this.metrics = metrics;
+
+        LOG.info("TOKEN: " + config.controller_token());
 
         if (zConfig.controller() != null && zConfig.controller().getUrl() != null
                 && !"".equals(zConfig.controller().url())) {

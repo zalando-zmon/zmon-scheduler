@@ -38,6 +38,7 @@ public class ZalandoConfig {
     public static class AuthAdapterConfig extends BaseAdapterConfig {
         public String user;
         public String password;
+        public String token;
 
         public String getUser() {
             return user;
@@ -55,6 +56,13 @@ public class ZalandoConfig {
             this.password = password;
         }
 
+        public String getToken() {
+            return token;
+        }
+
+        public void setToken(String token) {
+            this.token = token;
+        }
     }
 
     public static class Entityservice extends AuthAdapterConfig {

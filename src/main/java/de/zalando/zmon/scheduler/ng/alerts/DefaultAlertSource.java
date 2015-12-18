@@ -95,7 +95,7 @@ public class DefaultAlertSource extends AlertSource {
         rt.getMessageConverters().add(converter);
 
         AlertDefinitions defs;
-        if (null != user && !"".equals(user)) {
+        if ((null != user && !"".equals(user)) || (null != token && !"".equals(token))) {
             LOG.info("Querying alerts with credentials {}", user);
 
             final HttpEntity<String> request = new HttpEntity<>(getAuthenticationHeader());
