@@ -60,7 +60,7 @@ public class EntityServiceAdapter extends EntityAdapter {
         }
 
         Timer.Context tC = timer.time();
-        ResponseEntity<BaseEntityList> response = rt.exchange(url + "/rest/api/v1/entities/", HttpMethod.GET, request, BaseEntityList.class);
+        ResponseEntity<BaseEntityList> response = rt.exchange(url + "/api/v1/entities/", HttpMethod.GET, request, BaseEntityList.class);
         LOG.info("Entity Service Adapter used: {}ms", tC.stop() / 1000000);
 
         BaseEntityList list = response.getBody();

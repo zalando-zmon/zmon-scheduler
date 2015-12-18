@@ -28,7 +28,7 @@ public class AlertSourceRegistry extends SourceRegistry<AlertSource> {
         this.metrics = metrics;
 
         final DefaultAlertSource source = new DefaultAlertSource("alert-source",
-                config.controller_url() + "/rest/api/v1/checks/all-active-alert-definitions", config.controller_user(),
+                config.controller_url() + "/api/v1/checks/all-active-alert-definitions", config.controller_user(),
                 config.controller_password(), config.controller_token(), metrics);
         register(source);
     }
@@ -42,7 +42,7 @@ public class AlertSourceRegistry extends SourceRegistry<AlertSource> {
                 && !"".equals(zConfig.controller().url())) {
             final ZalandoControllerConfig conf = zConfig.controller();
             final DefaultAlertSource source = new DefaultAlertSource(conf.name(), conf.url(), conf.user(),
-                    conf.password(), conf.token(), metrics);
+                    conf.password(), config.controller_token(), metrics);
             register(source);
         }
     }
