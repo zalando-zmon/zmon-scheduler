@@ -144,6 +144,10 @@ class ScheduledCheck(val id : Integer,
   @volatile
   var cancel : Boolean = false
 
+  def cancelExecution() : Unit = {
+    cancel = true
+  }
+
   def execute(entity : Entity, alerts : ArrayBuffer[Alert]): Unit = {
     if(cancel) {
       taskFuture.cancel(false)
@@ -220,7 +224,7 @@ class ScheduledCheck(val id : Integer,
     catch {
       case e : Exception => {
         metrics.errorCount.mark()
-        ScheduledCheck.LOG.error("Error in execution of check:" + id, e)
+        ScheduledCheck.LOG.error("Error in execution of check: " + id, e)
       }
     }
   }
@@ -237,8 +241,13 @@ class CheckChangedListener(val scheduler : Scheduler) extends CheckChangeListene
   }
 
   override def notifyCheckIntervalChange(repo: CheckRepository, checkId: Int): Unit = {
-    Scheduler.LOG.info("Check interval changed: " + checkId);
+    Scheduler.LOG.info("Check interval changed: " + checkId)
     scheduler.executeImmediate(checkId)
+  }
+
+  override def notifyDeleteCheck(repo: CheckRepository, checkId : Int): Unit = {
+    Scheduler.LOG.info("Check removed or inactive: " + checkId)
+    scheduler.unschedule(checkId)
   }
 }
 
@@ -384,6 +393,15 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
       }
     }
     true
+  }
+
+  def unschedule(id: Integer): Unit = {
+    this.synchronized {
+      val scheduledCheck = scheduledChecks.getOrElse(id, null)
+      if(null != scheduledCheck) {
+        scheduledCheck.cancelExecution()
+      }
+    }
   }
 
   def schedule(id: Integer, delay: Long) : Long = {

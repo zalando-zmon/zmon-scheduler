@@ -48,6 +48,10 @@ public class CheckRepository extends CachedRepository<Integer, CheckSourceRegist
                 l.notifyNewCheck(this, id);
             }
 
+            for(Integer id: removedChecks) {
+                l.notifyDeleteCheck(this, id);
+            }
+
             for(Integer id : intervalChanged) {
                 l.notifyCheckIntervalChange(this, id);
             }
@@ -71,18 +75,9 @@ public class CheckRepository extends CachedRepository<Integer, CheckSourceRegist
         update(oldMap, currentMap);
     }
 
-    private static final CheckDefinition NULL_OBJ;
-
-    static {
-        NULL_OBJ = new CheckDefinition();
-        NULL_OBJ.setId(0);
-        NULL_OBJ.setCommand("False");
-        NULL_OBJ.setEntities(new ArrayList<>(0));
-    }
-
     @Override
     protected CheckDefinition getNullObject() {
-        return NULL_OBJ;
+        return null;
     }
 
     @Autowired
