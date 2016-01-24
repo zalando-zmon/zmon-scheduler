@@ -25,4 +25,17 @@ Running Locally
     $ ./mvnw clean install
     $ java -jar target/zmon-scheduler-ng-1.0-SNAPSHOT.jar
 
+Building the Docker Image
+=========================
 
+.. code-block:: bash
+
+    $ sudo pip3 install scm-source
+    $ scm-source
+    $ docker build -t zmon-scheduler .
+
+
+See also the `ZMON Documentation`_.
+
+.. _main ZMON repository: https://github.com/zalando/zmon
+.. _ZMON Documentation: https://zmon.readthedocs.org/
