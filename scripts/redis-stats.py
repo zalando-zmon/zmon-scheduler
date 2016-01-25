@@ -45,7 +45,7 @@ def main(redis_host, redis_port):
     # i.e. checks using the most worker time
     rows = []
     for key, duration in durations.most_common(20):
-        rows.append({'check_id': key, 'duration': round(duration, 2)})
+        rows.append({'check_id': key, 'duration': round(duration, 1)})
     clickclick.print_table(['check_id', 'duration'], rows)
 
     total_duration = sum(durations.values())
