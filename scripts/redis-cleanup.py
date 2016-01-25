@@ -7,8 +7,31 @@ This should probably become part of the regular scheduler code!
 '''
 
 import click
+import json
 import redis
 import requests
+import time
+
+
+def cleanup_outdated_results(r):
+    now = time.time()
+    keys = r.keys('zmon:checks:*:*')
+    p = r.pipeline()
+    for key in keys:
+        p.lrange(key, 0, 0)
+    results = p.execute()
+
+    cutoff = now - (8 * 24 * 3600)  # 8 days ago
+    ages = {}
+    for key, res in zip(keys, results):
+        if res:
+            data = json.loads(res[0].decode('utf-8'))
+            if data['ts'] < cutoff:
+                ages[key] = now - data['ts']
+    for key, age in ages.items():
+        _, _, check_id, entity_id = key.decode('utf-8').split(':', 3)
+        print('Deleting outdated check results {}/{} ({}d ago)..'.format(check_id, entity_id, int(age/(3600*24))))
+        r.delete(key)
 
 
 @click.command()
@@ -85,6 +108,8 @@ def main(zmon_url, redis_host, redis_port):
     for key in sorted(keys_to_delete):
         print('Deleting {}..'.format(key))
         r.delete(key)
+
+    cleanup_outdated_results(r)
 
     # delete ALL metrics
     # keys = r.keys('zmon:metrics:*')
