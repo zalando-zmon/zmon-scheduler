@@ -52,6 +52,17 @@ def main(zmon_url, redis_host, redis_port):
         print('Deleting {}..'.format(key))
         r.delete(key)
 
+    keys = r.keys('zmon:metrics:*:alerts.*.*')
+    keys_to_delete = set()
+    for key in keys:
+        parts = key.rsplit(b'.')
+        alert_id = int(parts[-2])
+        if alert_id not in all_active_alert_ids:
+            keys_to_delete.add(key)
+    for key in sorted(keys_to_delete):
+        print('Deleting {}..'.format(key))
+        r.delete(key)
+
     # delete all non-active checks
     keys = r.keys('zmon:checks:*')
     keys_to_delete = set()
@@ -64,6 +75,22 @@ def main(zmon_url, redis_host, redis_port):
         print('Deleting {}..'.format(key))
         r.delete(key)
 
+    keys = r.keys('zmon:metrics:*:check.*.*')
+    keys_to_delete = set()
+    for key in keys:
+        parts = key.rsplit(b'.')
+        check_id = int(parts[-2])
+        if check_id not in all_active_check_ids:
+            keys_to_delete.add(key)
+    for key in sorted(keys_to_delete):
+        print('Deleting {}..'.format(key))
+        r.delete(key)
+
+    # delete ALL metrics
+    # keys = r.keys('zmon:metrics:*')
+    # for key in keys:
+    #     print('Deleting {}..'.format(key))
+    #     r.delete(key)
 
 if __name__ == '__main__':
     main()
