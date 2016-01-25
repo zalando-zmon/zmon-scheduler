@@ -5,3 +5,8 @@ src/main/resources/application-zalando.yaml
 .idea
 *.iml
 *.json
+
+.project
+.classpath
+.settings
+
