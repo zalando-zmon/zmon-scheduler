@@ -40,7 +40,7 @@ public abstract class CachedRepository<I, S, T> implements Runnable {
             fill();
             lastUpdated = System.currentTimeMillis();
         }
-        catch(Exception e) {
+        catch(Throwable e) {
             LOG.error("Error during refresh of {}", registry.getClass(), e);
         }
     }

@@ -3,7 +3,6 @@ package de.zalando.zmon.scheduler.ng.entities;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.zalando.zmon.scheduler.ng.CachedRepository;
-import de.zalando.zmon.scheduler.ng.InstantEvalForwarder;
 import de.zalando.zmon.scheduler.ng.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.filter;
 import org.slf4j.Logger;
@@ -14,7 +13,6 @@ import org.xerial.snappy.Snappy;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-import javax.swing.event.ChangeListener;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
