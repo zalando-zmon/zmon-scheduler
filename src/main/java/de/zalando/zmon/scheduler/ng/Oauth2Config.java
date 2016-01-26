@@ -14,6 +14,10 @@ import java.net.URI;
 @Configuration
 public class Oauth2Config {
 
+    /*
+    * In case where no oauth2 infrastructure is used, we always use/send the provided static token
+    * */
+
     @Bean
     public TokenWrapper accessTokens(SchedulerConfig config) {
         if(config.getOauth2_access_token_url() == null) {

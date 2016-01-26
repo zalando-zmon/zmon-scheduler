@@ -24,9 +24,12 @@ public class TrialRunHttpSubscriber implements Runnable {
     private final String url;
     private final Scheduler scheduler;
     private final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
+    private final TokenWrapper tokenWrapper;
 
-    public TrialRunHttpSubscriber(Scheduler scheduler, SchedulerConfig config) {
+    public TrialRunHttpSubscriber(Scheduler scheduler, SchedulerConfig config, TokenWrapper tokenWrapper) {
         url = config.trial_run_http_url();
+        this.tokenWrapper = tokenWrapper;
+
         LOG.info("Subscribing for trial runs: {}", url);
         this.scheduler = scheduler;
         if(url!=null && !url.equals("")) {
@@ -39,7 +42,10 @@ public class TrialRunHttpSubscriber implements Runnable {
         try {
             RestTemplate rt = new RestTemplate();
             HttpEntity<String> request;
-            request = new HttpEntity<>(new HttpHeaders());
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Authorization", "Bearer " + tokenWrapper.get());
+            request = new HttpEntity<>(headers);
 
             ResponseEntity<List<TrialRunRequest>> response = rt.exchange(url, HttpMethod.GET, request, new ParameterizedTypeReference<List<TrialRunRequest>>() {
             });
@@ -49,7 +55,7 @@ public class TrialRunHttpSubscriber implements Runnable {
                 scheduler.scheduleTrialRun(trialRunRequest);
             }
         }
-        catch(Exception ex) {
+        catch(Throwable ex) {
             LOG.error("", ex);
         }
     }

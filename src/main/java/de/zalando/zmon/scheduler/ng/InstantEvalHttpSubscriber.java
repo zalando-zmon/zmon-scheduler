@@ -24,9 +24,12 @@ public class InstantEvalHttpSubscriber implements Runnable {
     private final String url;
     private final Scheduler scheduler;
     private final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
+    private final TokenWrapper tokenWrapper;
 
-    public InstantEvalHttpSubscriber(Scheduler scheduler, SchedulerConfig config) {
+    public InstantEvalHttpSubscriber(Scheduler scheduler, SchedulerConfig config, TokenWrapper tokenWrapper) {
         url = config.instant_eval_http_url();
+        this.tokenWrapper = tokenWrapper;
+
         LOG.info("Subscribing for instant evaluations: {}", url);
         this.scheduler = scheduler;
         if(url!=null && !url.equals("")) {
@@ -39,7 +42,10 @@ public class InstantEvalHttpSubscriber implements Runnable {
         try {
             RestTemplate rt = new RestTemplate();
             HttpEntity<String> request;
-            request = new HttpEntity<>(new HttpHeaders());
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Authorization", "Bearer " + tokenWrapper.get());
+            request = new HttpEntity<>(headers);
 
             ResponseEntity<List<Integer>> response = rt.exchange(url, HttpMethod.GET, request, new ParameterizedTypeReference<List<Integer>>() {});
 
@@ -48,7 +54,7 @@ public class InstantEvalHttpSubscriber implements Runnable {
                 scheduler.executeImmediate(checkId);
             }
         }
-        catch(Exception ex) {
+        catch(Throwable ex) {
             LOG.error("", ex);
         }
     }
