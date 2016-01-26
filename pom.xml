@@ -73,6 +73,11 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.zalando.stups</groupId>
+            <artifactId>tokens</artifactId>
+            <version>0.9.8</version>
+        </dependency>
     </dependencies>
 
     <build>

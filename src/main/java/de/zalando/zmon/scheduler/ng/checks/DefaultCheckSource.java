@@ -1,8 +1,8 @@
 package de.zalando.zmon.scheduler.ng.checks;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import de.zalando.zmon.scheduler.ng.TokenWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -22,14 +22,7 @@ public class DefaultCheckSource extends CheckSource {
     private final static Logger LOG = LoggerFactory.getLogger(DefaultCheckSource.class);
 
     private String url;
-    private String user;
-    private String password;
-    private String token;
-
-    public DefaultCheckSource(String name, String url) {
-        super(name);
-        this.url = url;
-    }
+    private TokenWrapper tokens;
 
     private static final ObjectMapper mapper = createObjectMapper();
 
@@ -39,20 +32,16 @@ public class DefaultCheckSource extends CheckSource {
         return m;
     }
 
-    public DefaultCheckSource(String name, String url, String user, String password, String token) {
+    public DefaultCheckSource(String name, String url, final TokenWrapper tokens) {
         super(name);
         this.url = url;
-        this.user = user;
-        this.password = password;
-        this.token = token;
+        this.tokens = tokens;
     }
 
     private HttpHeaders getWithAuth() {
         HttpHeaders headers = new HttpHeaders();
-        if (token != null) {
-         headers.add("Authorization", "Bearer " + token);
-        } else {
-            headers.add("Authorization", "Basic " + Base64.getEncoder().encodeToString((user + ":" + password).getBytes()));
+        if (tokens != null) {
+         headers.add("Authorization", "Bearer " + tokens.get());
         }
         return headers;
     }
@@ -67,8 +56,8 @@ public class DefaultCheckSource extends CheckSource {
         rt.getMessageConverters().add(converter);
 
         CheckDefinitions defs;
-        if((null!=user && !"".equals(user)) || (null != token && !"".equals(token))) {
-            LOG.info("Querying checks with credentials {}", user);
+        if(tokens!=null) {
+            LOG.info("Querying checks with token: " + tokens.get().substring(0, 3) + "...");
             HttpEntity<String> request = new HttpEntity<>(getWithAuth());
             ResponseEntity<CheckDefinitions> response;
             response = rt.exchange(url, HttpMethod.GET, request, CheckDefinitions.class);

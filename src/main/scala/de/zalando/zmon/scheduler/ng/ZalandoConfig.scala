@@ -62,17 +62,19 @@ class SchedulerConfig {
 
   @BeanProperty var urls_without_rest : Boolean = false
 
+  @BeanProperty var oauth2_access_token_url : String = null
+  @BeanProperty var oauth2_scopes: java.util.List[String] = null
+  @BeanProperty var oauth2_static_token: String = ""
+
   // the entity service provides entities to run checks against ( it is part of the controller )
   @BeanProperty var entity_service_url: String = null
   @BeanProperty var entity_service_user: String = null
   @BeanProperty var entity_service_password: String = null
-  @BeanProperty var entity_service_token: String = null
 
   // Using the zmon controller as a source for alerts and checks
   @BeanProperty var controller_url: String = null
   @BeanProperty var controller_user: String = null
   @BeanProperty var controller_password: String = null
-  @BeanProperty var controller_token: String = null
 
   @BeanProperty var enable_downtime_redis_sub : Boolean = true
   @BeanProperty var redis_downtime_pubsub : String = ""

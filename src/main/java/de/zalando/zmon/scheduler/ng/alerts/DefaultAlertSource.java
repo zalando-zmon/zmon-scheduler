@@ -1,11 +1,12 @@
 package de.zalando.zmon.scheduler.ng.alerts;
 
-import java.util.Base64;
 import java.util.Collection;
 
+import de.zalando.zmon.scheduler.ng.TokenWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -29,9 +30,7 @@ public class DefaultAlertSource extends AlertSource {
     private final Timer timer;
 
     private final String url;
-    private final String user;
-    private final String password;
-    private final String token;
+    private final TokenWrapper tokens;
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultAlertSource.class);
 
@@ -43,46 +42,24 @@ public class DefaultAlertSource extends AlertSource {
         return m;
     }
 
-    public DefaultAlertSource(final String name, final String url, final String user, final String password,
-            final String token, final MetricRegistry metrics) {
+    @Autowired
+    public DefaultAlertSource(final String name, final String url, final MetricRegistry metrics, final TokenWrapper tokens) {
         super(name);
         this.metrics = metrics;
-        this.user = user;
         this.url = url;
-        this.password = password;
-        this.token = token;
+        this.tokens = tokens;
         this.timer = metrics.timer("alert-adapter." + name);
-    }
-
-    public DefaultAlertSource(final String name, final String url, final MetricRegistry metrics) {
-        super(name);
-        this.metrics = metrics;
-        this.user = null;
-        this.url = url;
-        this.password = null;
-        this.token = null;
-        this.timer = metrics.timer("alert-adapter." + name);
-    }
-
-    private HttpHeaders getWithAuth() {
-        final HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Basic " + Base64.getEncoder().encodeToString((user + ":" + password).getBytes()));
-        return headers;
-    }
-
-    private HttpHeaders getWithOAuth2() {
-        final HttpHeaders headers = new HttpHeaders();
-        final String bearerToken = token;
-        headers.add("Authorization", "Bearer " + bearerToken);
-        return headers;
     }
 
     private HttpHeaders getAuthenticationHeader() {
-        if (null != token && !"".equals(token)) {
-            return getWithOAuth2();
+
+        final HttpHeaders headers = new HttpHeaders();
+
+        if(tokens!=null) {
+            headers.add("Authorization", "Bearer " + tokens.get());
         }
 
-        return getWithAuth();
+        return headers;
     }
 
     @Override
@@ -95,9 +72,8 @@ public class DefaultAlertSource extends AlertSource {
         rt.getMessageConverters().add(converter);
 
         AlertDefinitions defs;
-        if ((null != user && !"".equals(user)) || (null != token && !"".equals(token))) {
-            LOG.info("Querying alerts with credentials {}", user);
-
+        if (tokens!=null) {
+            LOG.info("Querying with token: " + tokens.get().substring(0, 3) + "...");
             final HttpEntity<String> request = new HttpEntity<>(getAuthenticationHeader());
             ResponseEntity<AlertDefinitions> response;
             Timer.Context ct = timer.time();
@@ -106,7 +82,6 @@ public class DefaultAlertSource extends AlertSource {
             defs = response.getBody();
         } else {
             LOG.info("Querying without credentials");
-
             Timer.Context ct = timer.time();
             defs = rt.getForObject(url, AlertDefinitions.class);
             ct.stop();

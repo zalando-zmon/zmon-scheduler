@@ -3,6 +3,7 @@ package de.zalando.zmon.scheduler.ng.entities;
 import com.codahale.metrics.MetricRegistry;
 import de.zalando.zmon.scheduler.ng.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.SourceRegistry;
+import de.zalando.zmon.scheduler.ng.TokenWrapper;
 import de.zalando.zmon.scheduler.ng.ZalandoConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
     }
 
     @Autowired(required=false)
-    public EntityAdapterRegistry(SchedulerConfig config, MetricRegistry metrics) {
+    public EntityAdapterRegistry(SchedulerConfig config, MetricRegistry metrics, TokenWrapper tokens) {
         this.metrics = metrics;
         register(EMPTY_ADAPTER);
 
@@ -37,7 +38,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
         }
 
         if(config.entity_service_url() !=null && !config.entity_service_url().equals("")) {
-            EntityServiceAdapter e = new EntityServiceAdapter(config.entity_service_url() + (config.urls_without_rest() ? "" : "/rest"), config.entity_service_user(), config.entity_service_password(), config.entity_service_token(), metrics);
+            EntityServiceAdapter e = new EntityServiceAdapter(config.entity_service_url() + (config.urls_without_rest() ? "" : "/rest"), metrics, tokens);
             register(e);
         }
 
@@ -55,7 +56,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
         }
 
         if(config.dummy_cities()!=null && !config.dummy_cities().equals("")) {
-            register(new YamlEntityAdapter("dummy-cities",config.dummy_cities(),"city", m -> (m.get("country")+"-"+m.get("city"))));
+            register(new YamlEntityAdapter("dummy-cities", config.dummy_cities(), "city", m -> (m.get("country")+"-"+m.get("city"))));
         }
 
         if(zConfig.cmdb != null && zConfig.cmdb.url != null) {
@@ -74,7 +75,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
         }
 
         if(zConfig.entityservice != null && zConfig.entityservice.url != null) {
-            EntityServiceAdapter e = new EntityServiceAdapter(zConfig.entityservice.url + (config.urls_without_rest() ? "" : "/rest"), zConfig.entityservice.user, zConfig.entityservice.password, zConfig.entityservice.token, metrics);
+            EntityServiceAdapter e = new EntityServiceAdapter(zConfig.entityservice.url + (config.urls_without_rest() ? "" : "/rest"), metrics, null);
             register(e);
         }
 

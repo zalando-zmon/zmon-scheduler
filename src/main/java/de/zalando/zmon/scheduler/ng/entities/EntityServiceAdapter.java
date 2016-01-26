@@ -2,7 +2,7 @@ package de.zalando.zmon.scheduler.ng.entities;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import de.zalando.zmon.scheduler.ng.BaseSource;
+import de.zalando.zmon.scheduler.ng.TokenWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -19,21 +19,17 @@ import java.util.*;
 public class EntityServiceAdapter extends EntityAdapter {
 
     private String url;
-    private String user;
-    private String password;
-    private String token;
+    private TokenWrapper tokens;
 
     private final MetricRegistry metrics;
     private final Timer timer;
 
     private static final Logger LOG = LoggerFactory.getLogger(EntityServiceAdapter.class);
 
-    public EntityServiceAdapter(String url, String user, String password, String token, MetricRegistry metrics) {
+    public EntityServiceAdapter(String url, MetricRegistry metrics, TokenWrapper tokens) {
         super("EntityServiceAdapter");
         this.url = url;
-        this.user = user;
-        this.password = password;
-        this.token = token;
+        this.tokens = tokens;
         this.metrics = metrics;
         this.timer = metrics.timer("entity-adapter.entity-service");
     }
@@ -44,10 +40,8 @@ public class EntityServiceAdapter extends EntityAdapter {
     private HttpHeaders getWithAuth() {
         HttpHeaders headers = new HttpHeaders();
 
-        if (token != null) {
-            headers.add("Authorization", "Bearer " + token);
-        } else {
-            headers.add("Authorization", "Basic " + Base64.getEncoder().encodeToString((user + ":" + password).getBytes()));
+        if (tokens != null) {
+            headers.add("Authorization", "Bearer " + tokens.get());
         }
 
         return headers;
@@ -58,8 +52,8 @@ public class EntityServiceAdapter extends EntityAdapter {
         RestTemplate rt = new RestTemplate();
         HttpEntity<String> request;
 
-        if((user!=null && !user.equals("")) || (token!=null && !"".equals(token))) {
-            LOG.info("Querying entity service with credentials {}", user);
+        if(tokens != null) {
+            LOG.info("Querying entity service with token: " + tokens.get().substring(0, 3) + "...");
             request = new HttpEntity<>(getWithAuth());
         }
         else {
