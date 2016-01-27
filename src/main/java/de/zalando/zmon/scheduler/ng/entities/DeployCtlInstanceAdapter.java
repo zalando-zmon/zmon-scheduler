@@ -48,62 +48,66 @@ public class DeployCtlInstanceAdapter extends EntityAdapter {
     @Override
     public Collection<Entity> getCollection() {
 
-        RestTemplate rt = new RestTemplate();
-        HttpEntity<String> request = new HttpEntity<>(getWithAuth());
-
-        LOG.info("Querying deployctl with credentials {}", user);
-        Timer.Context tC = timer.time();
-
-        BaseEntityList list = rt.postForObject(url + "/live", request, BaseEntityList.class);
-        BaseEntityList listBeta = rt.postForObject(url + "/beta", request, BaseEntityList.class);
-        BaseEntityList listIntegration = rt.postForObject(url + "/integration", request, BaseEntityList.class);
-        BaseEntityList listRelease = rt.postForObject(url + "/release-staging", request, BaseEntityList.class);
-        BaseEntityList listPatch = rt.postForObject(url + "/patch-staging", request, BaseEntityList.class);
-
-        list.addAll(listBeta);
-        list.addAll(listIntegration);
-        list.addAll(listRelease);
-        list.addAll(listPatch);
-
-        LOG.info("DeployCtlInstance Adapter used: {}ms", tC.stop() / 1000000);
-
         List<Entity> entities = new ArrayList<>();
 
-        for(BaseEntity base : list) {
-            if(!base.get("status").equals("ALLOCATED")) continue;
-            if(base.get("instance").equals("9999")) continue;
+        try {
+            RestTemplate rt = new RestTemplate();
+            HttpEntity<String> request = new HttpEntity<>(getWithAuth());
 
-            Entity entity = new Entity(base.get("host")+":"+base.get("instance"), "DeployCtlInstanceAdapter");
+            LOG.info("Querying deployctl with credentials {}", user);
+            Timer.Context tC = timer.time();
 
-            if(base.containsKey("current")) {
-                Map<String, Object> current = (Map<String, Object>) base.get("current");
-                if(null != current) {
-                    String lbStatus = (String) current.get("load_balancer_status");
-                    if(null != lbStatus) {
-                        base.put("load_balancer_status", lbStatus);
+            BaseEntityList list = rt.postForObject(url + "/live", request, BaseEntityList.class);
+            BaseEntityList listBeta = rt.postForObject(url + "/beta", request, BaseEntityList.class);
+            BaseEntityList listIntegration = rt.postForObject(url + "/integration", request, BaseEntityList.class);
+            BaseEntityList listRelease = rt.postForObject(url + "/release-staging", request, BaseEntityList.class);
+            BaseEntityList listPatch = rt.postForObject(url + "/patch-staging", request, BaseEntityList.class);
+
+            list.addAll(listBeta);
+            list.addAll(listIntegration);
+            list.addAll(listRelease);
+            list.addAll(listPatch);
+
+            LOG.info("DeployCtlInstance Adapter used: {}ms", tC.stop() / 1000000);
+
+            for (BaseEntity base : list) {
+                if (!base.get("status").equals("ALLOCATED")) continue;
+                if (base.get("instance").equals("9999")) continue;
+
+                Entity entity = new Entity(base.get("host") + ":" + base.get("instance"), "DeployCtlInstanceAdapter");
+
+                if (base.containsKey("current")) {
+                    Map<String, Object> current = (Map<String, Object>) base.get("current");
+                    if (null != current) {
+                        String lbStatus = (String) current.get("load_balancer_status");
+                        if (null != lbStatus) {
+                            base.put("load_balancer_status", lbStatus);
+                        }
                     }
                 }
-            }
 
-            Set<String> baseKeys = new HashSet<>(base.keySet());
-            for(String k : baseKeys) {
-                if(!FIELDS.contains(k)) {
-                    base.remove(k);
+                Set<String> baseKeys = new HashSet<>(base.keySet());
+                for (String k : baseKeys) {
+                    if (!FIELDS.contains(k)) {
+                        base.remove(k);
+                    }
                 }
-            }
 
-            if(ZOMCAT_TYPES.contains(base.get("project_type"))) {
-                base.put("type", "zomcat");
-            }
-            else {
-                base.put("type", base.get("project_type"));
-            }
+                if (ZOMCAT_TYPES.contains(base.get("project_type"))) {
+                    base.put("type", "zomcat");
+                } else {
+                    base.put("type", base.get("project_type"));
+                }
 
-            base.put("environment", Environments.getNormalized((String) base.get("environment")));
-            base.put("team", Teams.getNormalizedTeam((String) base.get("project_organization")));
+                base.put("environment", Environments.getNormalized((String) base.get("environment")));
+                base.put("team", Teams.getNormalizedTeam((String) base.get("project_organization")));
 
-            entity.addProperties(base);
-            entities.add(entity);
+                entity.addProperties(base);
+                entities.add(entity);
+            }
+        }
+        catch(Throwable ex) {
+            LOG.error("Failed to retrieve instance data from DeployCtl", ex);
         }
 
         return entities;

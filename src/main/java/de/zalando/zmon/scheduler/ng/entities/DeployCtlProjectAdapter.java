@@ -48,52 +48,56 @@ public class DeployCtlProjectAdapter extends EntityAdapter {
     @Override
     public Collection<Entity> getCollection() {
 
-        RestTemplate rt = new RestTemplate();
-        HttpEntity<String> request = new HttpEntity<>(getWithAuth());
-
-        LOG.info("Querying deployctl with credentials for projects {}", user);
-        Timer.Context tC = timer.time();
-
-        BaseEntityList list = rt.postForObject(url, request, BaseEntityList.class);
-
-        LOG.info("DeployCtlProject Adapter used: {}ms", tC.stop() / 1000000);
-
         List<Entity> entities = new ArrayList<>();
 
-        for(BaseEntity base : list) {
+        try {
 
-            if(!base.containsKey("deployable") || (!(boolean)base.get("deployable"))) {
-                continue;
-            }
+            RestTemplate rt = new RestTemplate();
+            HttpEntity<String> request = new HttpEntity<>(getWithAuth());
 
-            Entity entity = new Entity(((String)base.get("group")).replace(".","_")+":"+base.get("name"), "DeployCtlProjectAdapter");
+            LOG.info("Querying deployctl with credentials for projects {}", user);
+            Timer.Context tC = timer.time();
 
-            Set<String> baseKeys = new HashSet<>(base.keySet());
-            for(String k : baseKeys) {
-                if(!FIELDS.contains(k)) {
-                    base.remove(k);
+            BaseEntityList list = rt.postForObject(url, request, BaseEntityList.class);
+
+            LOG.info("DeployCtlProject Adapter used: {}ms", tC.stop() / 1000000);
+
+            for (BaseEntity base : list) {
+
+                if (!base.containsKey("deployable") || (!(boolean) base.get("deployable"))) {
+                    continue;
                 }
-            }
 
-            if(ZOMCAT_TYPES.contains(base.get("type"))) {
-                base.put("instance_type", "zomcat");
-            }
-            else {
-                base.put("instance_type", base.get("type"));
-            }
+                Entity entity = new Entity(((String) base.get("group")).replace(".", "_") + ":" + base.get("name"), "DeployCtlProjectAdapter");
 
-            base.put("type", "project");
-            base.put("deployable", "true");
+                Set<String> baseKeys = new HashSet<>(base.keySet());
+                for (String k : baseKeys) {
+                    if (!FIELDS.contains(k)) {
+                        base.remove(k);
+                    }
+                }
 
-            if(!base.containsKey("organization") || null==base.get("organization")) {
-                base.put("team", "UNKNOWN_TEAM");
-            }
-            else {
-                base.put("team", Teams.getNormalizedTeam((String) base.get("organization")));
-            }
+                if (ZOMCAT_TYPES.contains(base.get("type"))) {
+                    base.put("instance_type", "zomcat");
+                } else {
+                    base.put("instance_type", base.get("type"));
+                }
 
-            entity.addProperties(base);
-            entities.add(entity);
+                base.put("type", "project");
+                base.put("deployable", "true");
+
+                if (!base.containsKey("organization") || null == base.get("organization")) {
+                    base.put("team", "UNKNOWN_TEAM");
+                } else {
+                    base.put("team", Teams.getNormalizedTeam((String) base.get("organization")));
+                }
+
+                entity.addProperties(base);
+                entities.add(entity);
+            }
+        }
+        catch(Throwable ex) {
+            LOG.error("Failed to retrieve project data from DeployCtl", ex);
         }
 
         return entities;
