@@ -73,7 +73,8 @@ public class DefaultAlertSource extends AlertSource {
 
         AlertDefinitions defs;
         if (tokens!=null) {
-            LOG.info("Querying with token: " + tokens.get().substring(0, 3) + "...");
+            final String accessToken = tokens.get();
+            LOG.info("Querying alert definitions with token " + accessToken.substring(0, Math.min(accessToken.length(), 3)) + "..");
             final HttpEntity<String> request = new HttpEntity<>(getAuthenticationHeader());
             ResponseEntity<AlertDefinitions> response;
             Timer.Context ct = timer.time();

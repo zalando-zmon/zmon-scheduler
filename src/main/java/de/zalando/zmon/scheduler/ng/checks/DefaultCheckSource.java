@@ -57,7 +57,8 @@ public class DefaultCheckSource extends CheckSource {
 
         CheckDefinitions defs;
         if(tokens!=null) {
-            LOG.info("Querying checks with token: " + tokens.get().substring(0, 3) + "...");
+            final String accessToken = tokens.get();
+            LOG.info("Querying check definitions with token " + accessToken.substring(0, Math.min(accessToken.length(), 3)) + "..");
             HttpEntity<String> request = new HttpEntity<>(getWithAuth());
             ResponseEntity<CheckDefinitions> response;
             response = rt.exchange(url, HttpMethod.GET, request, CheckDefinitions.class);
