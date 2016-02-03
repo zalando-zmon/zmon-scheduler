@@ -5,9 +5,14 @@ package de.zalando.zmon.scheduler.ng.entities;
  */
 public class Teams {
     public static String getNormalizedTeam(String team) {
-        if(team.startsWith("Zalando/Technology/")) {
+        if (null == team) {
+            return "";
+        }
+
+        if (team.startsWith("Zalando/Technology/")) {
             return team.substring(19);
         }
+
         return team;
     }
 }
