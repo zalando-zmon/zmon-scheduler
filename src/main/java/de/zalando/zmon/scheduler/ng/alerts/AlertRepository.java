@@ -14,10 +14,18 @@ public class AlertRepository extends CachedRepository<Integer, AlertSourceRegist
 
     private Map<Integer, List<AlertDefinition>> byCheckId;
 
+    private final Set<AlertChangeListener> changeListeners = new HashSet<>();
+
+    public void registerChangeListener(AlertChangeListener listener) {
+        changeListeners.add(listener);
+    }
+
     @Override
     protected void fill() {
         Map<Integer, AlertDefinition> m = new HashMap<>();
         Map<Integer, List<AlertDefinition>> newByCheckId = new HashMap<>();
+
+
 
         for(String name : registry.getSourceNames()) {
             for(AlertDefinition ad: registry.get(name).getCollection()) {

@@ -4,10 +4,7 @@ import de.zalando.zmon.scheduler.ng.CachedRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by jmussler on 4/7/15.
@@ -15,7 +12,7 @@ import java.util.Map;
 @Component
 public class CheckRepository extends CachedRepository<Integer, CheckSourceRegistry, CheckDefinition> {
 
-    private final List<CheckChangeListener> listeners = new ArrayList<>();
+    private final Set<CheckChangeListener> listeners = new HashSet<>();
 
     public synchronized void registerListener(CheckChangeListener l) {
         listeners.add(l);

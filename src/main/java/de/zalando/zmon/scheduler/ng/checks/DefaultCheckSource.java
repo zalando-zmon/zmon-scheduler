@@ -5,10 +5,12 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import de.zalando.zmon.scheduler.ng.TokenWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
@@ -23,6 +25,7 @@ public class DefaultCheckSource extends CheckSource {
 
     private String url;
     private TokenWrapper tokens;
+    private ClientHttpRequestFactory clientFactory;
 
     private static final ObjectMapper mapper = createObjectMapper();
 
@@ -32,8 +35,10 @@ public class DefaultCheckSource extends CheckSource {
         return m;
     }
 
-    public DefaultCheckSource(String name, String url, final TokenWrapper tokens) {
+    @Autowired
+    public DefaultCheckSource(String name, String url, final TokenWrapper tokens, final ClientHttpRequestFactory clientFactory) {
         super(name);
+        this.clientFactory = clientFactory;
         this.url = url;
         this.tokens = tokens;
     }
@@ -51,7 +56,8 @@ public class DefaultCheckSource extends CheckSource {
 
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         converter.setObjectMapper(mapper);
-        RestTemplate rt = new RestTemplate();
+
+        RestTemplate rt = new RestTemplate(clientFactory);
         rt.getMessageConverters().clear();
         rt.getMessageConverters().add(converter);
 

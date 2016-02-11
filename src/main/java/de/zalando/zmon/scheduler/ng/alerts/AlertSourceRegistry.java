@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 
 import com.codahale.metrics.MetricRegistry;
@@ -24,24 +25,24 @@ public class AlertSourceRegistry extends SourceRegistry<AlertSource> {
     }
 
     @Autowired(required = false)
-    public AlertSourceRegistry(final SchedulerConfig config, final MetricRegistry metrics, final TokenWrapper tokens) {
+    public AlertSourceRegistry(final SchedulerConfig config, final MetricRegistry metrics, final TokenWrapper tokens, ClientHttpRequestFactory clientFactory) {
         this.metrics = metrics;
 
         final DefaultAlertSource source = new DefaultAlertSource("alert-source",
-                config.controller_url() + (config.urls_without_rest() ? "" : "/rest") + "/api/v1/checks/all-active-alert-definitions", metrics, tokens);
+                config.controller_url() + (config.urls_without_rest() ? "" : "/rest") + "/api/v1/checks/all-active-alert-definitions", metrics, tokens, clientFactory);
 
         register(source);
     }
 
     @Autowired(required = false)
     public AlertSourceRegistry(final ZalandoAlertConfig zConfig, final SchedulerConfig config,
-            final MetricRegistry metrics) {
+            final MetricRegistry metrics, ClientHttpRequestFactory clientFactory) {
         this.metrics = metrics;
 
         if (zConfig.controller() != null && zConfig.controller().getUrl() != null
                 && !"".equals(zConfig.controller().url())) {
             final ZalandoControllerConfig conf = zConfig.controller();
-            final DefaultAlertSource source = new DefaultAlertSource(conf.name(), conf.url(), metrics, null);
+            final DefaultAlertSource source = new DefaultAlertSource(conf.name(), conf.url(), metrics, null, clientFactory);
             register(source);
         }
     }

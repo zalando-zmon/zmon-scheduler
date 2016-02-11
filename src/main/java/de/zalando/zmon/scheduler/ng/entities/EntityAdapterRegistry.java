@@ -8,6 +8,7 @@ import de.zalando.zmon.scheduler.ng.ZalandoConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -29,7 +30,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
     }
 
     @Autowired(required=false)
-    public EntityAdapterRegistry(SchedulerConfig config, MetricRegistry metrics, TokenWrapper tokens) {
+    public EntityAdapterRegistry(SchedulerConfig config, MetricRegistry metrics, TokenWrapper tokens, ClientHttpRequestFactory clientFactory) {
         this.metrics = metrics;
         register(EMPTY_ADAPTER);
 
@@ -38,7 +39,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
         }
 
         if(config.entity_service_url() !=null && !config.entity_service_url().equals("")) {
-            EntityServiceAdapter e = new EntityServiceAdapter(config.entity_service_url() + (config.urls_without_rest() ? "" : "/rest"), metrics, tokens);
+            EntityServiceAdapter e = new EntityServiceAdapter(config.entity_service_url() + (config.urls_without_rest() ? "" : "/rest"), metrics, tokens, clientFactory);
             register(e);
         }
 
@@ -48,7 +49,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
     }
 
     @Autowired(required=false)
-    public EntityAdapterRegistry(SchedulerConfig config, ZalandoConfig zConfig, MetricRegistry metrics) {
+    public EntityAdapterRegistry(SchedulerConfig config, ZalandoConfig zConfig, MetricRegistry metrics, ClientHttpRequestFactory clientFactory) {
         this.metrics = metrics;
 
         if(config.enable_global_entity()) {
@@ -75,7 +76,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
         }
 
         if(zConfig.entityservice != null && zConfig.entityservice.url != null) {
-            EntityServiceAdapter e = new EntityServiceAdapter(zConfig.entityservice.url + (config.urls_without_rest() ? "" : "/rest"), metrics, null);
+            EntityServiceAdapter e = new EntityServiceAdapter(zConfig.entityservice.url + (config.urls_without_rest() ? "" : "/rest"), metrics, null, clientFactory);
             register(e);
         }
 

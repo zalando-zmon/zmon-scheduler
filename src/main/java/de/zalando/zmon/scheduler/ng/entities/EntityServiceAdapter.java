@@ -5,10 +5,12 @@ import com.codahale.metrics.Timer;
 import de.zalando.zmon.scheduler.ng.TokenWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
@@ -24,10 +26,14 @@ public class EntityServiceAdapter extends EntityAdapter {
     private final MetricRegistry metrics;
     private final Timer timer;
 
+    private ClientHttpRequestFactory clientFactory;
+
     private static final Logger LOG = LoggerFactory.getLogger(EntityServiceAdapter.class);
 
-    public EntityServiceAdapter(String url, MetricRegistry metrics, TokenWrapper tokens) {
+    @Autowired
+    public EntityServiceAdapter(String url, MetricRegistry metrics, TokenWrapper tokens, ClientHttpRequestFactory clientFactory) {
         super("EntityServiceAdapter");
+        this.clientFactory = clientFactory;
         this.url = url;
         this.tokens = tokens;
         this.metrics = metrics;
@@ -49,7 +55,7 @@ public class EntityServiceAdapter extends EntityAdapter {
 
     @Override
     public Collection<Entity> getCollection() {
-        RestTemplate rt = new RestTemplate();
+        RestTemplate rt = new RestTemplate(clientFactory);
         HttpEntity<String> request;
 
         if(tokens != null) {

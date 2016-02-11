@@ -11,6 +11,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 import org.springframework.web.client.RestTemplate;
@@ -31,6 +32,7 @@ public class DefaultAlertSource extends AlertSource {
 
     private final String url;
     private final TokenWrapper tokens;
+    private final ClientHttpRequestFactory clientFactory;
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultAlertSource.class);
 
@@ -43,8 +45,9 @@ public class DefaultAlertSource extends AlertSource {
     }
 
     @Autowired
-    public DefaultAlertSource(final String name, final String url, final MetricRegistry metrics, final TokenWrapper tokens) {
+    public DefaultAlertSource(final String name, final String url, final MetricRegistry metrics, final TokenWrapper tokens, final ClientHttpRequestFactory clientFactory) {
         super(name);
+        this.clientFactory = clientFactory;
         this.metrics = metrics;
         this.url = url;
         this.tokens = tokens;
@@ -64,7 +67,7 @@ public class DefaultAlertSource extends AlertSource {
 
     @Override
     public Collection<AlertDefinition> getCollection() {
-        RestTemplate rt = new RestTemplate();
+        RestTemplate rt = new RestTemplate(clientFactory);
 
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         converter.setObjectMapper(mapper);
