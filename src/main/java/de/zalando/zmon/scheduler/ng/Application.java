@@ -115,11 +115,13 @@ public class Application {
     @RequestMapping(value="/api/v1/alerts/{id}/instant-eval", method=RequestMethod.POST)
     public void triggerInstantEvaluation(@PathVariable(value="id") int id) {
         scheduler.executeImmediate(id);
+        instantEvalForwarder.forwardRequest(id);
     }
 
     @RequestMapping(value="/api/v1/trial-runs", method=RequestMethod.POST)
     public void postTrialRun(@RequestBody TrialRunRequest trialRun) {
         scheduler.scheduleTrialRun(trialRun);
+        trialRunForwarder.forwardRequest(trialRun);
     }
 
     @RequestMapping(value="/api/v1/trial-runs/", method=RequestMethod.GET)
