@@ -112,6 +112,16 @@ public class Application {
         return trialRunForwarder.getRequests(dcId);
     }
 
+    @RequestMapping(value="/api/v1/alerts/{id}/instant-eval", method=RequestMethod.POST)
+    public void triggerInstantEvaluation(@PathVariable(value="id") int id) {
+        scheduler.executeImmediate(id);
+    }
+
+    @RequestMapping(value="/api/v1/trial-runs", method=RequestMethod.POST)
+    public void postTrialRun(@RequestBody TrialRunRequest trialRun) {
+        scheduler.scheduleTrialRun(trialRun);
+    }
+
     @RequestMapping(value="/api/v1/trial-runs/", method=RequestMethod.GET)
     Collection<String> getKnownTrialRunDCs() {
         return trialRunForwarder.getKnwonDCs();
