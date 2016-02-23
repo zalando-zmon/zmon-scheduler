@@ -423,14 +423,14 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
     }
   }
 
-  def executeImmediate(id : Integer): Unit = {
-    if(!viableCheck(id)) return
+  def executeImmediate(checkId : Integer): Unit = {
+    if(!viableCheck(checkId)) return
     try {
-      val lastRun = schedule(id, 0)
-      Scheduler.LOG.info("Schedule for immediate execution: " + id + " last run: " + ((System.currentTimeMillis() - lastRun) / 1000) + "s ago")
+      val lastRun = schedule(checkId, 0)
+      Scheduler.LOG.info("Schedule for immediate execution: checkId=" + checkId + " last run: " + ((System.currentTimeMillis() - lastRun) / 1000) + "s ago")
     }
     catch {
-      case ex : Exception => Scheduler.LOG.error("Unexpected exception in executeImmediate for check_id: " + id, ex)
+      case ex : Exception => Scheduler.LOG.error("Unexpected exception in executeImmediate for check_id: checkId=" + checkId, ex)
     }
   }
 
