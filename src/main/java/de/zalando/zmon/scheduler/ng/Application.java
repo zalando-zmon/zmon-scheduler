@@ -114,8 +114,9 @@ public class Application {
 
     @RequestMapping(value="/api/v1/alerts/{id}/instant-eval", method=RequestMethod.POST)
     public void triggerInstantEvaluation(@PathVariable(value="id") int id) {
-        scheduler.executeImmediate(id);
-        instantEvalForwarder.forwardRequest(id);
+        int checkId = alertRepo.get(id).getCheckDefinitionId();
+        scheduler.executeImmediate(checkId);
+        instantEvalForwarder.forwardRequest(checkId);
     }
 
     @RequestMapping(value="/api/v1/trial-runs", method=RequestMethod.POST)

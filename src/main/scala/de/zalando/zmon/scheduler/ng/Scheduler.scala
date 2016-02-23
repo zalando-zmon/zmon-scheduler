@@ -430,7 +430,7 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
       Scheduler.LOG.info("Schedule for immediate execution: " + id + " last run: " + ((System.currentTimeMillis() - lastRun) / 1000) + "s ago")
     }
     catch {
-      case ex : Exception => Scheduler.LOG.error("Unexpected exception in execImmediate for check_id: " + id, ex)
+      case ex : Exception => Scheduler.LOG.error("Unexpected exception in executeImmediate for check_id: " + id, ex)
     }
   }
 
