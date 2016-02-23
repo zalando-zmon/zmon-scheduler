@@ -181,7 +181,7 @@ class ScheduledCheck(val id : Integer,
 
     val checkDef = check.getCheckDef()
     if(null==checkDef) {
-      Scheduler.LOG.error("Probably inactive/deleted check still scheduled: " + check.id)
+      Scheduler.LOG.warn("Probably inactive/deleted check still scheduled: " + check.id)
       return new ArrayBuffer[Entity]()
     }
 
