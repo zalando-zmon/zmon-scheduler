@@ -1,6 +1,7 @@
 package de.zalando.zmon.scheduler.ng.checks;
 
 import de.zalando.zmon.scheduler.ng.CachedRepository;
+import de.zalando.zmon.scheduler.ng.SchedulerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,7 @@ import java.util.*;
 public class CheckRepository extends CachedRepository<Integer, CheckSourceRegistry, CheckDefinition> {
 
     private final Set<CheckChangeListener> listeners = new HashSet<>();
+    private final long checkMinInterval;
 
     public synchronized void registerListener(CheckChangeListener l) {
         listeners.add(l);
@@ -61,8 +63,8 @@ public class CheckRepository extends CachedRepository<Integer, CheckSourceRegist
 
         for(String name : registry.getSourceNames()) {
             for(CheckDefinition cd: registry.get(name).getCollection()) {
-                if(cd.getInterval()<5L) {
-                    cd.setInterval(10L);
+                if(cd.getInterval()<checkMinInterval) {
+                    cd.setInterval(checkMinInterval);
                 }
                 m.put(cd.getId(), cd);
             }
@@ -78,8 +80,9 @@ public class CheckRepository extends CachedRepository<Integer, CheckSourceRegist
     }
 
     @Autowired
-    public CheckRepository(CheckSourceRegistry registry) {
+    public CheckRepository(CheckSourceRegistry registry, SchedulerConfig config) {
         super(registry);
+        this.checkMinInterval = config.getCheck_min_interval();
         currentMap = new HashMap<>();
         fill();
     }

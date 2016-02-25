@@ -112,6 +112,8 @@ class SchedulerConfig {
 
   @BeanProperty var entity_properties_key : String = null
 
+  @BeanProperty var check_min_interval : Long = 15L
+
   @Value("${server.port}")
   @BeanProperty var server_port : String = null
 }
