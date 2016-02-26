@@ -25,7 +25,7 @@ class YamlAdapterTest extends FlatSpec with Matchers {
   val ar = new AlertSourceRegistry(metrics)
   ar.register(as)
 
-  val checkRepo = new CheckRepository(cr)
+  val checkRepo = new CheckRepository(cr, new SchedulerConfig())
   val alertRepo = new AlertRepository(ar)
   val entityRepo = new EntityRepository(er)
 
