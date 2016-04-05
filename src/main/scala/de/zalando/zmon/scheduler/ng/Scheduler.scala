@@ -222,7 +222,7 @@ class ScheduledCheck(val id : Integer,
       runCheck()
     }
     catch {
-      case e : Exception => {
+      case e : Throwable => {
         metrics.errorCount.mark()
         ScheduledCheck.LOG.error("Error in execution of check: " + id, e)
       }
