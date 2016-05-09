@@ -1,6 +1,6 @@
-=================
-ZMON Scheduler NG
-=================
+==============
+ZMON Scheduler
+==============
 
 .. image:: https://travis-ci.org/zalando/zmon-scheduler.svg?branch=master
    :target: https://travis-ci.org/zalando/zmon-scheduler
