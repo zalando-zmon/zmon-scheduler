@@ -2,8 +2,8 @@
 ZMON Scheduler NG
 =================
 
-.. image:: https://travis-ci.org/zalando/zmon-scheduler-ng.svg?branch=master
-   :target: https://travis-ci.org/zalando/zmon-scheduler-ng
+.. image:: https://travis-ci.org/zalando/zmon-scheduler.svg?branch=master
+   :target: https://travis-ci.org/zalando/zmon-scheduler
    :alt: Build Status
 
 This is the replacement for our current Python "zmon-scheduler" as part of the ZMON infrastructure.
