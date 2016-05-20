@@ -61,45 +61,45 @@ public class Application {
     @Autowired
     Scheduler scheduler;
 
-    @RequestMapping(value="/api/v1/entity-adapter", method=RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/entity-adapter", method = RequestMethod.GET)
     Collection<String> getAdapters() {
         return entityRegistry.getSourceNames();
     }
 
-    @RequestMapping(value="/api/v1/entity-adapter/{name}", method=RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/entity-adapter/{name}", method = RequestMethod.GET)
     Collection<Entity> getEntities(@PathVariable(value = "name") String name) {
         return entityRegistry.get(name).getCollection();
     }
 
-    @RequestMapping(value="/api/v1/check-source", method=RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/check-source", method = RequestMethod.GET)
     Collection<String> getCheckSources() {
         return checkSourceRegistry.getSourceNames();
     }
 
-    @RequestMapping(value="/api/v1/check-source/{name}", method=RequestMethod.GET)
-    Collection<CheckDefinition> getChecks(@PathVariable(value="name") String name) {
+    @RequestMapping(value = "/api/v1/check-source/{name}", method = RequestMethod.GET)
+    Collection<CheckDefinition> getChecks(@PathVariable(value = "name") String name) {
         return checkSourceRegistry.get(name).getCollection();
     }
 
-    @RequestMapping(value="/api/v1/alert-source", method=RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/alert-source", method = RequestMethod.GET)
     Collection<String> getAlertSources() {
         return alertSourceRegistry.getSourceNames();
     }
 
-    @RequestMapping(value="/api/v1/alert-source/{name}", method=RequestMethod.GET)
-    Collection<AlertDefinition> getAlerts(@PathVariable(value="name") String name) {
+    @RequestMapping(value = "/api/v1/alert-source/{name}", method = RequestMethod.GET)
+    Collection<AlertDefinition> getAlerts(@PathVariable(value = "name") String name) {
         return alertSourceRegistry.get(name).getCollection();
     }
 
     @Autowired
     private InstantEvalForwarder instantEvalForwarder;
 
-    @RequestMapping(value="/api/v1/instant-evaluations/{dc}/", method=RequestMethod.GET)
-    Collection<Integer> getPendingInstantEvaluations(@PathVariable(value="dc") String dcId) {
+    @RequestMapping(value = "/api/v1/instant-evaluations/{dc}/", method = RequestMethod.GET)
+    Collection<Integer> getPendingInstantEvaluations(@PathVariable(value = "dc") String dcId) {
         return instantEvalForwarder.getRequests(dcId);
     }
 
-    @RequestMapping(value="/api/v1/instant-evaluations/", method=RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/instant-evaluations/", method = RequestMethod.GET)
     Collection<String> getKnownInstantEvalForwardDCs() {
         return instantEvalForwarder.getKnwonDCs();
     }
@@ -107,49 +107,49 @@ public class Application {
     @Autowired
     private TrialRunForwarder trialRunForwarder;
 
-    @RequestMapping(value="/api/v1/trial-runs/{dc}/", method=RequestMethod.GET)
-    Collection<TrialRunRequest> getPendingTrialRuns(@PathVariable(value="dc") String dcId) {
+    @RequestMapping(value = "/api/v1/trial-runs/{dc}/", method = RequestMethod.GET)
+    Collection<TrialRunRequest> getPendingTrialRuns(@PathVariable(value = "dc") String dcId) {
         return trialRunForwarder.getRequests(dcId);
     }
 
-    @RequestMapping(value="/api/v1/checks/{id}/instant-eval", method=RequestMethod.POST)
-    public void triggerInstantEvaluationByCheck(@PathVariable(value="id") int checkId) {
+    @RequestMapping(value = "/api/v1/checks/{id}/instant-eval", method = RequestMethod.POST)
+    public void triggerInstantEvaluationByCheck(@PathVariable(value = "id") int checkId) {
         scheduler.executeImmediate(checkId);
         instantEvalForwarder.forwardRequest(checkId);
     }
 
-    @RequestMapping(value="/api/v1/alerts/{id}/instant-eval", method=RequestMethod.POST)
-    public void triggerInstantEvaluation(@PathVariable(value="id") int id) {
+    @RequestMapping(value = "/api/v1/alerts/{id}/instant-eval", method = RequestMethod.POST)
+    public void triggerInstantEvaluation(@PathVariable(value = "id") int id) {
         int checkId = alertRepo.get(id).getCheckDefinitionId();
         scheduler.executeImmediate(checkId);
         instantEvalForwarder.forwardRequest(checkId);
     }
 
-    @RequestMapping(value="/api/v1/trial-runs", method=RequestMethod.POST)
+    @RequestMapping(value = "/api/v1/trial-runs", method = RequestMethod.POST)
     public void postTrialRun(@RequestBody TrialRunRequest trialRun) {
         scheduler.scheduleTrialRun(trialRun);
         trialRunForwarder.forwardRequest(trialRun);
     }
 
-    @RequestMapping(value="/api/v1/trial-runs/", method=RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/trial-runs/", method = RequestMethod.GET)
     Collection<String> getKnownTrialRunDCs() {
         return trialRunForwarder.getKnwonDCs();
     }
 
-    @RequestMapping(value="/api/v1/trigger-check/{id}", method=RequestMethod.GET)
-    void triggerInstantEval(@PathVariable(value="id") int checkId) {
+    @RequestMapping(value = "/api/v1/trigger-check/{id}", method = RequestMethod.GET)
+    void triggerInstantEval(@PathVariable(value = "id") int checkId) {
         scheduler.executeImmediate(checkId);
     }
 
-    @RequestMapping(value="/api/v1/entities", method=RequestMethod.GET)
-    Collection<Entity> queryKnownEntities(@RequestParam(value="filter", required = true) String sFilter,
-                            @RequestParam(value="exclude_filter", defaultValue = "") String sExcludeFilter,
-                            @RequestParam(value="local", defaultValue ="false") boolean baseFilter) throws IOException {
+    @RequestMapping(value = "/api/v1/entities", method = RequestMethod.GET)
+    Collection<Entity> queryKnownEntities(@RequestParam(value = "filter", required = true) String sFilter,
+                                          @RequestParam(value = "exclude_filter", defaultValue = "") String sExcludeFilter,
+                                          @RequestParam(value = "local", defaultValue = "false") boolean baseFilter) throws IOException {
 
-        List<Map<String,String>> filter = mapper.readValue(sFilter, new TypeReference<List<Map<String,String>>>() {
+        List<Map<String, String>> filter = mapper.readValue(sFilter, new TypeReference<List<Map<String, String>>>() {
         });
 
-        List<Map<String,String>> excludeFilter = mapper.readValue(sExcludeFilter, new TypeReference<List<Map<String,String>>>() {
+        List<Map<String, String>> excludeFilter = mapper.readValue(sExcludeFilter, new TypeReference<List<Map<String, String>>>() {
         });
 
         return scheduler.queryKnownEntities(filter, excludeFilter, baseFilter);
@@ -165,7 +165,7 @@ public class Application {
     @Autowired
     EntityRepository entityRepo;
 
-    @RequestMapping(value="/api/v1/repository-updates", method= RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/repository-updates", method = RequestMethod.GET)
     JsonNode getUpdateStatus() {
         ObjectNode node = mapper.createObjectNode();
         node.put("alert-repo", alertRepo.getLastUpdated());
@@ -176,31 +176,33 @@ public class Application {
 
     private static class Test2 {
         public String fieldName = "name";
-        public String fieldFirstName ="FirstName";
+        public String fieldFirstName = "FirstName";
     }
+
     private static class Test1 {
-        public String abc ="abc";
+        public String abc = "abc";
         public Test2 fieldTest = new Test2();
     }
 
-    @RequestMapping(value="/api/v1/test", method=RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/test", method = RequestMethod.GET)
     Test1 getTestObject() {
         return new Test1();
     }
 
     public static void main(String[] args) throws Exception {
 
-javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
-    new javax.net.ssl.HostnameVerifier(){
+        javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
+                new javax.net.ssl.HostnameVerifier() {
 
-        public boolean verify(String hostname,
-                javax.net.ssl.SSLSession sslSession) {
-            if (hostname.equals("localhost")) {
-                return true;
-            }
-            return false;
-        }
-    });
+                    public boolean verify(String hostname,
+                                          javax.net.ssl.SSLSession sslSession) {
+                        if (hostname.equals("localhost")) {
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+
         SpringApplication.run(Application.class, args);
     }
 }
