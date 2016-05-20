@@ -70,12 +70,12 @@ public class AlertOverlapGenerator {
 
         for(Map.Entry<String, String> entry : f.entrySet()) {
             if(!ps.containsKey(entry.getKey())) {
-                continue;
+                break;
             }
 
             Object v = ps.get(entry.getKey());
             if(null == v) {
-                continue;
+                break;
             }
 
             // ignoring collection support for now ( not really in use anymore )
