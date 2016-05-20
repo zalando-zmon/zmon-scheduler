@@ -174,21 +174,6 @@ public class Application {
         return node;
     }
 
-    private static class Test2 {
-        public String fieldName = "name";
-        public String fieldFirstName = "FirstName";
-    }
-
-    private static class Test1 {
-        public String abc = "abc";
-        public Test2 fieldTest = new Test2();
-    }
-
-    @RequestMapping(value = "/api/v1/test", method = RequestMethod.GET)
-    Test1 getTestObject() {
-        return new Test1();
-    }
-
     public static void main(String[] args) throws Exception {
 
         javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
