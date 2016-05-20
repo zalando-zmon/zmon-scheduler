@@ -39,13 +39,15 @@ public class AlertOverlapGenerator {
 
     private final EntityRepository entityRepo;
     private final Map<Integer, List<AlertDefinition>> alertRepo;
+    private final Map<Integer, AlertDefinition> alertRepoByAlertId;
     private final Map<Integer, CheckDefinition> checkRepo;
 
     @Autowired
-    public AlertOverlapGenerator(EntityRepository entityRepo, Map<Integer, List<AlertDefinition>> alertRepo, Map<Integer, CheckDefinition> checkRepo) {
+    public AlertOverlapGenerator(EntityRepository entityRepo, Map<Integer, List<AlertDefinition>> alertRepo, Map<Integer, CheckDefinition> checkRepo, Map<Integer, AlertDefinition> alertsById) {
         this.entityRepo = entityRepo;
         this.alertRepo = alertRepo;
         this.checkRepo = checkRepo;
+        this.alertRepoByAlertId = alertsById;
     }
 
     public List<Entity> getFilteredEntities(Map<String, String> filter) {
@@ -151,7 +153,7 @@ public class AlertOverlapGenerator {
         for(Map.Entry<String, Set<Entity>> entry : entityGroupByAlertIds.entrySet()) {
             EntityGroup g = new EntityGroup();
             for(Integer i : mapStringToSet.get(entry.getKey())) {
-                g.alerts.add(new AlertInfo("", i));
+                g.alerts.add(new AlertInfo(alertRepoByAlertId.get(i).getName(), i));
             }
 
             for(Entity e : entry.getValue()) {
