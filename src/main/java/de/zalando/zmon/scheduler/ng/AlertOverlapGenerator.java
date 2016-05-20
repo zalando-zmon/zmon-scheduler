@@ -140,7 +140,7 @@ public class AlertOverlapGenerator {
                 mapStringToSet.put(setId, entry.getValue());
             }
 
-            if(entityGroupByAlertIds.containsKey(setId)) {
+            if(!entityGroupByAlertIds.containsKey(setId)) {
                 entityGroupByAlertIds.put(setId, new HashSet<>());
             }
 

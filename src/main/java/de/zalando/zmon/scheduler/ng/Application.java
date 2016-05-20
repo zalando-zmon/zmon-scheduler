@@ -91,7 +91,7 @@ public class Application {
         return alertSourceRegistry.get(name).getCollection();
     }
 
-    @RequestMapping(value = "/api/v1/alter-coverage", method = RequestMethod.POST)
+    @RequestMapping(value = "/api/v1/alert-coverage", method = RequestMethod.POST)
     Collection<AlertOverlapGenerator.EntityGroup> getAlertCoverage(@RequestBody Map<String, String> entityFilter) {
         AlertOverlapGenerator g = new AlertOverlapGenerator(entityRepo, alertRepo.getByCheckId(), checkRepo.getCurrentMap());
         return g.getOverlaps(entityFilter);
