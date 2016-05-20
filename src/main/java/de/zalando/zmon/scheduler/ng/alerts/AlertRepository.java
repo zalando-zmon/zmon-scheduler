@@ -77,4 +77,8 @@ public class AlertRepository extends CachedRepository<Integer, AlertSourceRegist
             return EMPTY_LIST;
         }
     }
+
+    public Map<Integer, List<AlertDefinition>> getByCheckId() {
+        return byCheckId;
+    }
 }

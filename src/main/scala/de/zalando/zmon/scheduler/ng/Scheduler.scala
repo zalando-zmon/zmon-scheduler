@@ -83,9 +83,9 @@ class Alert(var id : Integer, val repo : AlertRepository) {
   def matchEntity(entity : Entity): Boolean = {
     val properties = entity.getFilterProperties
     val entityFilters = repo.get(id).getEntities
-    if ( entityFilters.size()==0 ) {
+    if ( entityFilters.size()== 0 ) {
       val excludeEntityFilter = repo.get(id).getEntitiesExclude
-      if(excludeEntityFilter!=null) {
+      if(excludeEntityFilter != null) {
         for (outFilter <- excludeEntityFilter) {
           if (filter.overlaps(outFilter, properties)) {
             return false

@@ -53,7 +53,11 @@ public abstract class CachedRepository<I, S, T> implements Runnable {
         return v;
     }
 
-    Collection<T> get() {
+    public Collection<T> get() {
         return currentMap.values();
+    }
+
+    public Map<I, T> getCurrentMap() {
+        return currentMap;
     }
 }
