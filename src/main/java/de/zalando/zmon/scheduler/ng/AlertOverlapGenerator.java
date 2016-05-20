@@ -54,11 +54,11 @@ public class AlertOverlapGenerator {
         Collection<Entity> allEntities = entityRepo.getUnfiltered();
         List<Entity> filteredEntities = new ArrayList<>();
 
-        for(Entity e : allEntities) {
+        for (Entity e : allEntities) {
 
             boolean match = filter(filter, e.getFilterProperties());
 
-            if(match) {
+            if (match) {
                 filteredEntities.add(e);
             }
         }
@@ -67,24 +67,23 @@ public class AlertOverlapGenerator {
     }
 
     public static boolean filter(Map<String, String> f, Map<String, Object> ps) {
-
-        boolean match = false;
-
-        for(Map.Entry<String, String> entry : f.entrySet()) {
-            if(!ps.containsKey(entry.getKey())) {
-                break;
+        for (Map.Entry<String, String> entry : f.entrySet()) {
+            if (!ps.containsKey(entry.getKey())) {
+                return false;
             }
 
             Object v = ps.get(entry.getKey());
-            if(null == v) {
-                break;
+            if (null == v) {
+                return false;
             }
 
             // ignoring collection support for now ( not really in use anymore )
-            match = v.equals(entry.getValue());
+            if (!v.equals(entry.getValue())) {
+                return false;
+            }
         }
 
-        return match;
+        return true;
     }
 
     public List<EntityGroup> getOverlaps(Map<String, String> filter) {
@@ -92,40 +91,39 @@ public class AlertOverlapGenerator {
 
         Map<Entity, Set<Integer>> alertOverlap = new HashMap<>();
 
-        for(Entity e : entities) {
+        for (Entity e : entities) {
 
             Set<Integer> entityAlerts = new TreeSet<>();
             alertOverlap.put(e, entityAlerts);
 
-            boolean matchCheck = false;
             for (CheckDefinition cd : checkRepo.values()) {
-
-                for ( Map<String, String> cFilter : cd.getEntities()) {
+                boolean matchCheck = false;
+                for (Map<String, String> cFilter : cd.getEntities()) {
                     matchCheck |= filter(cFilter, e.getFilterProperties());
                 }
 
-                if(matchCheck && alertRepo.containsKey(cd.getId())) {
-                    for( AlertDefinition ad : alertRepo.get(cd.getId())) {
+                if (matchCheck && alertRepo.containsKey(cd.getId())) {
+                    for (AlertDefinition ad : alertRepo.get(cd.getId())) {
                         boolean matchAlert = false;
                         boolean matchExclude = false;
 
-                        for(Map<String, String> aFilter : ad.getEntities()) {
-                            if(filter(aFilter, e.getFilterProperties())) {
+                        for (Map<String, String> aFilter : ad.getEntities()) {
+                            if (filter(aFilter, e.getFilterProperties())) {
                                 matchAlert = true;
                                 break;
                             }
                         }
 
-                        if(matchAlert && ad.getEntitiesExclude() != null) {
-                            for(Map<String, String> eFilter : ad.getEntitiesExclude()) {
-                                if(filter(eFilter, e.getFilterProperties())) {
+                        if (matchAlert && ad.getEntitiesExclude() != null) {
+                            for (Map<String, String> eFilter : ad.getEntitiesExclude()) {
+                                if (filter(eFilter, e.getFilterProperties())) {
                                     matchExclude = true;
                                     break;
                                 }
                             }
                         }
 
-                        if(matchAlert && !matchExclude) {
+                        if (matchAlert && !matchExclude) {
                             entityAlerts.add(ad.getId());
                         }
                     }
@@ -136,13 +134,13 @@ public class AlertOverlapGenerator {
         Map<String, Set<Integer>> mapStringToSet = new HashMap<>();
         Map<String, Set<Entity>> entityGroupByAlertIds = new HashMap<>();
 
-        for(Map.Entry<Entity, Set<Integer>> entry : alertOverlap.entrySet()) {
-            String setId = entry.getValue().stream().map(x->""+x).collect(Collectors.joining(","));
-            if(!mapStringToSet.containsKey(setId)) {
+        for (Map.Entry<Entity, Set<Integer>> entry : alertOverlap.entrySet()) {
+            String setId = entry.getValue().stream().map(x -> "" + x).collect(Collectors.joining(","));
+            if (!mapStringToSet.containsKey(setId)) {
                 mapStringToSet.put(setId, entry.getValue());
             }
 
-            if(!entityGroupByAlertIds.containsKey(setId)) {
+            if (!entityGroupByAlertIds.containsKey(setId)) {
                 entityGroupByAlertIds.put(setId, new HashSet<>());
             }
 
@@ -150,13 +148,13 @@ public class AlertOverlapGenerator {
         }
 
         List<EntityGroup> groups = new ArrayList<>();
-        for(Map.Entry<String, Set<Entity>> entry : entityGroupByAlertIds.entrySet()) {
+        for (Map.Entry<String, Set<Entity>> entry : entityGroupByAlertIds.entrySet()) {
             EntityGroup g = new EntityGroup();
-            for(Integer i : mapStringToSet.get(entry.getKey())) {
+            for (Integer i : mapStringToSet.get(entry.getKey())) {
                 g.alerts.add(new AlertInfo(alertRepoByAlertId.get(i).getName(), i));
             }
 
-            for(Entity e : entry.getValue()) {
+            for (Entity e : entry.getValue()) {
                 g.entities.add(new EntityInfo(e.getId()));
             }
 
