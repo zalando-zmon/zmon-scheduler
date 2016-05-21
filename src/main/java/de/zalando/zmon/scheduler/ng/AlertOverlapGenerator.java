@@ -50,16 +50,17 @@ public class AlertOverlapGenerator {
         this.alertRepoByAlertId = alertsById;
     }
 
-    public List<Entity> getFilteredEntities(Map<String, String> filter) {
+    public List<Entity> getFilteredEntities(List<Map<String, String>> filters) {
         Collection<Entity> allEntities = entityRepo.getUnfiltered();
         List<Entity> filteredEntities = new ArrayList<>();
 
         for (Entity e : allEntities) {
-
-            boolean match = filter(filter, e.getFilterProperties());
-
-            if (match) {
-                filteredEntities.add(e);
+            for (Map<String, String> filter : filters) {
+                boolean match = filter(filter, e.getFilterProperties());
+                if (match) {
+                    filteredEntities.add(e);
+                    break;
+                }
             }
         }
 
@@ -86,8 +87,8 @@ public class AlertOverlapGenerator {
         return true;
     }
 
-    public List<EntityGroup> getOverlaps(Map<String, String> filter) {
-        List<Entity> entities = getFilteredEntities(filter);
+    public List<EntityGroup> getOverlaps(List<Map<String, String>> filters) {
+        List<Entity> entities = getFilteredEntities(filters);
 
         Map<Entity, Set<Integer>> alertOverlap = new HashMap<>();
 
