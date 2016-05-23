@@ -18,6 +18,7 @@ import de.zalando.zmon.scheduler.ng.entities.{EntityRepository, Entity, EntityAd
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
+import org.springframework.http.client.ClientHttpRequestFactory
 import redis.clients.jedis.Jedis
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -269,7 +270,8 @@ class SchedulerFactory {
                       queueSelector : QueueSelector,
                       instantForwarder : InstantEvalForwarder,
                       trialRunForwarder : TrialRunForwarder,
-                      tokenWrapper : TokenWrapper)
+                      tokenWrapper : TokenWrapper,
+                      httpClientFactory: ClientHttpRequestFactory)
                      (implicit schedulerConfig : SchedulerConfig, metrics: MetricRegistry) : Scheduler = {
     SchedulerFactory.LOG.info("Createing scheduler instance")
     val s = new Scheduler(alertRepo, checkRepo, entityRepo, queueSelector)
@@ -303,11 +305,11 @@ class SchedulerFactory {
     }
 
     if(schedulerConfig.trial_run_http_url!=null) {
-      val trialRunPoller = new TrialRunHttpSubscriber(s, schedulerConfig, tokenWrapper);
+      val trialRunPoller = new TrialRunHttpSubscriber(s, schedulerConfig, tokenWrapper, httpClientFactory);
     }
 
     if(schedulerConfig.instant_eval_http_url!=null) {
-      val instantEvalPoller = new InstantEvalHttpSubscriber(s, schedulerConfig, tokenWrapper);
+      val instantEvalPoller = new InstantEvalHttpSubscriber(s, schedulerConfig, tokenWrapper, httpClientFactory);
     }
 
     s

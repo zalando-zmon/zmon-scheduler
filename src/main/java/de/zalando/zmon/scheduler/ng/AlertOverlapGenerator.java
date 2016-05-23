@@ -87,7 +87,7 @@ public class AlertOverlapGenerator {
         return true;
     }
 
-    public List<EntityGroup> getOverlaps(List<Map<String, String>> filters) {
+    public Map<Entity, Set<Integer>> getOverlaps(List<Map<String, String>> filters) {
         List<Entity> entities = getFilteredEntities(filters);
 
         Map<Entity, Set<Integer>> alertOverlap = new HashMap<>();
@@ -132,6 +132,12 @@ public class AlertOverlapGenerator {
             }
         }
 
+        return alertOverlap;
+    }
+
+    public List<EntityGroup> groupByAlertIds(List<Map<String, String>> filters) {
+        Map<Entity, Set<Integer>> alertOverlap = getOverlaps(filters);
+
         Map<String, Set<Integer>> mapStringToSet = new HashMap<>();
         Map<String, Set<Entity>> entityGroupByAlertIds = new HashMap<>();
 
@@ -162,6 +168,12 @@ public class AlertOverlapGenerator {
             groups.add(g);
         }
 
+        return groups;
+    }
+
+    public List<EntityGroup> groupByFields(List<Map<String, String>> filters, Set<String> fields) {
+        Map<Entity, Set<Integer>> alertOverlap = getOverlaps(filters);
+        List<EntityGroup> groups = new ArrayList<>();
         return groups;
     }
 }

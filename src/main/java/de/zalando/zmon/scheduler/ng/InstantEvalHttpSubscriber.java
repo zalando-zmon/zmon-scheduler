@@ -7,6 +7,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -25,10 +26,12 @@ public class InstantEvalHttpSubscriber implements Runnable {
     private final Scheduler scheduler;
     private final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
     private final TokenWrapper tokenWrapper;
+    private final ClientHttpRequestFactory clientFactory;
 
-    public InstantEvalHttpSubscriber(Scheduler scheduler, SchedulerConfig config, TokenWrapper tokenWrapper) {
+    public InstantEvalHttpSubscriber(Scheduler scheduler, SchedulerConfig config, TokenWrapper tokenWrapper, ClientHttpRequestFactory clientFactory) {
         url = config.instant_eval_http_url();
         this.tokenWrapper = tokenWrapper;
+        this.clientFactory = clientFactory;
 
         LOG.info("Subscribing for instant evaluations: {}", url);
         this.scheduler = scheduler;
@@ -40,7 +43,7 @@ public class InstantEvalHttpSubscriber implements Runnable {
     @Override
     public void run() {
         try {
-            RestTemplate rt = new RestTemplate();
+            RestTemplate rt = new RestTemplate(clientFactory);
             HttpEntity<String> request;
 
             HttpHeaders headers = new HttpHeaders();
