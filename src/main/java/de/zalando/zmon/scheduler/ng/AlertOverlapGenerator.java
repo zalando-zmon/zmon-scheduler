@@ -105,7 +105,7 @@ public class AlertOverlapGenerator {
 
                 if (matchCheck && alertRepo.containsKey(cd.getId())) {
                     for (AlertDefinition ad : alertRepo.get(cd.getId())) {
-                        boolean matchAlert = false;
+                        boolean matchAlert = false || ad.getEntities().isEmpty();
                         boolean matchExclude = false;
 
                         for (Map<String, String> aFilter : ad.getEntities()) {
