@@ -16,9 +16,11 @@ public class AlertOverlapGenerator {
 
     public static class EntityInfo {
         public String id;
+        public String type;
 
-        public EntityInfo(String i) {
+        public EntityInfo(String i, String t) {
             id = i;
+            type = t;
         }
     }
 
@@ -162,7 +164,7 @@ public class AlertOverlapGenerator {
             }
 
             for (Entity e : entry.getValue()) {
-                g.entities.add(new EntityInfo(e.getId()));
+                g.entities.add(new EntityInfo(e.getId(), (String) e.getProperties().get("type")));
             }
 
             groups.add(g);
