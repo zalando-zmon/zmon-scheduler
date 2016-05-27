@@ -28,15 +28,15 @@ public class AlertSourceRegistry extends SourceRegistry<AlertSource> {
     public AlertSourceRegistry(final SchedulerConfig config, final MetricRegistry metrics, final TokenWrapper tokens, ClientHttpRequestFactory clientFactory) {
         this.metrics = metrics;
 
-        final DefaultAlertSource source = new DefaultAlertSource("alert-source",
-                config.controller_url() + (config.urls_without_rest() ? "" : "/rest") + "/api/v1/checks/all-active-alert-definitions", metrics, tokens, clientFactory);
+        final String url = config.controller_url() + (config.urls_without_rest() ? "" : "/rest") + "/api/v1/checks/all-active-alert-definitions";
+        final DefaultAlertSource source = new DefaultAlertSource("alert-source", url, metrics, tokens, clientFactory);
 
         register(source);
     }
 
     @Autowired(required = false)
     public AlertSourceRegistry(final ZalandoAlertConfig zConfig, final SchedulerConfig config,
-            final MetricRegistry metrics, ClientHttpRequestFactory clientFactory) {
+                               final MetricRegistry metrics, ClientHttpRequestFactory clientFactory) {
         this.metrics = metrics;
 
         if (zConfig.controller() != null && zConfig.controller().getUrl() != null

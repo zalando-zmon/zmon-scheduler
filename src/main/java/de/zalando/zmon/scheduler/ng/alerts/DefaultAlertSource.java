@@ -49,6 +49,7 @@ public class DefaultAlertSource extends AlertSource {
         super(name);
         this.clientFactory = clientFactory;
         this.metrics = metrics;
+        LOG.info("alert source url={}", url);
         this.url = url;
         this.tokens = tokens;
         this.timer = metrics.timer("alert-adapter." + name);
@@ -58,7 +59,7 @@ public class DefaultAlertSource extends AlertSource {
 
         final HttpHeaders headers = new HttpHeaders();
 
-        if(tokens!=null) {
+        if (tokens != null) {
             headers.add("Authorization", "Bearer " + tokens.get());
         }
 
@@ -75,7 +76,7 @@ public class DefaultAlertSource extends AlertSource {
         rt.getMessageConverters().add(converter);
 
         AlertDefinitions defs;
-        if (tokens!=null) {
+        if (tokens != null) {
             final String accessToken = tokens.get();
             LOG.info("Querying alert definitions with token " + accessToken.substring(0, Math.min(accessToken.length(), 3)) + "..");
             final HttpEntity<String> request = new HttpEntity<>(getAuthenticationHeader());

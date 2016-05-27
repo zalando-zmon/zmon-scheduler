@@ -39,6 +39,8 @@ public class DefaultCheckSource extends CheckSource {
     public DefaultCheckSource(String name, String url, final TokenWrapper tokens, final ClientHttpRequestFactory clientFactory) {
         super(name);
         this.clientFactory = clientFactory;
+        LOG.info("check source url={}", url);
+
         this.url = url;
         this.tokens = tokens;
     }
@@ -46,7 +48,7 @@ public class DefaultCheckSource extends CheckSource {
     private HttpHeaders getWithAuth() {
         HttpHeaders headers = new HttpHeaders();
         if (tokens != null) {
-         headers.add("Authorization", "Bearer " + tokens.get());
+            headers.add("Authorization", "Bearer " + tokens.get());
         }
         return headers;
     }
@@ -62,7 +64,7 @@ public class DefaultCheckSource extends CheckSource {
         rt.getMessageConverters().add(converter);
 
         CheckDefinitions defs;
-        if(tokens!=null) {
+        if (tokens != null) {
             final String accessToken = tokens.get();
             LOG.info("Querying check definitions with token " + accessToken.substring(0, Math.min(accessToken.length(), 3)) + "..");
             HttpEntity<String> request = new HttpEntity<>(getWithAuth());
