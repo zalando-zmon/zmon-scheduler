@@ -5,6 +5,9 @@ endpoints:
   enabled: false
   metrics:
     enabled: true
+  health:
+    enabled: true
+    sensitive: true
 
 spring:
   jackson:
