@@ -34,6 +34,7 @@ public class EntityServiceAdapter extends EntityAdapter {
     public EntityServiceAdapter(String url, MetricRegistry metrics, TokenWrapper tokens, ClientHttpRequestFactory clientFactory) {
         super("EntityServiceAdapter");
         this.clientFactory = clientFactory;
+        LOG.info("entity service url={}", url);
         this.url = url;
         this.tokens = tokens;
         this.metrics = metrics;
