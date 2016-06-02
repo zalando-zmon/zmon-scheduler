@@ -250,6 +250,10 @@ class CheckChangedListener(val scheduler : Scheduler) extends CheckChangeListene
     Scheduler.LOG.info("Check removed or inactive: " + checkId)
     scheduler.unschedule(checkId)
   }
+
+  override def notifyFilterChange(checkId : Int) : Unit = {
+
+  }
 }
 
 @Configuration
