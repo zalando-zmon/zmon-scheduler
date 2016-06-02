@@ -1,10 +1,13 @@
 package de.zalando.zmon.scheduler.ng.cleanup;
 
+import de.zalando.zmon.scheduler.ng.AlertOverlapGenerator;
 import de.zalando.zmon.scheduler.ng.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.alerts.AlertChangeListener;
 import de.zalando.zmon.scheduler.ng.alerts.AlertDefinition;
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
+import de.zalando.zmon.scheduler.ng.checks.CheckDefinition;
 import de.zalando.zmon.scheduler.ng.checks.CheckRepository;
+import de.zalando.zmon.scheduler.ng.entities.Entity;
 import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
@@ -64,7 +67,7 @@ public class AlertChangeCleaner implements AlertChangeListener {
     @Override
     public void notifyAlertChange(AlertDefinition alert) {
         final AlertChangeCleaner c = this;
-        executor.schedule(()->c.doCleanup(alert.getId()), 90, TimeUnit.SECONDS);
+        executor.schedule(()->c.doCleanup(alert.getId(), alert.getCheckDefinitionId()), 90, TimeUnit.SECONDS);
     }
 
     @Override
@@ -72,20 +75,38 @@ public class AlertChangeCleaner implements AlertChangeListener {
 
     }
 
-    public void doCleanup(int alertId) {
+    private Set<String> getMatchingEntities(int alertId, int checkId) {
+        Set<String> entityIds = new HashSet<>();
+
+        CheckDefinition cd = checkRepository.get(checkId);
+        AlertDefinition ad = alertRepository.get(alertId);
+
+        for(Entity e: entityRepository.getUnfiltered()) {
+            if(AlertOverlapGenerator.matchCheckFilter(cd, e)) {
+                if(AlertOverlapGenerator.matchAlertFilter(ad, e)) {
+                    entityIds.add(e.getId());
+                }
+            }
+        }
+
+        return entityIds;
+    }
+
+    public void doCleanup(int alertId, int checkId) {
         try {
             Jedis j = redisPool.getResource();
             try {
-                Set<String> entityIdsInAlert = new HashSet<>();
-                Set<String> entityIdsTotal = new HashSet<>();
-
-                Set<String> matchedEntityIds = new HashSet<>();
-
-                entityIdsInAlert.removeAll(matchedEntityIds);
-                entityIdsTotal.removeAll(matchedEntityIds);
 
                 final String alertKey = "zmon:alerts:" + alertId;
                 final String alertMapKey = "zmon:alerts:" + alertId + ":entities";
+
+                Set<String> entityIdsInAlert = j.smembers(alertKey);
+                Set<String> entityIdsTotal = j.hkeys(alertMapKey);
+
+                Set<String> matchedEntityIds = getMatchingEntities(alertId, checkId);
+
+                entityIdsInAlert.removeAll(matchedEntityIds);
+                entityIdsTotal.removeAll(matchedEntityIds);
 
                 Pipeline p = j.pipelined();
                 for(String e : entityIdsInAlert) {
