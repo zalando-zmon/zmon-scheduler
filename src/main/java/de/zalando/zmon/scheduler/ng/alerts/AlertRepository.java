@@ -25,15 +25,12 @@ public class AlertRepository extends CachedRepository<Integer, AlertSourceRegist
         Map<Integer, AlertDefinition> m = new HashMap<>();
         Map<Integer, List<AlertDefinition>> newByCheckId = new HashMap<>();
 
-
-
-        for(String name : registry.getSourceNames()) {
-            for(AlertDefinition ad: registry.get(name).getCollection()) {
+        for (String name : registry.getSourceNames()) {
+            for (AlertDefinition ad : registry.get(name).getCollection()) {
                 m.put(ad.getId(), ad);
-                if(newByCheckId.containsKey(ad.getCheckDefinitionId())) {
+                if (newByCheckId.containsKey(ad.getCheckDefinitionId())) {
                     newByCheckId.get(ad.getCheckDefinitionId()).add(ad);
-                }
-                else {
+                } else {
                     List<AlertDefinition> ads = new ArrayList<>(1);
                     ads.add(ad);
                     newByCheckId.put(ad.getCheckDefinitionId(), ads);
@@ -70,10 +67,9 @@ public class AlertRepository extends CachedRepository<Integer, AlertSourceRegist
     private final static List<AlertDefinition> EMPTY_LIST = new ArrayList<>(0);
 
     public Collection<AlertDefinition> getByCheckId(Integer id) {
-        if(byCheckId.containsKey(id)) {
+        if (byCheckId.containsKey(id)) {
             return byCheckId.get(id);
-        }
-        else {
+        } else {
             return EMPTY_LIST;
         }
     }

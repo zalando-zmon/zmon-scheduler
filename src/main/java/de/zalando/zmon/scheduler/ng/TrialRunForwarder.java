@@ -16,8 +16,8 @@ public class TrialRunForwarder implements EntityChangeListener {
     private final Map<String, List<TrialRunRequest>> pendingTrialRuns = new HashMap<>();
 
     public void forwardRequest(TrialRunRequest trialRunRequest) {
-        synchronized(this) {
-            for(String k : pendingTrialRuns.keySet()) {
+        synchronized (this) {
+            for (String k : pendingTrialRuns.keySet()) {
                 pendingTrialRuns.get(k).add(trialRunRequest);
             }
         }
@@ -26,8 +26,8 @@ public class TrialRunForwarder implements EntityChangeListener {
     private final static List<TrialRunRequest> EMPTY_LIST = new ArrayList<>(0);
 
     public List<TrialRunRequest> getRequests(String dcId) {
-        synchronized(this) {
-            if(!pendingTrialRuns.containsKey(dcId)) {
+        synchronized (this) {
+            if (!pendingTrialRuns.containsKey(dcId)) {
                 return EMPTY_LIST;
             }
 
@@ -45,11 +45,11 @@ public class TrialRunForwarder implements EntityChangeListener {
 
     @Override
     public void notifyEntityAdd(EntityRepository repo, Entity e) {
-        if(e.getFilterProperties().get("type").equals("local")) {
+        if (e.getFilterProperties().get("type").equals("local")) {
             // local entities depict remote DCs
-            if(!pendingTrialRuns.containsKey(e.getId())) {
-                synchronized(this) {
-                    if(!pendingTrialRuns.containsKey(e.getId())) {
+            if (!pendingTrialRuns.containsKey(e.getId())) {
+                synchronized (this) {
+                    if (!pendingTrialRuns.containsKey(e.getId())) {
                         pendingTrialRuns.put(e.getId(), new ArrayList<>());
                     }
                 }
@@ -59,11 +59,11 @@ public class TrialRunForwarder implements EntityChangeListener {
 
     @Override
     public void notifyEntityRemove(EntityRepository repo, Entity e) {
-        if(e.getFilterProperties().get("type").equals("local")) {
+        if (e.getFilterProperties().get("type").equals("local")) {
             // local entities depict remote DCs
-            if(pendingTrialRuns.containsKey(e.getId())) {
-                synchronized(this) {
-                    if(pendingTrialRuns.containsKey(e.getId())) {
+            if (pendingTrialRuns.containsKey(e.getId())) {
+                synchronized (this) {
+                    if (pendingTrialRuns.containsKey(e.getId())) {
                         pendingTrialRuns.remove(e.getId());
                     }
                 }
