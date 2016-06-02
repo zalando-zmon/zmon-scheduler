@@ -254,4 +254,11 @@ public class AlertDefinition {
         sb.append('}');
         return sb.toString();
     }
+
+    public boolean compareForAlertUpdate(AlertDefinition b) {
+        // compare check id
+        // compare filter
+        // compare exclude filter
+        return false;
+    }
 }

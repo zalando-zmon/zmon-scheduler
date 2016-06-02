@@ -38,8 +38,37 @@ public class AlertRepository extends CachedRepository<Integer, AlertSourceRegist
             }
         }
 
+        List<AlertDefinition> changedAlerts = new ArrayList<>();
+        List<AlertDefinition> deletedAlerts = new ArrayList<>();
+        List<AlertDefinition> addedAlerts = new ArrayList<>();
+
+        for(Map.Entry<Integer, AlertDefinition> e : m.entrySet()) {
+            if(currentMap.containsKey(e.getKey())) {
+                if(currentMap.get(e.getKey()).compareForAlertUpdate(e.getValue())) {
+                    changedAlerts.add(e.getValue());
+                }
+            }
+            else {
+                addedAlerts.add(e.getValue());
+            }
+        }
+
+        for(Map.Entry<Integer, AlertDefinition> e : currentMap.entrySet()) {
+            if(!m.containsKey(e.getKey())) {
+                deletedAlerts.add(e.getValue());
+            }
+        }
+
         byCheckId = newByCheckId;
         currentMap = m;
+
+        // we notifiy after update with the new state
+        // main purpose is now delayed cleanup of alert filter changes
+        for(AlertChangeListener l : changeListeners) {
+            for(AlertDefinition ad : changedAlerts) {
+                l.notifyAlertChange(ad);
+            }
+        }
     }
 
     @Override
