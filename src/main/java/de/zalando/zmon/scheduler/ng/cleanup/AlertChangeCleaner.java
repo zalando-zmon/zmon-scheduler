@@ -35,6 +35,7 @@ public class AlertChangeCleaner implements AlertChangeListener {
     @Bean
     @Autowired
     public static AlertChangeCleaner createCleaner(AlertRepository alertRepo, CheckRepository checkRepo, EntityRepository entityRepo, SchedulerConfig config) {
+        LOG.info("Registering alertChangeCleaner...");
         AlertChangeCleaner l = new AlertChangeCleaner(alertRepo, checkRepo, entityRepo, config);
         alertRepo.registerChangeListener(l);
         return l;
@@ -107,6 +108,8 @@ public class AlertChangeCleaner implements AlertChangeListener {
 
                 entityIdsInAlert.removeAll(matchedEntityIds);
                 entityIdsTotal.removeAll(matchedEntityIds);
+
+                LOG.info("Cleaning alertId={} checkId={} srem={} hdel={}", alertId, checkId, entityIdsInAlert.size(), entityIdsTotal.size());
 
                 Pipeline p = j.pipelined();
                 for(String e : entityIdsInAlert) {
