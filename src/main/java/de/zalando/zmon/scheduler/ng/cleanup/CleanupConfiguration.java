@@ -18,7 +18,7 @@ public class CleanupConfiguration {
 
     private final static Logger LOG = LoggerFactory.getLogger(CleanupConfiguration.class);
 
-    @Bean
+    @Bean(name = "checkChangeCleaner")
     @Autowired
     public CheckChangeCleaner createCleaner(AlertRepository alertRepo, CheckRepository checkRepo, AlertChangeCleaner alertCleaner) {
         LOG.info("Registering checkChangeCleaner...");
@@ -27,7 +27,7 @@ public class CleanupConfiguration {
         return l;
     }
 
-    @Bean
+    @Bean(name = "alertChangeCleaner")
     @Autowired
     public AlertChangeCleaner createCleaner(AlertRepository alertRepo, CheckRepository checkRepo, EntityRepository entityRepo, SchedulerConfig config) {
         LOG.info("Registering alertChangeCleaner...");
