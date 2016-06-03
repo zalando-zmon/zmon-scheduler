@@ -12,10 +12,6 @@ import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Pipeline;
@@ -28,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by jmussler on 02.06.16.
  */
-@Component
 public class AlertChangeCleaner implements AlertChangeListener {
 
     private final static Logger LOG = LoggerFactory.getLogger(AlertChangeListener.class);

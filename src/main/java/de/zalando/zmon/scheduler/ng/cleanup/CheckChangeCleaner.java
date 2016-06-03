@@ -1,23 +1,15 @@
 package de.zalando.zmon.scheduler.ng.cleanup;
 
-import de.zalando.zmon.scheduler.ng.alerts.AlertChangeListener;
 import de.zalando.zmon.scheduler.ng.alerts.AlertDefinition;
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
 import de.zalando.zmon.scheduler.ng.checks.CheckChangeListener;
 import de.zalando.zmon.scheduler.ng.checks.CheckRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 
 /**
  * Created by jmussler on 02.06.16.
  */
-@Component
 public class CheckChangeCleaner implements CheckChangeListener {
 
     private final AlertChangeCleaner alertCleaner;
