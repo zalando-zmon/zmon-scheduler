@@ -17,21 +17,10 @@ import java.util.Collection;
 /**
  * Created by jmussler on 02.06.16.
  */
-@Configuration
+@Component
 public class CheckChangeCleaner implements CheckChangeListener {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AlertChangeListener.class);
-
     private final AlertChangeCleaner alertCleaner;
-
-    @Bean
-    @Autowired
-    public static CheckChangeCleaner createCleaner(AlertRepository alertRepo, CheckRepository checkRepo, AlertChangeCleaner alertCleaner) {
-        LOG.info("Registering checkChangeCleaner...");
-        CheckChangeCleaner l = new CheckChangeCleaner(alertRepo, alertCleaner);
-        checkRepo.registerListener(l);
-        return l;
-    }
 
     private final AlertRepository alertRepository;
 

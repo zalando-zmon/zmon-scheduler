@@ -28,19 +28,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by jmussler on 02.06.16.
  */
-@Configuration
+@Component
 public class AlertChangeCleaner implements AlertChangeListener {
 
     private final static Logger LOG = LoggerFactory.getLogger(AlertChangeListener.class);
-
-    @Bean
-    @Autowired
-    public static AlertChangeCleaner createCleaner(AlertRepository alertRepo, CheckRepository checkRepo, EntityRepository entityRepo, SchedulerConfig config) {
-        LOG.info("Registering alertChangeCleaner...");
-        AlertChangeCleaner l = new AlertChangeCleaner(alertRepo, checkRepo, entityRepo, config);
-        alertRepo.registerChangeListener(l);
-        return l;
-    }
 
     private final AlertRepository alertRepository;
     private final CheckRepository checkRepository;
