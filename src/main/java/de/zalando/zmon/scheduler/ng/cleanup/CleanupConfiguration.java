@@ -20,7 +20,7 @@ public class CleanupConfiguration {
 
     @Bean
     @Autowired
-    public static CheckChangeCleaner createCleaner(AlertRepository alertRepo, CheckRepository checkRepo, AlertChangeCleaner alertCleaner) {
+    public CheckChangeCleaner createCleaner(AlertRepository alertRepo, CheckRepository checkRepo, AlertChangeCleaner alertCleaner) {
         LOG.info("Registering checkChangeCleaner...");
         CheckChangeCleaner l = new CheckChangeCleaner(alertRepo, alertCleaner);
         checkRepo.registerListener(l);
@@ -29,7 +29,7 @@ public class CleanupConfiguration {
 
     @Bean
     @Autowired
-    public static AlertChangeCleaner createCleaner(AlertRepository alertRepo, CheckRepository checkRepo, EntityRepository entityRepo, SchedulerConfig config) {
+    public AlertChangeCleaner createCleaner(AlertRepository alertRepo, CheckRepository checkRepo, EntityRepository entityRepo, SchedulerConfig config) {
         LOG.info("Registering alertChangeCleaner...");
         AlertChangeCleaner l = new AlertChangeCleaner(alertRepo, checkRepo, entityRepo, config);
         alertRepo.registerChangeListener(l);
