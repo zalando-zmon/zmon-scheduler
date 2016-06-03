@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -16,6 +17,7 @@ import java.util.Collection;
 /**
  * Created by jmussler on 02.06.16.
  */
+@Configuration
 @Component
 public class CheckChangeCleaner implements CheckChangeListener {
 
@@ -27,17 +29,15 @@ public class CheckChangeCleaner implements CheckChangeListener {
     @Autowired
     public static CheckChangeCleaner createCleaner(AlertRepository alertRepo, CheckRepository checkRepo, AlertChangeCleaner alertCleaner) {
         LOG.info("Registering checkChangeCleaner...");
-        CheckChangeCleaner l = new CheckChangeCleaner(alertRepo, checkRepo, alertCleaner);
+        CheckChangeCleaner l = new CheckChangeCleaner(alertRepo, alertCleaner);
         checkRepo.registerListener(l);
         return l;
     }
 
     private final AlertRepository alertRepository;
-    private final CheckRepository checkRepository;
 
-    public CheckChangeCleaner(AlertRepository alertRepo, CheckRepository checkRepository, AlertChangeCleaner alertCleaner) {
+    public CheckChangeCleaner(AlertRepository alertRepo, AlertChangeCleaner alertCleaner) {
         this.alertRepository = alertRepo;
-        this.checkRepository = checkRepository;
         this.alertCleaner = alertCleaner;
     }
 

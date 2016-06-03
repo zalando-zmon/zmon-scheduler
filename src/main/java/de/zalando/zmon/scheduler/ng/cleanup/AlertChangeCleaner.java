@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -27,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by jmussler on 02.06.16.
  */
+@Configuration
 @Component
 public class AlertChangeCleaner implements AlertChangeListener {
 
