@@ -206,4 +206,16 @@ public class CheckDefinition {
         return builder.toString();
     }
 
+    public boolean compareForCheckUpdate(CheckDefinition b) {
+        if (entities != null) {
+            return entities.equals(b.entities);
+        }
+
+        if (entities == null && b.entities != null) {
+            return true;
+        }
+
+        return false;
+    }
+
 }

@@ -89,6 +89,33 @@ public class AlertOverlapGenerator {
         return true;
     }
 
+    public static boolean matchCheckFilter(CheckDefinition cd, Entity e) {
+        return cd.getEntities().stream().anyMatch(x->filter(x, e.getFilterProperties()));
+    }
+
+    public static boolean matchAlertFilter(AlertDefinition ad, Entity e) {
+        boolean matchAlert = false || ad.getEntities().isEmpty();
+        boolean matchExclude = false;
+
+        for (Map<String, String> aFilter : ad.getEntities()) {
+            if (filter(aFilter, e.getFilterProperties())) {
+                matchAlert = true;
+                break;
+            }
+        }
+
+        if (matchAlert && ad.getEntitiesExclude() != null) {
+            for (Map<String, String> eFilter : ad.getEntitiesExclude()) {
+                if (filter(eFilter, e.getFilterProperties())) {
+                    matchExclude = true;
+                    break;
+                }
+            }
+        }
+
+        return matchAlert && !matchExclude;
+    }
+
     public Map<Entity, Set<Integer>> getOverlaps(List<Map<String, String>> filters) {
         List<Entity> entities = getFilteredEntities(filters);
 
@@ -100,33 +127,11 @@ public class AlertOverlapGenerator {
             alertOverlap.put(e, entityAlerts);
 
             for (CheckDefinition cd : checkRepo.values()) {
-                boolean matchCheck = false;
-                for (Map<String, String> cFilter : cd.getEntities()) {
-                    matchCheck |= filter(cFilter, e.getFilterProperties());
-                }
+                boolean matchCheck = matchCheckFilter(cd, e);
 
                 if (matchCheck && alertRepo.containsKey(cd.getId())) {
                     for (AlertDefinition ad : alertRepo.get(cd.getId())) {
-                        boolean matchAlert = false || ad.getEntities().isEmpty();
-                        boolean matchExclude = false;
-
-                        for (Map<String, String> aFilter : ad.getEntities()) {
-                            if (filter(aFilter, e.getFilterProperties())) {
-                                matchAlert = true;
-                                break;
-                            }
-                        }
-
-                        if (matchAlert && ad.getEntitiesExclude() != null) {
-                            for (Map<String, String> eFilter : ad.getEntitiesExclude()) {
-                                if (filter(eFilter, e.getFilterProperties())) {
-                                    matchExclude = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (matchAlert && !matchExclude) {
+                        if (matchAlertFilter(ad, e)) {
                             entityAlerts.add(ad.getId());
                         }
                     }

@@ -254,4 +254,29 @@ public class AlertDefinition {
         sb.append('}');
         return sb.toString();
     }
+
+    public boolean compareForAlertUpdate(AlertDefinition b) {
+        if (checkDefinitionId != b.checkDefinitionId) {
+            return true;
+        }
+
+        if (entities == null && b.entities != null) {
+            return true;
+        }
+
+        if (entitiesExclude == null && b.entitiesExclude != null) {
+            return true;
+        }
+
+        // we dont need to overly precise here, triggering cleanup too often, e.g. on filter/property reorder should not happen that often
+        if(entities != null && !entities.equals(b.entities)) {
+            return true;
+        }
+
+        if(entitiesExclude != null && !entitiesExclude.equals(b.entitiesExclude)) {
+            return true;
+        }
+
+        return false;
+    }
 }

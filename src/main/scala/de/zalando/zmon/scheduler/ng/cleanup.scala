@@ -35,7 +35,7 @@ class SingleEntityCleanupFactory {
   }
 }
 
-class CleanupTask(val pool: JedisPool, val entity : Entity, val config: SchedulerConfig, val alertRepo: AlertRepository, val checkRepo: CheckRepository, val entityRepository: EntityRepository) extends Runnable {
+class EntityCleanupTask(val pool: JedisPool, val entity : Entity, val config: SchedulerConfig, val alertRepo: AlertRepository, val checkRepo: CheckRepository, val entityRepository: EntityRepository) extends Runnable {
 
   def getAlerts(id : Int): mutable.MutableList[Alert] = {
     val alerts = collection.mutable.MutableList[Alert]()
@@ -99,11 +99,13 @@ class SingleEntityCleanup(val config: SchedulerConfig, val alertRepo: AlertRepos
 
   val executor = new ScheduledThreadPoolExecutor(1);
 
-  // Delay cleanup task to avoid race condition with remote workers/schedulers that can still report feedback
+  // Turns out delaying it once can be to early still, so we do one quick removal and one a bit later to be sure
   def notifyEntityRemove(repo: EntityRepository, entity: Entity) : Unit = {
-    executor.schedule(new CleanupTask(pool, entity, config, alertRepo, checkRepo, entityRepository), 120, TimeUnit.SECONDS)
+    executor.schedule(new EntityCleanupTask(pool, entity, config, alertRepo, checkRepo, entityRepository), 90, TimeUnit.SECONDS)
+    executor.schedule(new EntityCleanupTask(pool, entity, config, alertRepo, checkRepo, entityRepository), 300, TimeUnit.SECONDS)
   }
 
   def notifyEntityChange(repo: EntityRepository, e: Entity) : Unit = {}
   def notifyEntityAdd(repo: EntityRepository, e: Entity) : Unit = {}
 }
+

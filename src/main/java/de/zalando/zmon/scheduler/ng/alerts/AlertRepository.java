@@ -25,15 +25,12 @@ public class AlertRepository extends CachedRepository<Integer, AlertSourceRegist
         Map<Integer, AlertDefinition> m = new HashMap<>();
         Map<Integer, List<AlertDefinition>> newByCheckId = new HashMap<>();
 
-
-
-        for(String name : registry.getSourceNames()) {
-            for(AlertDefinition ad: registry.get(name).getCollection()) {
+        for (String name : registry.getSourceNames()) {
+            for (AlertDefinition ad : registry.get(name).getCollection()) {
                 m.put(ad.getId(), ad);
-                if(newByCheckId.containsKey(ad.getCheckDefinitionId())) {
+                if (newByCheckId.containsKey(ad.getCheckDefinitionId())) {
                     newByCheckId.get(ad.getCheckDefinitionId()).add(ad);
-                }
-                else {
+                } else {
                     List<AlertDefinition> ads = new ArrayList<>(1);
                     ads.add(ad);
                     newByCheckId.put(ad.getCheckDefinitionId(), ads);
@@ -41,8 +38,37 @@ public class AlertRepository extends CachedRepository<Integer, AlertSourceRegist
             }
         }
 
+        List<AlertDefinition> changedAlerts = new ArrayList<>();
+        List<AlertDefinition> deletedAlerts = new ArrayList<>();
+        List<AlertDefinition> addedAlerts = new ArrayList<>();
+
+        for(Map.Entry<Integer, AlertDefinition> e : m.entrySet()) {
+            if(currentMap.containsKey(e.getKey())) {
+                if(currentMap.get(e.getKey()).compareForAlertUpdate(e.getValue())) {
+                    changedAlerts.add(e.getValue());
+                }
+            }
+            else {
+                addedAlerts.add(e.getValue());
+            }
+        }
+
+        for(Map.Entry<Integer, AlertDefinition> e : currentMap.entrySet()) {
+            if(!m.containsKey(e.getKey())) {
+                deletedAlerts.add(e.getValue());
+            }
+        }
+
         byCheckId = newByCheckId;
         currentMap = m;
+
+        // we notifiy after update with the new state
+        // main purpose is now delayed cleanup of alert filter changes
+        for(AlertChangeListener l : changeListeners) {
+            for(AlertDefinition ad : changedAlerts) {
+                l.notifyAlertChange(ad);
+            }
+        }
     }
 
     @Override
@@ -70,10 +96,9 @@ public class AlertRepository extends CachedRepository<Integer, AlertSourceRegist
     private final static List<AlertDefinition> EMPTY_LIST = new ArrayList<>(0);
 
     public Collection<AlertDefinition> getByCheckId(Integer id) {
-        if(byCheckId.containsKey(id)) {
+        if (byCheckId.containsKey(id)) {
             return byCheckId.get(id);
-        }
-        else {
+        } else {
             return EMPTY_LIST;
         }
     }
