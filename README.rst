@@ -2,8 +2,8 @@
 ZMON Scheduler
 ==============
 
-.. image:: https://travis-ci.org/zalando/zmon-scheduler.svg?branch=master
-   :target: https://travis-ci.org/zalando/zmon-scheduler
+.. image:: https://travis-ci.org/zalando-zmon/zmon-scheduler.svg?branch=master
+   :target: https://travis-ci.org/zalando-zmon/zmon-scheduler
    :alt: Build Status
 
 This is the replacement for our current Python "zmon-scheduler" as part of the ZMON infrastructure.
@@ -23,7 +23,7 @@ Running Locally
 .. code-block:: bash
 
     $ ./mvnw clean install
-    $ java -jar target/zmon-scheduler-ng-1.0-SNAPSHOT.jar
+    $ java -jar target/zmon-scheduler-1.0-SNAPSHOT.jar
 
 Building the Docker Image
 =========================
@@ -31,7 +31,7 @@ Building the Docker Image
 .. code-block:: bash
 
     $ sudo pip3 install scm-source
-    $ scm-source
+    $ scm-source -f target/scm-source.json
     $ docker build -t zmon-scheduler .
 
 
