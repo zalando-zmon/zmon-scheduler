@@ -11,7 +11,7 @@
     </parent>
 
     <groupId>de.zalando</groupId>
-    <artifactId>zmon-scheduler-ng</artifactId>
+    <artifactId>zmon-scheduler</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <dependencies>
