@@ -13,6 +13,7 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import de.zalando.zmon.scheduler.ng.alerts.{AlertRepository, AlertDefinition, AlertSourceRegistry}
 import de.zalando.zmon.scheduler.ng.checks.{CheckChangeListener, CheckRepository, CheckDefinition, CheckSourceRegistry}
+import de.zalando.zmon.scheduler.ng.cleanup.CheckChangeCleaner
 import de.zalando.zmon.scheduler.ng.entities.{EntityRepository, Entity, EntityAdapterRegistry}
 
 import org.slf4j.LoggerFactory
@@ -258,6 +259,7 @@ class CheckChangedListener(val scheduler : Scheduler) extends CheckChangeListene
 
 @Configuration
 class SchedulerFactory {
+
   @Bean
   @Autowired
   def createCheckChangeListener(checkRepo: CheckRepository, scheduler: Scheduler): CheckChangedListener = {

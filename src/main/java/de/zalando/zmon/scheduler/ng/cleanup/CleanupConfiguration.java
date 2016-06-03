@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by jmussler on 03.06.16.
@@ -18,7 +19,7 @@ public class CleanupConfiguration {
 
     private final static Logger LOG = LoggerFactory.getLogger(CleanupConfiguration.class);
 
-    @Bean(name = "checkChangeCleaner")
+    @Bean
     @Autowired
     public CheckChangeCleaner createCleaner(AlertRepository alertRepo, CheckRepository checkRepo, AlertChangeCleaner alertCleaner) {
         LOG.info("Registering checkChangeCleaner...");
@@ -27,12 +28,22 @@ public class CleanupConfiguration {
         return l;
     }
 
-    @Bean(name = "alertChangeCleaner")
+    @Bean
     @Autowired
     public AlertChangeCleaner createCleaner(AlertRepository alertRepo, CheckRepository checkRepo, EntityRepository entityRepo, SchedulerConfig config) {
         LOG.info("Registering alertChangeCleaner...");
         AlertChangeCleaner l = new AlertChangeCleaner(alertRepo, checkRepo, entityRepo, config);
         alertRepo.registerChangeListener(l);
         return l;
+    }
+
+    @Component
+    public static class CheckCleanUpHolder {
+        private final CheckChangeCleaner cleaner;
+
+        @Autowired
+        public CheckCleanUpHolder(CheckChangeCleaner x) {
+            cleaner = x;
+        }
     }
 }
