@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
  * Created by jmussler on 02.06.16.
  */
 @Configuration
-@Component
 public class AlertChangeCleaner implements AlertChangeListener {
 
     private final static Logger LOG = LoggerFactory.getLogger(AlertChangeListener.class);

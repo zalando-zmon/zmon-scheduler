@@ -18,7 +18,6 @@ import java.util.Collection;
  * Created by jmussler on 02.06.16.
  */
 @Configuration
-@Component
 public class CheckChangeCleaner implements CheckChangeListener {
 
     private final static Logger LOG = LoggerFactory.getLogger(AlertChangeListener.class);
