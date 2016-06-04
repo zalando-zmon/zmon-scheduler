@@ -26,12 +26,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.*;
 import org.springframework.boot.autoconfigure.*;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -140,11 +137,6 @@ public class Application {
     @RequestMapping(value = "/api/v1/trial-runs/", method = RequestMethod.GET)
     Collection<String> getKnownTrialRunDCs() {
         return trialRunForwarder.getKnwonDCs();
-    }
-
-    @RequestMapping(value = "/api/v1/trigger-check/{id}", method = RequestMethod.GET)
-    void triggerInstantEval(@PathVariable(value = "id") int checkId) {
-        scheduler.executeImmediate(checkId);
     }
 
     @RequestMapping(value = "/api/v1/entities", method = RequestMethod.GET)

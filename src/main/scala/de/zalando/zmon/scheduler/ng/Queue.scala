@@ -23,15 +23,15 @@ object WriterFactory {
 
   def createWriter(schedulerConfig : SchedulerConfig, metrics: MetricRegistry): QueueWriter = {
     if(schedulerConfig.task_writer_type == TaskWriterType.REDIS) {
-      LOG.info(s"Creating Redis queue writer: ${schedulerConfig.redis_host} ${schedulerConfig.redis_port}")
+      LOG.info(s"Creating queue writer: Redis host=${schedulerConfig.redis_host} port=${schedulerConfig.redis_port}")
       return new JedisQueueWriter(schedulerConfig.redis_host, schedulerConfig.redis_port, metrics)
     }
     else if (schedulerConfig.task_writer_type == TaskWriterType.ARRAY_LIST) {
-      LOG.info("creating ArrayQueueWriter")
+      LOG.info("creating queue writer: ArrayQueueWriter")
       return new ArrayQueueWriter(metrics)
     }
     else {
-      LOG.info("Creating LOG queue writer")
+      LOG.info("Creating queue writer: LOG writer")
       new LogQueueWriter(metrics)
     }
   }
@@ -81,7 +81,7 @@ class JedisQueueWriter(host : String, port : Int = 6379, metrics : MetricRegistr
       jedis.rpush(queue.getBytes, command)
     }
     finally {
-      jedisPool.returnResource(jedis)
+      jedis.close()
     }
   }
 }

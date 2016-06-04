@@ -290,16 +290,8 @@ class SchedulerFactory {
     }
     SchedulerFactory.LOG.info("Initial scheduling of all checks done")
 
-    if(schedulerConfig.enable_instant_eval) {
-      val instantEvalListener = new RedisInstantEvalSubscriber(s, schedulerConfig, alertRepo, instantForwarder)
-    }
-
     if(schedulerConfig.enable_downtime_redis_sub) {
       val downtimeEvalListener = new RedisDownTimeSubscriber(s, schedulerConfig, alertRepo)
-    }
-
-    if(schedulerConfig.enable_trail_run) {
-      val trialRunSubscriber = new TrialRunSubscriber(s, schedulerConfig, trialRunForwarder)
     }
 
     if(schedulerConfig.instant_eval_forward) {
@@ -374,7 +366,7 @@ class RedisMetricsUpdater(val config : SchedulerConfig, val metrics : SchedulerM
     }
     catch {
       case e: Exception => {
-        Scheduler.LOG.error("", e)
+        Scheduler.LOG.error("Metrics update failed: {} host={} port={}", e.getMessage(), config.redis_host, ""+config.redis_port)
       }
     }
   }
@@ -392,7 +384,7 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
   val lastScheduleAtStartup = SchedulePersister.loadSchedule()
 
   service.scheduleAtFixedRate(new SchedulePersister(scheduledChecks), 5, 15, TimeUnit.SECONDS)
-  service.scheduleAtFixedRate(new RedisMetricsUpdater(schedulerConfig, schedulerMetrics), 5, 1, TimeUnit.SECONDS)
+  service.scheduleAtFixedRate(new RedisMetricsUpdater(schedulerConfig, schedulerMetrics), 5, 3, TimeUnit.SECONDS)
 
   def viableCheck(id : Integer) : Boolean = {
     if(0 == id) return false;

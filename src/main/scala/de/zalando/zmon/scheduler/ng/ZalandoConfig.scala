@@ -80,10 +80,6 @@ class SchedulerConfig {
   @BeanProperty var redis_downtime_pubsub : String = ""
   @BeanProperty var redis_downtime_requests : String = ""
 
-  @BeanProperty var enable_instant_eval : Boolean = false
-  @BeanProperty var redis_instant_eval_pubsub : String = ""
-  @BeanProperty var redis_instant_eval_requests : String = ""
-
   // Remote/AWS support
   // used to enable polling for instant eval via http with DC id
   @BeanProperty var instant_eval_forward : Boolean = true
@@ -92,10 +88,6 @@ class SchedulerConfig {
   // used to enable polling for trial runs via http with DC id
   @BeanProperty var trial_run_forward : Boolean = true
   @BeanProperty var trial_run_http_url : String = null
-
-  @BeanProperty var enable_trail_run : Boolean = false
-  @BeanProperty var redis_trialrun_pubsub : String = "zmon:trial_run:pubsub"
-  @BeanProperty var redis_trialrun_requests : String = "zmon:trial_run:requests"
 
   @BeanProperty var dummy_cities : String = null // "dummy_data/cities.json"
 

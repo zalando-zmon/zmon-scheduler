@@ -65,27 +65,6 @@ abstract class RedisSubscriber(val host : String, val port : Int,  val pubSubKey
   }
 }
 
-object RedisInstantEvalSubscriber {
-  val mapper = new ObjectMapper()
-  val LOG = LoggerFactory.getLogger(RedisInstantEvalSubscriber.getClass)
-}
-
-class RedisInstantEvalSubscriber(val scheduler : Scheduler, val config : SchedulerConfig, val alertRepo: AlertRepository, val forwarder: InstantEvalForwarder) extends RedisSubscriber(config.redis_host, config.redis_port, config.redis_instant_eval_pubsub) {
-
-  override def handleMessage(jedis: Jedis, channel : String, message : String) : Unit = {
-    RedisInstantEvalSubscriber.LOG.info("received instant eval request: " + channel + " : " + message )
-
-    val request = jedis.hget(config.redis_instant_eval_requests, message)
-    val node = RedisInstantEvalSubscriber.mapper.readTree(request)
-
-    if(node.has("alert_definition_id")) {
-      val alertId = node.get("alert_definition_id").asInt()
-      scheduler.executeImmediate(alertRepo.get(alertId).getCheckDefinitionId)
-      forwarder.forwardRequest(alertRepo.get(alertId).getCheckDefinitionId)
-    }
-  }
-}
-
 object SubscriberMapper {
   val mapper = new ObjectMapper()
 }
@@ -99,15 +78,5 @@ class RedisDownTimeSubscriber(val scheduler : Scheduler, val config : SchedulerC
       val alertId = node.get("alert_definition_id").asInt()
       scheduler.executeImmediate(alertRepo.get(alertId).getCheckDefinitionId)
     }
-  }
-}
-
-class TrialRunSubscriber(val scheduler : Scheduler, val config: SchedulerConfig, val forwarder : TrialRunForwarder) extends RedisSubscriber(config.redis_host, config.redis_port, config.redis_trialrun_pubsub) {
-  def handleMessage(jedis : Jedis, channel : String, message : String) : Unit = {
-    val requestJson = jedis.hget(config.redis_trialrun_requests, message)
-    jedis.hdel(config.redis_trialrun_requests, message);
-    val request : TrialRunRequest = SubscriberMapper.mapper.readValue(requestJson, new TypeReference[TrialRunRequest] {})
-    scheduler.scheduleTrialRun(request)
-    forwarder.forwardRequest(request)
   }
 }
