@@ -11,6 +11,7 @@ import json
 import redis
 import requests
 import time
+import zign.api
 
 
 def cleanup_outdated_results(r):
@@ -47,8 +48,10 @@ def main(zmon_url, redis_host, redis_port):
         print('Deleting {}..'.format(key))
         r.delete(key)
 
+    headers = {'Authorization': 'Bearer {}'.format(zign.api.get_token('zmon', ['uid']))}
+
     # get all active checks
-    response = requests.get(zmon_url + '/checks/all-active-alert-definitions')
+    response = requests.get(zmon_url + '/checks/all-active-alert-definitions', headers=headers)
     data = response.json()
     all_active_alert_ids = set()
     all_referenced_check_ids = set()
@@ -56,7 +59,7 @@ def main(zmon_url, redis_host, redis_port):
         all_active_alert_ids.add(row['id'])
         all_referenced_check_ids.add(row['check_definition_id'])
 
-    response = requests.get(zmon_url + '/checks/all-active-check-definitions')
+    response = requests.get(zmon_url + '/checks/all-active-check-definitions', headers=headers)
     data = response.json()
     all_active_check_ids = set()
     for row in data['check_definitions']:
