@@ -18,10 +18,6 @@ spring:
 scheduler:
   redis_host: "localhost"
   redis_port: 6379
-  redis_downtime_pubsub: "zmon:downtime_schedule:pubsub"
-  redis_downtime_requests: "zmon:downtime_schedule:requests"
-  redis_instant_eval_pubsub: "zmon:alert_evaluation:pubsub"
-  redis_instant_eval_requests: "zmon:alert_evaluation:requests"
   instant_eval_forward: false
   trial_run_forward: false 
   default_queue: "zmon:queue:default"

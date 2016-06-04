@@ -15,6 +15,8 @@ import de.zalando.zmon.scheduler.ng.alerts.AlertSourceRegistry;
 import de.zalando.zmon.scheduler.ng.checks.CheckDefinition;
 import de.zalando.zmon.scheduler.ng.checks.CheckRepository;
 import de.zalando.zmon.scheduler.ng.checks.CheckSourceRegistry;
+import de.zalando.zmon.scheduler.ng.cleanup.AlertChangeCleaner;
+import de.zalando.zmon.scheduler.ng.cleanup.CheckChangeCleaner;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
 import de.zalando.zmon.scheduler.ng.entities.EntityAdapterRegistry;
 import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
@@ -35,10 +37,8 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@EnableAutoConfiguration
 @EnableConfigurationProperties
-@Configuration
-@ComponentScan
+@SpringBootApplication
 public class Application {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.class);

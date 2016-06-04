@@ -39,7 +39,7 @@ public class DefaultCheckSource extends CheckSource {
     public DefaultCheckSource(String name, String url, final TokenWrapper tokens, final ClientHttpRequestFactory clientFactory) {
         super(name);
         this.clientFactory = clientFactory;
-        LOG.info("check source url={}", url);
+        LOG.info("configuring check source url={}", url);
 
         this.url = url;
         this.tokens = tokens;
@@ -63,19 +63,24 @@ public class DefaultCheckSource extends CheckSource {
         rt.getMessageConverters().clear();
         rt.getMessageConverters().add(converter);
 
-        CheckDefinitions defs;
-        if (tokens != null) {
-            final String accessToken = tokens.get();
-            LOG.info("Querying check definitions with token " + accessToken.substring(0, Math.min(accessToken.length(), 3)) + "..");
-            HttpEntity<String> request = new HttpEntity<>(getWithAuth());
-            ResponseEntity<CheckDefinitions> response;
-            response = rt.exchange(url, HttpMethod.GET, request, CheckDefinitions.class);
-            defs = response.getBody();
-        } else {
-            LOG.info("Querying without credentials");
-            defs = rt.getForObject(url, CheckDefinitions.class);
+        CheckDefinitions defs = new CheckDefinitions();
+        try {
+            if (tokens != null) {
+                final String accessToken = tokens.get();
+                LOG.info("Querying check definitions with token " + accessToken.substring(0, Math.min(accessToken.length(), 3)) + "..");
+                HttpEntity<String> request = new HttpEntity<>(getWithAuth());
+                ResponseEntity<CheckDefinitions> response;
+                response = rt.exchange(url, HttpMethod.GET, request, CheckDefinitions.class);
+                defs = response.getBody();
+            } else {
+                LOG.info("Querying without credentials");
+                defs = rt.getForObject(url, CheckDefinitions.class);
+            }
+            LOG.info("Got {} checks from {}", defs.getCheckDefinitions().size(), getName());
         }
-        LOG.info("Got {} checks from {}", defs.getCheckDefinitions().size(), getName());
+        catch(Throwable t) {
+            LOG.error("Failed to get check definitions: {}", t.getMessage());
+        }
 
         return defs.getCheckDefinitions();
     }

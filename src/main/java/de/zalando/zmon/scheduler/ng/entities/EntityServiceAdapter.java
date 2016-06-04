@@ -34,7 +34,7 @@ public class EntityServiceAdapter extends EntityAdapter {
     public EntityServiceAdapter(String url, MetricRegistry metrics, TokenWrapper tokens, ClientHttpRequestFactory clientFactory) {
         super("EntityServiceAdapter");
         this.clientFactory = clientFactory;
-        LOG.info("entity service url={}", url);
+        LOG.info("configuring entity service url={}", url);
         this.url = url;
         this.tokens = tokens;
         this.metrics = metrics;
@@ -70,19 +70,25 @@ public class EntityServiceAdapter extends EntityAdapter {
             request = new HttpEntity<>(new HttpHeaders());
         }
 
-        Timer.Context tC = timer.time();
-        ResponseEntity<BaseEntityList> response = rt.exchange(url, HttpMethod.GET, request, BaseEntityList.class);
-        LOG.info("Entity Service Adapter used: {}ms", tC.stop() / 1000000);
+        try {
+            Timer.Context tC = timer.time();
+            ResponseEntity<BaseEntityList> response = rt.exchange(url, HttpMethod.GET, request, BaseEntityList.class);
+            LOG.info("Entity Service Adapter used: {}ms", tC.stop() / 1000000);
 
-        BaseEntityList list = response.getBody();
-        List<Entity> entityList = new ArrayList<>(list.size());
+            BaseEntityList list = response.getBody();
+            List<Entity> entityList = new ArrayList<>(list.size());
 
-        for(BaseEntity base: list) {
-            Entity entity = new Entity((String) base.get("id"), this.getName());
-            entity.addProperties(base);
-            entityList.add(entity);
+            for (BaseEntity base : list) {
+                Entity entity = new Entity((String) base.get("id"), this.getName());
+                entity.addProperties(base);
+                entityList.add(entity);
+            }
+
+            return entityList;
         }
-
-        return entityList;
+        catch(Throwable t) {
+            LOG.error("Loading entities failed: {}", t.getMessage());
+        }
+        return new ArrayList<>(0);
     }
 }

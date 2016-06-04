@@ -76,11 +76,11 @@ class SchedulerConfig {
   @BeanProperty var controller_user: String = null
   @BeanProperty var controller_password: String = null
 
-  @BeanProperty var enable_downtime_redis_sub : Boolean = true
+  @BeanProperty var enable_downtime_redis_sub : Boolean = false
   @BeanProperty var redis_downtime_pubsub : String = ""
   @BeanProperty var redis_downtime_requests : String = ""
 
-  @BeanProperty var enable_instant_eval : Boolean = true
+  @BeanProperty var enable_instant_eval : Boolean = false
   @BeanProperty var redis_instant_eval_pubsub : String = ""
   @BeanProperty var redis_instant_eval_requests : String = ""
 
@@ -93,7 +93,7 @@ class SchedulerConfig {
   @BeanProperty var trial_run_forward : Boolean = true
   @BeanProperty var trial_run_http_url : String = null
 
-  @BeanProperty var enable_trail_run : Boolean = true
+  @BeanProperty var enable_trail_run : Boolean = false
   @BeanProperty var redis_trialrun_pubsub : String = "zmon:trial_run:pubsub"
   @BeanProperty var redis_trialrun_requests : String = "zmon:trial_run:requests"
 

@@ -49,7 +49,7 @@ public class DefaultAlertSource extends AlertSource {
         super(name);
         this.clientFactory = clientFactory;
         this.metrics = metrics;
-        LOG.info("alert source url={}", url);
+        LOG.info("configuring alert source url={}", url);
         this.url = url;
         this.tokens = tokens;
         this.timer = metrics.timer("alert-adapter." + name);
@@ -75,24 +75,29 @@ public class DefaultAlertSource extends AlertSource {
         rt.getMessageConverters().clear();
         rt.getMessageConverters().add(converter);
 
-        AlertDefinitions defs;
-        if (tokens != null) {
-            final String accessToken = tokens.get();
-            LOG.info("Querying alert definitions with token " + accessToken.substring(0, Math.min(accessToken.length(), 3)) + "..");
-            final HttpEntity<String> request = new HttpEntity<>(getAuthenticationHeader());
-            ResponseEntity<AlertDefinitions> response;
-            Timer.Context ct = timer.time();
-            response = rt.exchange(url, HttpMethod.GET, request, AlertDefinitions.class);
-            ct.stop();
-            defs = response.getBody();
-        } else {
-            LOG.info("Querying without credentials");
-            Timer.Context ct = timer.time();
-            defs = rt.getForObject(url, AlertDefinitions.class);
-            ct.stop();
-        }
+        AlertDefinitions defs = new AlertDefinitions();
+        try {
+            if (tokens != null) {
+                final String accessToken = tokens.get();
+                LOG.info("Querying alert definitions with token " + accessToken.substring(0, Math.min(accessToken.length(), 3)) + "..");
+                final HttpEntity<String> request = new HttpEntity<>(getAuthenticationHeader());
+                ResponseEntity<AlertDefinitions> response;
+                Timer.Context ct = timer.time();
+                response = rt.exchange(url, HttpMethod.GET, request, AlertDefinitions.class);
+                ct.stop();
+                defs = response.getBody();
+            } else {
+                LOG.info("Querying without credentials");
+                Timer.Context ct = timer.time();
+                defs = rt.getForObject(url, AlertDefinitions.class);
+                ct.stop();
+            }
 
-        LOG.info("Got {} alerts from {}", defs.getAlertDefinitions().size(), getName());
+            LOG.info("Got {} alerts from {}", defs.getAlertDefinitions().size(), getName());
+        }
+        catch(Throwable t) {
+            LOG.error("Error querying for alert definitions: {}", t.getMessage());
+        }
 
         return defs.getAlertDefinitions();
     }

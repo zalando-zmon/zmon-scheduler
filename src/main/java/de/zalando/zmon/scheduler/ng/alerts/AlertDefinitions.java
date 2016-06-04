@@ -3,6 +3,7 @@ package de.zalando.zmon.scheduler.ng.alerts;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,7 +16,7 @@ public class AlertDefinitions {
     private Long snapshotId;
 
     @XmlElement
-    private List<AlertDefinition> alertDefinitions;
+    private List<AlertDefinition> alertDefinitions = new ArrayList<>();
 
     public Long getSnapshotId() {
         return snapshotId;
