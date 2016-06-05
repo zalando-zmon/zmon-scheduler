@@ -55,6 +55,8 @@ public class AlertChangeCleaner implements AlertChangeListener {
     @Override
     public void notifyAlertChange(AlertDefinition alert) {
         final AlertChangeCleaner c = this;
+        // schedule twice, 1 fast for UI/UX the long run is only for multi scheduler setup where results may come in too late.
+        executor.schedule(()->c.doCleanup(alert.getId(), alert.getCheckDefinitionId()), 10, TimeUnit.SECONDS);
         executor.schedule(()->c.doCleanup(alert.getId(), alert.getCheckDefinitionId()), 90, TimeUnit.SECONDS);
     }
 
