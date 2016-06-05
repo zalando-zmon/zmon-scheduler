@@ -5,7 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
-import redis.clients.jedis.ScanResult;
+
+import java.util.Set;
 
 /**
  * Created by jmussler on 05.06.16.
@@ -28,9 +29,9 @@ public class TrialRunCleanupTask implements Runnable {
             LOG.info("Trial run cleanup: id={}", this.trialRunId);
             Jedis jedis = new Jedis(config.getRedis_host(), config.getRedis_port());
             try {
-                ScanResult<String> keys = jedis.scan("zmon:trial_run:" + trialRunId + "*");
+                Set<String> keys = jedis.keys("zmon:trial_run:" + trialRunId + "*");
                 Pipeline p = jedis.pipelined();
-                for(String k : keys.getResult()) {
+                for(String k : keys) {
                     p.del(k);
                 }
                 p.sync();
