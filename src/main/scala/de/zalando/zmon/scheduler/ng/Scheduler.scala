@@ -13,7 +13,7 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import de.zalando.zmon.scheduler.ng.alerts.{AlertRepository, AlertDefinition, AlertSourceRegistry}
 import de.zalando.zmon.scheduler.ng.checks.{CheckChangeListener, CheckRepository, CheckDefinition, CheckSourceRegistry}
-import de.zalando.zmon.scheduler.ng.cleanup.CheckChangeCleaner
+import de.zalando.zmon.scheduler.ng.cleanup.{TrialRunCleanupTask, CheckChangeCleaner}
 import de.zalando.zmon.scheduler.ng.entities.{EntityRepository, Entity, EntityAdapterRegistry}
 
 import org.slf4j.LoggerFactory
@@ -511,7 +511,8 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
       }
     }
     finally {
-      if(null!=jedis) {
+      service.schedule(new TrialRunCleanupTask(request.id, schedulerConfig), 300, TimeUnit.SECONDS)
+      if (null != jedis) {
         jedis.close()
       }
     }
