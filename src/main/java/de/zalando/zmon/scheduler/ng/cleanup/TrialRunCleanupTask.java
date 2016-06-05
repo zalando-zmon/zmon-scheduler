@@ -4,9 +4,6 @@ import de.zalando.zmon.scheduler.ng.SchedulerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Pipeline;
-
-import java.util.Set;
 
 /**
  * Created by jmussler on 05.06.16.
@@ -29,12 +26,8 @@ public class TrialRunCleanupTask implements Runnable {
             LOG.info("Trial run cleanup: id={}", this.trialRunId);
             Jedis jedis = new Jedis(config.getRedis_host(), config.getRedis_port());
             try {
-                Set<String> keys = jedis.keys("zmon:trial_run:" + trialRunId + "*");
-                Pipeline p = jedis.pipelined();
-                for(String k : keys) {
-                    p.del(k);
-                }
-                p.sync();
+                jedis.del("zmon:trial_run:" + trialRunId);
+                jedis.del("zmon:trial_run:" + trialRunId + ":results");
             }
             finally {
                 jedis.close();
