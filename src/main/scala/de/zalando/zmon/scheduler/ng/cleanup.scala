@@ -49,8 +49,8 @@ class EntityCleanupTask(val pool: JedisPool, val entity : Entity, val config: Sc
 
   override def run(): Unit = {
 
-    var checksCleaned = 0;
-    var alertsCleaned = 0;
+    var checksCleaned = 0
+    var alertsCleaned = 0
 
     for(checkDef <- checkRepo.get()) {
       val check = new Check(checkDef.getId, checkRepo)
@@ -72,7 +72,7 @@ class EntityCleanupTask(val pool: JedisPool, val entity : Entity, val config: Sc
               jedis.srem("zmon:alerts:" + alert.id, entity.getId)
               jedis.del("zmon:alerts:" + alert.id + ":" + entity.getId)
               jedis.hdel("zmon:alerts:" + alert.id + ":entities", entity.getId)
-              alertsCleaned+=1
+              alertsCleaned += 1
             }
           }
           catch {
@@ -81,7 +81,7 @@ class EntityCleanupTask(val pool: JedisPool, val entity : Entity, val config: Sc
             }
           }
           finally {
-            pool.returnResource(jedis)
+            jedis.close()
           }
         }
       }
@@ -97,7 +97,7 @@ class SingleEntityCleanup(val config: SchedulerConfig, val alertRepo: AlertRepos
   poolConfig.setTestOnBorrow(true)
   val pool = new JedisPool(poolConfig, config.redis_host, config.redis_port)
 
-  val executor = new ScheduledThreadPoolExecutor(1);
+  val executor = new ScheduledThreadPoolExecutor(1)
 
   // Turns out delaying it once can be to early still, so we do one quick removal and one a bit later to be sure
   def notifyEntityRemove(repo: EntityRepository, entity: Entity) : Unit = {
@@ -105,7 +105,7 @@ class SingleEntityCleanup(val config: SchedulerConfig, val alertRepo: AlertRepos
     executor.schedule(new EntityCleanupTask(pool, entity, config, alertRepo, checkRepo, entityRepository), 300, TimeUnit.SECONDS)
   }
 
-  def notifyEntityChange(repo: EntityRepository, e: Entity) : Unit = {}
+  def notifyEntityChange(repo: EntityRepository, entityOld: Entity, entityNew : Entity) : Unit = {}
   def notifyEntityAdd(repo: EntityRepository, e: Entity) : Unit = {}
 }
 
