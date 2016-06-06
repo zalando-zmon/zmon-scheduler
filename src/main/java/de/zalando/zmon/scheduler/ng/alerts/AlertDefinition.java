@@ -260,7 +260,7 @@ public class AlertDefinition {
             return true;
         }
 
-        if (checkDefinitionId != null && !checkDefinitionId.equals(checkDefinitionId)) {
+        if (checkDefinitionId != null && !checkDefinitionId.equals(b.checkDefinitionId)) {
             return true;
         }
 
