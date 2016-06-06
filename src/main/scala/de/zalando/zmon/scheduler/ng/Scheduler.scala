@@ -13,7 +13,7 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import de.zalando.zmon.scheduler.ng.alerts.{AlertRepository, AlertDefinition, AlertSourceRegistry}
 import de.zalando.zmon.scheduler.ng.checks.{CheckChangeListener, CheckRepository, CheckDefinition, CheckSourceRegistry}
-import de.zalando.zmon.scheduler.ng.cleanup.{TrialRunCleanupTask, CheckChangeCleaner}
+import de.zalando.zmon.scheduler.ng.cleanup.{AllTrialRunCleanupTask, TrialRunCleanupTask, CheckChangeCleaner}
 import de.zalando.zmon.scheduler.ng.entities.{EntityRepository, Entity, EntityAdapterRegistry}
 
 import org.slf4j.LoggerFactory
@@ -385,6 +385,7 @@ class Scheduler(val alertRepo : AlertRepository, val checkRepo: CheckRepository,
 
   service.scheduleAtFixedRate(new SchedulePersister(scheduledChecks), 5, 15, TimeUnit.SECONDS)
   service.scheduleAtFixedRate(new RedisMetricsUpdater(schedulerConfig, schedulerMetrics), 5, 3, TimeUnit.SECONDS)
+  service.schedule(new AllTrialRunCleanupTask(schedulerConfig), 10, TimeUnit.SECONDS);
 
   def viableCheck(id : Integer) : Boolean = {
     if(0 == id) return false;
