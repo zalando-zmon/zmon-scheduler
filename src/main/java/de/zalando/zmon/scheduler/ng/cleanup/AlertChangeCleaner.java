@@ -115,7 +115,7 @@ public class AlertChangeCleaner implements AlertChangeListener {
             }
         }
         catch (Throwable t) {
-            LOG.error("Uncaught/Unexpected exception", t);
+            LOG.error("Uncaught/Unexpected exception: check_id={} alert_id={}", t, checkId, alertId);
         }
     }
 }

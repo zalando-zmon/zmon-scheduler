@@ -4,6 +4,8 @@ import de.zalando.zmon.scheduler.ng.alerts.AlertDefinition;
 import de.zalando.zmon.scheduler.ng.checks.CheckDefinition;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
 import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
@@ -13,6 +15,8 @@ import java.util.stream.Collectors;
  * Created by jmussler on 20.05.16.
  */
 public class AlertOverlapGenerator {
+
+    private final static Logger LOG = LoggerFactory.getLogger(AlertOverlapGenerator.class);
 
     public static class EntityInfo {
         public String id;
@@ -90,6 +94,10 @@ public class AlertOverlapGenerator {
     }
 
     public static boolean matchCheckFilter(CheckDefinition cd, Entity e) {
+        if (cd.getEntities() == null) {
+            LOG.info("null entities in check definition unexpected: cd={}", cd.getId());
+            return false;
+        }
         return cd.getEntities().stream().anyMatch(x->filter(x, e.getFilterProperties()));
     }
 
