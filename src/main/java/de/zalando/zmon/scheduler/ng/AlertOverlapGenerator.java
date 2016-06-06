@@ -102,7 +102,7 @@ public class AlertOverlapGenerator {
     }
 
     public static boolean matchAlertFilter(AlertDefinition ad, Entity e) {
-        boolean matchAlert = false || ad.getEntities().isEmpty();
+        boolean matchAlert = false || ad.getEntities() == null || ad.getEntities().isEmpty();
         boolean matchExclude = false;
 
         for (Map<String, String> aFilter : ad.getEntities()) {

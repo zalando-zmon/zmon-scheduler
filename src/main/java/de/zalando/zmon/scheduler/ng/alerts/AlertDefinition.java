@@ -256,7 +256,11 @@ public class AlertDefinition {
     }
 
     public boolean compareForAlertUpdate(AlertDefinition b) {
-        if (checkDefinitionId != b.checkDefinitionId) {
+        if (checkDefinitionId == null && b.checkDefinitionId != null) {
+            return true;
+        }
+
+        if (checkDefinitionId != null && !checkDefinitionId.equals(checkDefinitionId)) {
             return true;
         }
 
