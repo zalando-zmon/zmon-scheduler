@@ -6,12 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xerial.snappy.Snappy;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-
-import org.xerial.snappy.Snappy;
 
 /**
  * Created by jmussler on 3/31/15.
@@ -24,10 +23,13 @@ public abstract class CeleryWriter {
     private static final Logger LOG = LoggerFactory.getLogger(CeleryWriter.class);
 
     public static CeleryWriter create(TaskSerializerType t) {
-        switch(t) {
-            case COMPRESSED_BODY: return new CompressedBodySerializer();
-            case COMPRESSED_NESTED: return new CompressedNestedWriter();
-            case PLAIN: return new PlainWriter();
+        switch (t) {
+            case COMPRESSED_BODY:
+                return new CompressedBodySerializer();
+            case COMPRESSED_NESTED:
+                return new CompressedNestedWriter();
+            case PLAIN:
+                return new PlainWriter();
         }
         return new ClassicSerializer();
     }
@@ -84,8 +86,7 @@ public abstract class CeleryWriter {
             } catch (JsonProcessingException e) {
                 LOG.error("Serialize failed: {}", task);
                 return null;
-            }
-            catch (IOException ex) {
+            } catch (IOException ex) {
                 LOG.error("Compression failed", ex);
                 return null;
             }
@@ -141,8 +142,7 @@ public abstract class CeleryWriter {
             } catch (JsonProcessingException e) {
                 LOG.error("Serialize failed: {}", task);
                 return null;
-            }
-            catch (IOException ex) {
+            } catch (IOException ex) {
                 LOG.error("Compression failed", ex);
                 return null;
             }

@@ -1,6 +1,6 @@
 package de.zalando.zmon.scheduler.ng.entities;
 
-import com.codahale.metrics.*;
+import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ public class CmdbAdapter extends EntityAdapter {
     private final MetricRegistry metrics;
     private final Timer timer;
 
-    private static final List<String> FIELDS = Arrays.asList("teams","data_center_code","host","host_role_id","role_name","type","external_ip","internal_ip","virt_type","physcial_machine","physical_machine_model");
+    private static final List<String> FIELDS = Arrays.asList("teams", "data_center_code", "host", "host_role_id", "role_name", "type", "external_ip", "internal_ip", "virt_type", "physcial_machine", "physical_machine_model");
 
     private static final Logger LOG = LoggerFactory.getLogger(CmdbAdapter.class);
 
@@ -34,12 +34,15 @@ public class CmdbAdapter extends EntityAdapter {
         this.timer = metrics.timer("entity-adapter.cmdb");
     }
 
-    private static class BaseEntity extends HashMap<String, Object> {}
-    private static class BaseEntityList extends ArrayList<BaseEntity> {}
+    private static class BaseEntity extends HashMap<String, Object> {
+    }
+
+    private static class BaseEntityList extends ArrayList<BaseEntity> {
+    }
 
     private HttpHeaders getWithAuth() {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Basic " + Base64.getEncoder().encodeToString((user+":"+password).getBytes()));
+        headers.add("Authorization", "Basic " + Base64.getEncoder().encodeToString((user + ":" + password).getBytes()));
         return headers;
     }
 
@@ -61,36 +64,36 @@ public class CmdbAdapter extends EntityAdapter {
 
         List<Entity> entityList = new ArrayList<>(list.size());
 
-        for(BaseEntity base: list) {
+        for (BaseEntity base : list) {
             String hostName = (String) base.get("hostname");
-            if(hostName == null || "".equals(hostName)) {
+            if (hostName == null || "".equals(hostName)) {
                 continue;
             }
 
-            if(base.containsKey("physical_machine")) {
+            if (base.containsKey("physical_machine")) {
                 Map<String, Object> physicalMachine = (Map<String, Object>) base.get("physical_machine");
-                if(null!=physicalMachine && physicalMachine.containsKey("data_center_code")) {
+                if (null != physicalMachine && physicalMachine.containsKey("data_center_code")) {
                     base.put("data_center_code", physicalMachine.get("data_center_code"));
                 }
 
-                if(null != physicalMachine && physicalMachine.containsKey("model")) {
+                if (null != physicalMachine && physicalMachine.containsKey("model")) {
                     base.put("physical_machine_model", physicalMachine.get("model"));
                 }
                 base.remove("physical_machine");
             }
 
             Set<String> keys = new HashSet<>(base.keySet());
-            for(String k : keys) {
-                if(!FIELDS.contains(k)) {
+            for (String k : keys) {
+                if (!FIELDS.contains(k)) {
                     base.remove(k);
                 }
             }
 
-            if(base.containsKey("teams")) {
+            if (base.containsKey("teams")) {
                 List<Map<String, String>> teams = (List<Map<String, String>>) base.get("teams");
                 List<String> teamString = new ArrayList<>();
-                if(teams!=null) {
-                    for(Map<String, String> team : teams) {
+                if (teams != null) {
+                    for (Map<String, String> team : teams) {
                         teamString.add(team.get("name"));
                     }
                 }

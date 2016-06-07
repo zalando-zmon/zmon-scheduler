@@ -25,7 +25,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
 
     private static final Logger LOG = LoggerFactory.getLogger(EntityRepository.class);
 
-    private List<Map<String,String>> baseFilter = null;
+    private List<Map<String, String>> baseFilter = null;
     private final String skipField;
     private final List<EntityChangeListener> changeListeners = new ArrayList<>();
 
@@ -38,7 +38,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     public synchronized void registerListener(EntityChangeListener l) {
         LOG.info("Registering entity change listener ({}, {})", l.getClass(), currentMap.size());
         Map<String, Entity> m = unfilteredEntities;
-        for(String k : m.keySet()) {
+        for (String k : m.keySet()) {
             l.notifyEntityAdd(this, m.get(k));
         }
         changeListeners.add(l);
@@ -49,7 +49,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     }
 
     private void createAutoCompleteData() {
-        if(redisPool == null || redis_properties_key == null || redis_properties_key.equals("")) {
+        if (redisPool == null || redis_properties_key == null || redis_properties_key.equals("")) {
             return;
         }
 
@@ -84,13 +84,11 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
 
             try {
                 jedis.set(redis_properties_key.getBytes(), Snappy.compress(v.getBytes("UTF-8")));
-            }
-            finally {
+            } finally {
                 redisPool.returnResource(jedis);
             }
             LOG.info("Done writing auto complete data for front end");
-        }
-        catch(Exception ex) {
+        } catch (Exception ex) {
             LOG.error("Error during generating auto complete data");
         }
     }
@@ -104,44 +102,42 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
         Map<String, Entity> m = new HashMap<>();
         Map<String, Entity> mUnfiltered = new HashMap<>();
 
-        for(String name : registry.getSourceNames()) {
-            for(Entity e: registry.get(name).getCollection()) {
+        for (String name : registry.getSourceNames()) {
+            for (Entity e : registry.get(name).getCollection()) {
 
                 // try to map dc code and external ip if host is known ( relies on ordering of adapters :( and does not work for entity service )
                 Map<String, Object> p = e.getProperties();
-                if(p.containsKey("host") && !p.containsKey("external_ip")) {
+                if (p.containsKey("host") && !p.containsKey("external_ip")) {
                     String host = (String) p.get("host");
                     Entity hostEntity = m.get(host);
-                    if(null != hostEntity) {
-                        String externalIp = (String)hostEntity.getProperties().get("external_ip");
-                        if(null != externalIp) {
+                    if (null != hostEntity) {
+                        String externalIp = (String) hostEntity.getProperties().get("external_ip");
+                        if (null != externalIp) {
                             e.addProperty("external_ip", externalIp);
                         }
                     }
                 }
 
-                if(p.containsKey("host") && !p.containsKey("data_center_code")) {
+                if (p.containsKey("host") && !p.containsKey("data_center_code")) {
                     String host = (String) p.get("host");
                     Entity hostEntity = m.get(host);
-                    if(null != hostEntity) {
-                        String dataCenterCode = (String)hostEntity.getProperties().get("data_center_code");
-                        if(null != dataCenterCode) {
+                    if (null != hostEntity) {
+                        String dataCenterCode = (String) hostEntity.getProperties().get("data_center_code");
+                        if (null != dataCenterCode) {
                             e.addProperty("data_center_code", dataCenterCode);
                         }
                     }
                 }
 
-                if(null != skipField && e.getFilterProperties().containsKey(skipField)) {
+                if (null != skipField && e.getFilterProperties().containsKey(skipField)) {
                     // SKIP ( use this for DC vs AWS Distinction as legacy entities do not have skipField set )
-                }
-                else if(null != baseFilter && baseFilter.size()>0) {
-                    for(Map<String,String> f : baseFilter) {
+                } else if (null != baseFilter && baseFilter.size() > 0) {
+                    for (Map<String, String> f : baseFilter) {
                         if (filter.overlaps(f, e.getFilterProperties())) {
                             m.put(e.getId(), e);
                         }
                     }
-                }
-                else {
+                } else {
                     m.put(e.getId(), e);
                 }
 
@@ -153,24 +149,24 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
 
         Set<String> currentIds = unfilteredEntities.keySet();
         Set<String> futureIds = mUnfiltered.keySet();
-        Set<String> removedIds = currentIds.stream().filter(x->!futureIds.contains(x)).collect(Collectors.toSet());
+        Set<String> removedIds = currentIds.stream().filter(x -> !futureIds.contains(x)).collect(Collectors.toSet());
         LOG.info("Number of entities removed globaly: {}", removedIds.size());
 
         // now using unfiltered, thus code should solely rely on passed entity
-        for(String k : removedIds) {
-            for(EntityChangeListener l : currentListeners) {
+        for (String k : removedIds) {
+            for (EntityChangeListener l : currentListeners) {
                 l.notifyEntityRemove(this, unfilteredEntities.get(k));
             }
         }
 
-        Set<String> addedIds = futureIds.stream().filter(x->!currentIds.contains(x)).collect(Collectors.toSet());
+        Set<String> addedIds = futureIds.stream().filter(x -> !currentIds.contains(x)).collect(Collectors.toSet());
         LOG.info("Numberof entities added globaly: {}", addedIds.size());
 
         currentMap = m;
         unfilteredEntities = mUnfiltered;
 
-        for(String k : addedIds) {
-            for(EntityChangeListener l : currentListeners) {
+        for (String k : addedIds) {
+            for (EntityChangeListener l : currentListeners) {
                 l.notifyEntityAdd(this, unfilteredEntities.get(k));
             }
         }
@@ -197,20 +193,20 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
 
         this.skipField = config.entity_skip_on_field();
 
-        if(config.entity_properties_key()!=null && !"".equals(config.entity_properties_key())) {
+        if (config.entity_properties_key() != null && !"".equals(config.entity_properties_key())) {
             this.redisPool = new JedisPool(config.redis_host(), config.redis_port());
             this.redis_properties_key = config.entity_properties_key();
         }
 
-        if(config.entity_base_filter()==null && config.entity_base_filter_str()!=null) {
+        if (config.entity_base_filter() == null && config.entity_base_filter_str() != null) {
             ObjectMapper m = new ObjectMapper();
             try {
-                baseFilter = m.readValue(config.entity_base_filter_str(), new TypeReference<List<Map<String,String>>>() {});
+                baseFilter = m.readValue(config.entity_base_filter_str(), new TypeReference<List<Map<String, String>>>() {
+                });
             } catch (IOException e) {
                 LOG.error("failed to read string for base config", e);
             }
-        }
-        else {
+        } else {
             baseFilter = config.entity_base_filter();
         }
 

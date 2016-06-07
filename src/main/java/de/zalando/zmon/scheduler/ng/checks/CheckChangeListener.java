@@ -5,7 +5,10 @@ package de.zalando.zmon.scheduler.ng.checks;
  */
 public interface CheckChangeListener {
     void notifyNewCheck(CheckRepository repo, int checkId);
+
     void notifyCheckIntervalChange(CheckRepository repo, int checkId);
+
     void notifyDeleteCheck(CheckRepository repo, int checkId);
+
     void notifyFilterChange(int checkId);
 }

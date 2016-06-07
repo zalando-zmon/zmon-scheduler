@@ -98,11 +98,11 @@ public class AlertOverlapGenerator {
             LOG.info("null entities in check definition unexpected: cd={}", cd.getId());
             return false;
         }
-        return cd.getEntities().stream().anyMatch(x->filter(x, e.getFilterProperties()));
+        return cd.getEntities().stream().anyMatch(x -> filter(x, e.getFilterProperties()));
     }
 
     public static boolean matchAlertFilter(AlertDefinition ad, Entity e) {
-        boolean matchAlert = false || ad.getEntities() == null || ad.getEntities().isEmpty();
+        boolean matchAlert = ad.getEntities() == null || ad.getEntities().isEmpty();
         boolean matchExclude = false;
 
         for (Map<String, String> aFilter : ad.getEntities()) {
@@ -183,12 +183,6 @@ public class AlertOverlapGenerator {
             groups.add(g);
         }
 
-        return groups;
-    }
-
-    public List<EntityGroup> groupByFields(List<Map<String, String>> filters, Set<String> fields) {
-        Map<Entity, Set<Integer>> alertOverlap = getOverlaps(filters);
-        List<EntityGroup> groups = new ArrayList<>();
         return groups;
     }
 }

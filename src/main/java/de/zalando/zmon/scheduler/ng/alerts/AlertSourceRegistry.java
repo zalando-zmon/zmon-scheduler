@@ -1,14 +1,12 @@
 package de.zalando.zmon.scheduler.ng.alerts;
 
+import com.codahale.metrics.MetricRegistry;
 import de.zalando.zmon.scheduler.ng.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
-
-import com.codahale.metrics.MetricRegistry;
 
 /**
  * Created by jmussler on 4/7/15.

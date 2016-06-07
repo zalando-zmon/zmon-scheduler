@@ -56,8 +56,8 @@ public class AlertChangeCleaner implements AlertChangeListener {
     public void notifyAlertChange(AlertDefinition alert) {
         final AlertChangeCleaner c = this;
         // schedule twice, 1 fast for UI/UX the long run is only for multi scheduler setup where results may come in too late.
-        executor.schedule(()->c.doCleanup(alert.getId(), alert.getCheckDefinitionId()), 10, TimeUnit.SECONDS);
-        executor.schedule(()->c.doCleanup(alert.getId(), alert.getCheckDefinitionId()), 90, TimeUnit.SECONDS);
+        executor.schedule(() -> c.doCleanup(alert.getId(), alert.getCheckDefinitionId()), 10, TimeUnit.SECONDS);
+        executor.schedule(() -> c.doCleanup(alert.getId(), alert.getCheckDefinitionId()), 90, TimeUnit.SECONDS);
     }
 
     @Override
@@ -71,9 +71,9 @@ public class AlertChangeCleaner implements AlertChangeListener {
         CheckDefinition cd = checkRepository.get(checkId);
         AlertDefinition ad = alertRepository.get(alertId);
 
-        for(Entity e: entityRepository.getUnfiltered()) {
-            if(AlertOverlapGenerator.matchCheckFilter(cd, e)) {
-                if(AlertOverlapGenerator.matchAlertFilter(ad, e)) {
+        for (Entity e : entityRepository.getUnfiltered()) {
+            if (AlertOverlapGenerator.matchCheckFilter(cd, e)) {
+                if (AlertOverlapGenerator.matchAlertFilter(ad, e)) {
                     entityIds.add(e.getId());
                 }
             }
@@ -101,20 +101,18 @@ public class AlertChangeCleaner implements AlertChangeListener {
                 LOG.info("Cleaning alertId={} checkId={} srem={} hdel={}", alertId, checkId, entityIdsInAlert.size(), entityIdsTotal.size());
 
                 Pipeline p = j.pipelined();
-                for(String e : entityIdsInAlert) {
+                for (String e : entityIdsInAlert) {
                     p.srem(alertKey, e);
                 }
 
-                for(String e: entityIdsTotal) {
+                for (String e : entityIdsTotal) {
                     p.hdel(alertMapKey, e);
                 }
                 p.sync();
-            }
-            finally {
+            } finally {
                 j.close();
             }
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             LOG.error("Uncaught/Unexpected exception: msg={} check_id={} alert_id={}", t, checkId, alertId);
         }
     }

@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
-
 /**
  * Created by jmussler on 4/1/15.
  */

@@ -15,7 +15,7 @@ public class GlobalAdapter extends EntityAdapter {
 
     private final Logger LOG = LoggerFactory.getLogger(GlobalAdapter.class);
 
-    private final static Entity GLOBAL_ENTITY = new Entity("GLOBAL","global-adapter");
+    private final static Entity GLOBAL_ENTITY = new Entity("GLOBAL", "global-adapter");
     private final static List<Entity> GLOBAL_COLLECTION = new ArrayList<>(1);
 
     static {

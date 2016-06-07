@@ -38,14 +38,12 @@ public class Entity {
         for (Map.Entry<String, Object> e : valueMap.entrySet()) {
             if (e.getValue() instanceof String) {
                 filterProperties.put(e.getKey(), e.getValue());
-            }
-            else if(e.getValue() instanceof Integer) {
+            } else if (e.getValue() instanceof Integer) {
                 filterProperties.put(e.getKey(), e.getValue() + "");
-            }
-            else if(e.getValue() instanceof java.util.Collection) {
+            } else if (e.getValue() instanceof java.util.Collection) {
                 List<Object> list = new ArrayList<>();
-                for(Object o : (java.util.List)e.getValue()) {
-                    if(o instanceof String || o instanceof Integer)
+                for (Object o : (java.util.List) e.getValue()) {
+                    if (o instanceof String || o instanceof Integer)
                         list.add(o);
                 }
                 filterProperties.put(e.getKey(), list);
@@ -55,10 +53,9 @@ public class Entity {
 
     public void addProperty(String key, Object value) {
         properties.put(key, value);
-        if(value instanceof String) {
+        if (value instanceof String) {
             filterProperties.put(key, value);
-        }
-        else if(value instanceof Integer) {
+        } else if (value instanceof Integer) {
             filterProperties.put(key, value);
         }
     }

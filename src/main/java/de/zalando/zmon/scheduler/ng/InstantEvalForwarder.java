@@ -16,8 +16,8 @@ public class InstantEvalForwarder implements EntityChangeListener {
     private final Map<String, Set<Integer>> pendingTasks = new HashMap<>();
 
     public void forwardRequest(int checkId) {
-        synchronized(this) {
-            for(String k : pendingTasks.keySet()) {
+        synchronized (this) {
+            for (String k : pendingTasks.keySet()) {
                 pendingTasks.get(k).add(checkId);
             }
         }
@@ -26,8 +26,8 @@ public class InstantEvalForwarder implements EntityChangeListener {
     private static final List<Integer> EMPTY_LIST = new ArrayList<>(0);
 
     public List<Integer> getRequests(String dcId) {
-        synchronized(this) {
-            if(!pendingTasks.containsKey(dcId)) {
+        synchronized (this) {
+            if (!pendingTasks.containsKey(dcId)) {
                 return EMPTY_LIST;
             }
 
@@ -45,11 +45,11 @@ public class InstantEvalForwarder implements EntityChangeListener {
 
     @Override
     public void notifyEntityRemove(EntityRepository repo, Entity e) {
-        if(e.getFilterProperties().get("type").equals("local")) {
+        if (e.getFilterProperties().get("type").equals("local")) {
             // local entities depict remote DCs
-            if(pendingTasks.containsKey(e.getId())) {
-                synchronized(this) {
-                    if(pendingTasks.containsKey(e.getId())) {
+            if (pendingTasks.containsKey(e.getId())) {
+                synchronized (this) {
+                    if (pendingTasks.containsKey(e.getId())) {
                         pendingTasks.remove(e.getId());
                     }
                 }
@@ -64,11 +64,11 @@ public class InstantEvalForwarder implements EntityChangeListener {
 
     @Override
     public void notifyEntityAdd(EntityRepository repo, Entity e) {
-        if(e.getFilterProperties().get("type").equals("local")) {
+        if (e.getFilterProperties().get("type").equals("local")) {
             // local entities depict remote DCs
-            if(!pendingTasks.containsKey(e.getId())) {
-                synchronized(this) {
-                    if(!pendingTasks.containsKey(e.getId())) {
+            if (!pendingTasks.containsKey(e.getId())) {
+                synchronized (this) {
+                    if (!pendingTasks.containsKey(e.getId())) {
                         pendingTasks.put(e.getId(), new HashSet<>());
                     }
                 }
