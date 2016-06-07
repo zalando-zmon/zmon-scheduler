@@ -4,7 +4,6 @@ package de.zalando.zmon.scheduler.ng;
  * Created by jmussler on 3/26/15.
  */
 
-import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,14 +17,13 @@ import de.zalando.zmon.scheduler.ng.checks.CheckSourceRegistry;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
 import de.zalando.zmon.scheduler.ng.entities.EntityAdapterRegistry;
 import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.web.bind.annotation.*;
 
+import javax.net.ssl.SSLSession;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -35,8 +33,6 @@ import java.util.Map;
 @EnableConfigurationProperties
 @SpringBootApplication
 public class Application {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Application.class);
 
     @Autowired
     EntityAdapterRegistry entityRegistry;
@@ -48,40 +44,37 @@ public class Application {
     AlertSourceRegistry alertSourceRegistry;
 
     @Autowired
-    MetricRegistry metrics;
-
-    @Autowired
     ObjectMapper mapper;
 
     @Autowired
     Scheduler scheduler;
 
-    @RequestMapping(value = "/api/v1/entity-adapter", method = RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/entity-adapter")
     Collection<String> getAdapters() {
         return entityRegistry.getSourceNames();
     }
 
-    @RequestMapping(value = "/api/v1/entity-adapter/{name}", method = RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/entity-adapter/{name}")
     Collection<Entity> getEntities(@PathVariable(value = "name") String name) {
         return entityRegistry.get(name).getCollection();
     }
 
-    @RequestMapping(value = "/api/v1/check-source", method = RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/check-source")
     Collection<String> getCheckSources() {
         return checkSourceRegistry.getSourceNames();
     }
 
-    @RequestMapping(value = "/api/v1/check-source/{name}", method = RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/check-source/{name}")
     Collection<CheckDefinition> getChecks(@PathVariable(value = "name") String name) {
         return checkSourceRegistry.get(name).getCollection();
     }
 
-    @RequestMapping(value = "/api/v1/alert-source", method = RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/alert-source")
     Collection<String> getAlertSources() {
         return alertSourceRegistry.getSourceNames();
     }
 
-    @RequestMapping(value = "/api/v1/alert-source/{name}", method = RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/alert-source/{name}")
     Collection<AlertDefinition> getAlerts(@PathVariable(value = "name") String name) {
         return alertSourceRegistry.get(name).getCollection();
     }
@@ -95,12 +88,12 @@ public class Application {
     @Autowired
     private InstantEvalForwarder instantEvalForwarder;
 
-    @RequestMapping(value = "/api/v1/instant-evaluations/{dc}/", method = RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/instant-evaluations/{dc}/")
     Collection<Integer> getPendingInstantEvaluations(@PathVariable(value = "dc") String dcId) {
         return instantEvalForwarder.getRequests(dcId);
     }
 
-    @RequestMapping(value = "/api/v1/instant-evaluations/", method = RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/instant-evaluations/")
     Collection<String> getKnownInstantEvalForwardDCs() {
         return instantEvalForwarder.getKnwonDCs();
     }
@@ -108,7 +101,7 @@ public class Application {
     @Autowired
     private TrialRunForwarder trialRunForwarder;
 
-    @RequestMapping(value = "/api/v1/trial-runs/{dc}/", method = RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/trial-runs/{dc}/")
     Collection<TrialRunRequest> getPendingTrialRuns(@PathVariable(value = "dc") String dcId) {
         return trialRunForwarder.getRequests(dcId);
     }
@@ -132,13 +125,13 @@ public class Application {
         trialRunForwarder.forwardRequest(trialRun);
     }
 
-    @RequestMapping(value = "/api/v1/trial-runs/", method = RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/trial-runs/")
     Collection<String> getKnownTrialRunDCs() {
         return trialRunForwarder.getKnwonDCs();
     }
 
-    @RequestMapping(value = "/api/v1/entities", method = RequestMethod.GET)
-    Collection<Entity> queryKnownEntities(@RequestParam(value = "filter", required = true) String sFilter,
+    @RequestMapping(value = "/api/v1/entities")
+    Collection<Entity> queryKnownEntities(@RequestParam(value = "filter") String sFilter,
                                           @RequestParam(value = "exclude_filter", defaultValue = "") String sExcludeFilter,
                                           @RequestParam(value = "local", defaultValue = "false") boolean baseFilter) throws IOException {
 
@@ -161,7 +154,7 @@ public class Application {
     @Autowired
     EntityRepository entityRepo;
 
-    @RequestMapping(value = "/api/v1/repository-updates", method = RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/repository-updates")
     JsonNode getUpdateStatus() {
         ObjectNode node = mapper.createObjectNode();
         node.put("alert-repo", alertRepo.getLastUpdated());
@@ -173,13 +166,7 @@ public class Application {
     public static void main(String[] args) throws Exception {
 
         javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
-                new javax.net.ssl.HostnameVerifier() {
-
-                    public boolean verify(String hostname,
-                                          javax.net.ssl.SSLSession sslSession) {
-                        return hostname.equals("localhost");
-                    }
-                });
+                (String hostname, SSLSession sslSession) -> hostname.equals("localhost"));
 
         SpringApplication.run(Application.class, args);
     }

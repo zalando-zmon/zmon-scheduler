@@ -23,7 +23,6 @@ import java.util.Collection;
  */
 public class DefaultAlertSource extends AlertSource {
 
-    private final MetricRegistry metrics;
     private final Timer timer;
 
     private final String url;
@@ -45,7 +44,6 @@ public class DefaultAlertSource extends AlertSource {
     public DefaultAlertSource(final String name, final String url, final MetricRegistry metrics, final TokenWrapper tokens, final ClientHttpRequestFactory clientFactory) {
         super(name);
         this.clientFactory = clientFactory;
-        this.metrics = metrics;
         LOG.info("configuring alert source url={}", url);
         this.url = url;
         this.tokens = tokens;

@@ -16,10 +16,10 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Pipeline;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Created by jmussler on 02.06.16.
@@ -66,20 +66,14 @@ public class AlertChangeCleaner implements AlertChangeListener {
     }
 
     private Set<String> getMatchingEntities(int alertId, int checkId) {
-        Set<String> entityIds = new HashSet<>();
-
         CheckDefinition cd = checkRepository.get(checkId);
         AlertDefinition ad = alertRepository.get(alertId);
 
-        for (Entity e : entityRepository.getUnfiltered()) {
-            if (AlertOverlapGenerator.matchCheckFilter(cd, e)) {
-                if (AlertOverlapGenerator.matchAlertFilter(ad, e)) {
-                    entityIds.add(e.getId());
-                }
-            }
-        }
-
-        return entityIds;
+        return entityRepository.getUnfiltered().stream()
+                .filter(e -> AlertOverlapGenerator.matchCheckFilter(cd, e))
+                .filter(e -> AlertOverlapGenerator.matchAlertFilter(ad, e))
+                .map(Entity::getId)
+                .collect(Collectors.toSet());
     }
 
     public void doCleanup(int alertId, int checkId) {
