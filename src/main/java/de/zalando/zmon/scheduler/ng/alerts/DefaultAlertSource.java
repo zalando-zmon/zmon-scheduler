@@ -93,8 +93,9 @@ public class DefaultAlertSource extends AlertSource {
             LOG.info("Got {} alerts from {}", defs.getAlertDefinitions().size(), getName());
             isFirstLoad = false;
         } catch (Throwable t) {
-            LOG.error("Error querying for alert definitions: {}", t.getMessage());
+            LOG.error("Failed to get alert definitions: {}", t.getMessage());
             if(!isFirstLoad) {
+                // rethrow so that currently alerts are still used not not replaced by empty list
                 throw t;
             }
         }

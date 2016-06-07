@@ -93,8 +93,9 @@ public class EntityServiceAdapter extends EntityAdapter {
             isFirstLoad = false;
             return entityList;
         } catch (Throwable t) {
-            LOG.error("Loading entities failed: {}", t.getMessage());
+            LOG.error("Failed to get entities: {}", t.getMessage());
             if(!isFirstLoad) {
+                // rethrow, continue to used already loaded entities
                 throw t;
             }
         }

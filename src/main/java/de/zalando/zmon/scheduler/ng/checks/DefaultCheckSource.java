@@ -82,6 +82,7 @@ public class DefaultCheckSource extends CheckSource {
         } catch (Throwable t) {
             LOG.error("Failed to get check definitions: {}", t.getMessage());
             if(!isFirstLoad) {
+                // rethrow so that currently used checks are still used and not replaced by empty list
                 throw t;
             }
         }
