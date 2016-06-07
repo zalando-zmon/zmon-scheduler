@@ -59,4 +59,26 @@ public class SchedulerTest {
         verify(queueSelector, timeout(2000)).execute(eq(entity), any(), any(), gt(beforeSchedule));
     }
 
+    @Test
+    public void scheduleTrialRun() {
+        final EntityRepository entityRepo = mock(EntityRepository.class);
+        Entity entity = new Entity("myent", "test");
+        when(entityRepo.get()).thenReturn(asList(entity));
+
+        QueueSelector queueSelector = mock(QueueSelector.class);
+        SchedulerConfig config = new SchedulerConfig();
+        MetricRegistry metricRegistry = new MetricRegistry();
+        Scheduler scheduler = new Scheduler(null, null, entityRepo, queueSelector, config, metricRegistry);
+
+        TrialRunRequest request = new TrialRunRequest();
+        request.id = "test";
+        request.interval = 60L;
+        Map<String, String> includeFilter = new HashMap<>();
+        includeFilter.put("id", "myent");
+        request.entities = asList(includeFilter);
+        scheduler.scheduleTrialRun(request);
+
+        verify(queueSelector).execute(any(), eq("zmon:queue:default"), eq(entity));
+    }
+
 }
