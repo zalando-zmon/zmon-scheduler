@@ -58,7 +58,7 @@ public class InstantEvalForwarder implements EntityChangeListener {
     }
 
     @Override
-    public void notifyEntityChange(EntityRepository repo, Entity odlEntity, Entity newEntity) {
+    public void notifyEntityChange(EntityRepository repo, Entity oldEntity, Entity newEntity) {
 
     }
 

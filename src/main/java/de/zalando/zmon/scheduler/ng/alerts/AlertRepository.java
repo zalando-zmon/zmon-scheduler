@@ -31,7 +31,7 @@ public class AlertRepository extends CachedRepository<Integer, AlertSourceRegist
                 continue;
             }
 
-            for (AlertDefinition ad : registry.get(name).getCollection()) {
+            for (AlertDefinition ad : alerts) {
                 m.put(ad.getId(), ad);
                 if (newByCheckId.containsKey(ad.getCheckDefinitionId())) {
                     newByCheckId.get(ad.getCheckDefinitionId()).add(ad);
