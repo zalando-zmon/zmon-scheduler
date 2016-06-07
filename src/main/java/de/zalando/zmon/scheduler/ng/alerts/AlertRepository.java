@@ -42,19 +42,18 @@ public class AlertRepository extends CachedRepository<Integer, AlertSourceRegist
         List<AlertDefinition> deletedAlerts = new ArrayList<>();
         List<AlertDefinition> addedAlerts = new ArrayList<>();
 
-        for(Map.Entry<Integer, AlertDefinition> e : m.entrySet()) {
-            if(currentMap.containsKey(e.getKey())) {
-                if(currentMap.get(e.getKey()).compareForAlertUpdate(e.getValue())) {
+        for (Map.Entry<Integer, AlertDefinition> e : m.entrySet()) {
+            if (currentMap.containsKey(e.getKey())) {
+                if (currentMap.get(e.getKey()).compareForAlertUpdate(e.getValue())) {
                     changedAlerts.add(e.getValue());
                 }
-            }
-            else {
+            } else {
                 addedAlerts.add(e.getValue());
             }
         }
 
-        for(Map.Entry<Integer, AlertDefinition> e : currentMap.entrySet()) {
-            if(!m.containsKey(e.getKey())) {
+        for (Map.Entry<Integer, AlertDefinition> e : currentMap.entrySet()) {
+            if (!m.containsKey(e.getKey())) {
                 deletedAlerts.add(e.getValue());
             }
         }
@@ -64,8 +63,8 @@ public class AlertRepository extends CachedRepository<Integer, AlertSourceRegist
 
         // we notifiy after update with the new state
         // main purpose is now delayed cleanup of alert filter changes
-        for(AlertChangeListener l : changeListeners) {
-            for(AlertDefinition ad : changedAlerts) {
+        for (AlertChangeListener l : changeListeners) {
+            for (AlertDefinition ad : changedAlerts) {
                 l.notifyAlertChange(ad);
             }
         }

@@ -15,16 +15,14 @@ import de.zalando.zmon.scheduler.ng.alerts.AlertSourceRegistry;
 import de.zalando.zmon.scheduler.ng.checks.CheckDefinition;
 import de.zalando.zmon.scheduler.ng.checks.CheckRepository;
 import de.zalando.zmon.scheduler.ng.checks.CheckSourceRegistry;
-import de.zalando.zmon.scheduler.ng.cleanup.AlertChangeCleaner;
-import de.zalando.zmon.scheduler.ng.cleanup.CheckChangeCleaner;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
 import de.zalando.zmon.scheduler.ng.entities.EntityAdapterRegistry;
 import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.*;
-import org.springframework.boot.autoconfigure.*;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.web.bind.annotation.*;
 
@@ -179,10 +177,7 @@ public class Application {
 
                     public boolean verify(String hostname,
                                           javax.net.ssl.SSLSession sslSession) {
-                        if (hostname.equals("localhost")) {
-                            return true;
-                        }
-                        return false;
+                        return hostname.equals("localhost");
                     }
                 });
 

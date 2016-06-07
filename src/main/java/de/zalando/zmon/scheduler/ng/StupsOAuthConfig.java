@@ -3,7 +3,6 @@ package de.zalando.zmon.scheduler.ng;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,7 +15,7 @@ public class StupsOAuthConfig {
     private String authURI;
     private String tokenURI;
     private String metaFolder;
-    private Long lifeTime = 60*60*1000L;
+    private Long lifeTime = 60 * 60 * 1000L;
 
     public Long getLifeTime() {
         return lifeTime;

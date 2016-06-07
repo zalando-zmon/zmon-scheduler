@@ -24,7 +24,7 @@ public class CeleryBody {
     public String task = "check_and_notify";
     public final List<Long> timelimit = new ArrayList<>(2);
     public String eta;
-    public final Map<String,Object> kwargs = new HashMap<>();
+    public final Map<String, Object> kwargs = new HashMap<>();
 
     public static class CeleryCommandArg {
         public int check_id;
@@ -43,7 +43,7 @@ public class CeleryBody {
         public String name;
         public Map<String, Parameter> parameters;
         public int check_id;
-        public List<Map<String,String>> entities_map;
+        public List<Map<String, String>> entities_map;
         public String responsible_team;
         public int priority = 1;
         public String team;
@@ -66,7 +66,7 @@ public class CeleryBody {
         public String name;
         public Map<String, Parameter> parameters;
         public String check_id;
-        public List<Map<String,String>> entities_map;
+        public List<Map<String, String>> entities_map;
         public String responsible_team;
         public int priority = 1;
         public String team;

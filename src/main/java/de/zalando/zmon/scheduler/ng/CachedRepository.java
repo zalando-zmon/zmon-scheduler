@@ -23,7 +23,7 @@ public abstract class CachedRepository<I, S, T> implements Runnable {
 
     public CachedRepository(S r) {
         registry = r;
-        executor.scheduleAtFixedRate(this,180,60, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(this, 180, 60, TimeUnit.SECONDS);
     }
 
     protected abstract T getNullObject();
@@ -39,15 +39,14 @@ public abstract class CachedRepository<I, S, T> implements Runnable {
             LOG.info("scheduling update of: {}", registry.getClass());
             fill();
             lastUpdated = System.currentTimeMillis();
-        }
-        catch(Throwable e) {
+        } catch (Throwable e) {
             LOG.error("Error during refresh of {}", registry.getClass(), e);
         }
     }
 
     public T get(I id) {
         T v = currentMap.get(id);
-        if(null==v) {
+        if (null == v) {
             return getNullObject();
         }
         return v;

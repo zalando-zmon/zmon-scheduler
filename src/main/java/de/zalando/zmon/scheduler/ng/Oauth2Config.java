@@ -17,17 +17,15 @@ public class Oauth2Config {
     /*
     * In case where no oauth2 infrastructure is used, we always use/send the provided static token
     * */
-
     @Bean
     public TokenWrapper accessTokens(SchedulerConfig config) {
-        if(config.getOauth2_access_token_url() == null) {
+        if (config.getOauth2_access_token_url() == null) {
             return new TokenWrapper(config.getOauth2_static_token());
-        }
-        else {
+        } else {
             AccessTokenConfiguration tokenConfig = Tokens.createAccessTokensWithUri(URI.create(config.getOauth2_access_token_url()))
                     .manageToken("zmon-read");
 
-            for(String scope : config.getOauth2_scopes()) {
+            for (String scope : config.getOauth2_scopes()) {
                 tokenConfig.addScope(scope);
             }
 

@@ -27,8 +27,11 @@ public class DDSDatabaseAdapter extends EntityAdapter {
         timer = metrics.timer("entity-adapter.dds.databases");
     }
 
-    private static class BaseEntity extends HashMap<String, Object> {}
-    private static class BaseEntityList extends ArrayList<BaseEntity> {}
+    private static class BaseEntity extends HashMap<String, Object> {
+    }
+
+    private static class BaseEntityList extends ArrayList<BaseEntity> {
+    }
 
     @Override
     public Collection<Entity> getCollection() {
@@ -42,28 +45,26 @@ public class DDSDatabaseAdapter extends EntityAdapter {
 
         Set<String> seenIds = new HashSet<>();
 
-        for(BaseEntity base : list) {
-            List<String> parts = Arrays.asList((String)base.get("name"), (String)base.get("environment"), (String)base.get("role"), (String)base.get("slave_type"));
+        for (BaseEntity base : list) {
+            List<String> parts = Arrays.asList((String) base.get("name"), (String) base.get("environment"), (String) base.get("role"), (String) base.get("slave_type"));
             String entityId = parts.stream().filter(x -> x != null).collect(Collectors.joining("-"));
 
-            if(seenIds.contains(entityId)) {
+            if (seenIds.contains(entityId)) {
                 continue;
             }
             seenIds.add(entityId);
 
             Entity e = new Entity(entityId, "DDSDatabaseAdapter");
-            base.put("environment", Environments.getNormalized((String)base.get("environment")));
+            base.put("environment", Environments.getNormalized((String) base.get("environment")));
             base.remove("id");
-            if(!base.containsKey("pci")) {
+            if (!base.containsKey("pci")) {
                 base.put("pci", "false");
-            }
-            else {
+            } else {
                 Object o = base.get("pci");
-                if(o instanceof Boolean) {
-                    if((Boolean)o) {
+                if (o instanceof Boolean) {
+                    if ((Boolean) o) {
                         base.put("pci", "true");
-                    }
-                    else {
+                    } else {
                         base.put("pci", "false");
                     }
                 }

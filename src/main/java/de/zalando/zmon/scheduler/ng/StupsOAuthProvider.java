@@ -2,16 +2,13 @@ package de.zalando.zmon.scheduler.ng;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Form;
 import org.apache.http.client.fluent.Request;
-import org.apache.http.entity.ContentType;
-import org.apache.http.NameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 
 import java.io.File;
 import java.io.IOException;
@@ -80,7 +77,8 @@ public class StupsOAuthProvider {
         @Override
         public void run() {
             try {
-                Map<String, String> clientCredentials = mapper.readValue(new File(metaFolder + "/" + CLIENT_CREDENTIALS_FILE), new TypeReference<Map<String,String>>() {});
+                Map<String, String> clientCredentials = mapper.readValue(new File(metaFolder + "/" + CLIENT_CREDENTIALS_FILE), new TypeReference<Map<String, String>>() {
+                });
                 Map<String, String> robotCredentials = mapper.readValue(new File(metaFolder + "/" + ROBOT_CREDENTIALS_FILE), new TypeReference<Map<String, String>>() {
                 });
 
@@ -94,7 +92,7 @@ public class StupsOAuthProvider {
 
                 final String r = executor.execute(Request.Post(uri).bodyForm(form).useExpectContinue()).returnContent().asString();
 
-                container.updateToken(r, System.currentTimeMillis()+60*60*1000);
+                container.updateToken(r, System.currentTimeMillis() + 60 * 60 * 1000);
 
             } catch (IOException ex) {
                 LOG.error("", ex);
@@ -109,7 +107,7 @@ public class StupsOAuthProvider {
     @Autowired
     public StupsOAuthProvider(StupsOAuthConfig config) {
         this.config = config;
-        for(String k : config.getScopes().keySet()) {
+        for (String k : config.getScopes().keySet()) {
             tokens.put(k, new TokenContainer(config.scopes.get(k)));
         }
 

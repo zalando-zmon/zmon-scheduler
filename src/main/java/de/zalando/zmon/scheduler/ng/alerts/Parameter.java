@@ -12,7 +12,8 @@ public class Parameter {
     private String comment;
     private String type;
 
-    public Parameter() { }
+    public Parameter() {
+    }
 
     public Parameter(final Object value, final String comment, final String type) {
         this.value = value;

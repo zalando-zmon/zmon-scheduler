@@ -40,7 +40,7 @@ public class CheckChangeCleaner implements CheckChangeListener {
     public void notifyFilterChange(int checkId) {
         /* Just redirect to clean up all child alerts */
         Collection<AlertDefinition> alertDefs = alertRepository.getByCheckId(checkId);
-        for(AlertDefinition ad : alertDefs) {
+        for (AlertDefinition ad : alertDefs) {
             alertCleaner.notifyAlertChange(ad);
         }
     }

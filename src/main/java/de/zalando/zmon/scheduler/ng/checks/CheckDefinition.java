@@ -6,12 +6,11 @@ package de.zalando.zmon.scheduler.ng.checks;
 
 import de.zalando.zmon.scheduler.ng.DefinitionStatus;
 
-import java.util.List;
-import java.util.Map;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import java.util.List;
+import java.util.Map;
 
 // TODO check command encoding
 @XmlAccessorType(XmlAccessType.NONE)
@@ -211,11 +210,8 @@ public class CheckDefinition {
             return entities.equals(b.entities);
         }
 
-        if (entities == null && b.entities != null) {
-            return true;
-        }
+        return b.entities != null;
 
-        return false;
     }
 
 }

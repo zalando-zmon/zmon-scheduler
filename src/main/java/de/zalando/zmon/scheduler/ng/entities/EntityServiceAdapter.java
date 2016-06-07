@@ -13,7 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by jmussler on 4/2/15.
@@ -41,8 +44,11 @@ public class EntityServiceAdapter extends EntityAdapter {
         this.timer = metrics.timer("entity-adapter.entity-service");
     }
 
-    private static class BaseEntity extends HashMap<String, Object> {}
-    private static class BaseEntityList extends ArrayList<BaseEntity> {}
+    private static class BaseEntity extends HashMap<String, Object> {
+    }
+
+    private static class BaseEntityList extends ArrayList<BaseEntity> {
+    }
 
     private HttpHeaders getWithAuth() {
         HttpHeaders headers = new HttpHeaders();
@@ -59,12 +65,11 @@ public class EntityServiceAdapter extends EntityAdapter {
         RestTemplate rt = new RestTemplate(clientFactory);
         HttpEntity<String> request;
 
-        if(tokens != null) {
+        if (tokens != null) {
             final String accessToken = tokens.get();
             LOG.info("Querying entities with token " + accessToken.substring(0, Math.min(accessToken.length(), 3)) + "..");
             request = new HttpEntity<>(getWithAuth());
-        }
-        else {
+        } else {
             // FIXME: this branch is never reached
             LOG.info("Querying entity service");
             request = new HttpEntity<>(new HttpHeaders());
@@ -85,8 +90,7 @@ public class EntityServiceAdapter extends EntityAdapter {
             }
 
             return entityList;
-        }
-        catch(Throwable t) {
+        } catch (Throwable t) {
             LOG.error("Loading entities failed: {}", t.getMessage());
         }
         return new ArrayList<>(0);
