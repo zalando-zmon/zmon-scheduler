@@ -28,12 +28,10 @@ public class TrialRunCleanupTask implements Runnable {
             try {
                 jedis.del("zmon:trial_run:" + trialRunId);
                 jedis.del("zmon:trial_run:" + trialRunId + ":results");
-            }
-            finally {
+            } finally {
                 jedis.close();
             }
-        }
-        catch(Throwable t) {
+        } catch (Throwable t) {
             LOG.error("Failed to cleanup trial run data: id={} msg={}", this.trialRunId, t.getMessage());
         }
     }

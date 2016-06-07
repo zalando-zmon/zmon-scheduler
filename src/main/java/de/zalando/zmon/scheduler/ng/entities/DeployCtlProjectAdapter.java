@@ -24,11 +24,14 @@ public class DeployCtlProjectAdapter extends EntityAdapter {
     private String user;
     private String password;
 
-    private static class BaseEntity extends HashMap<String, Object> {}
-    private static class BaseEntityList extends ArrayList<BaseEntity> {}
+    private static class BaseEntity extends HashMap<String, Object> {
+    }
 
-    private static final List<String> FIELDS = Arrays.asList("organization","group","type","deployable","name","type","project_type");
-    private static final List<String> ZOMCAT_TYPES = Arrays.asList("maven-war","maven-pom","maven-grails-app");
+    private static class BaseEntityList extends ArrayList<BaseEntity> {
+    }
+
+    private static final List<String> FIELDS = Arrays.asList("organization", "group", "type", "deployable", "name", "type", "project_type");
+    private static final List<String> ZOMCAT_TYPES = Arrays.asList("maven-war", "maven-pom", "maven-grails-app");
 
     public DeployCtlProjectAdapter(String url, String user, String password, MetricRegistry metrics) {
         super("DeployCtlProjectAdapter");
@@ -41,7 +44,7 @@ public class DeployCtlProjectAdapter extends EntityAdapter {
 
     private HttpHeaders getWithAuth() {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Basic " + Base64.getEncoder().encodeToString((user+":"+password).getBytes()));
+        headers.add("Authorization", "Basic " + Base64.getEncoder().encodeToString((user + ":" + password).getBytes()));
         return headers;
     }
 
@@ -95,8 +98,7 @@ public class DeployCtlProjectAdapter extends EntityAdapter {
                 entity.addProperties(base);
                 entities.add(entity);
             }
-        }
-        catch(Throwable ex) {
+        } catch (Throwable ex) {
             LOG.error("Failed to retrieve project data from DeployCtl", ex);
         }
 

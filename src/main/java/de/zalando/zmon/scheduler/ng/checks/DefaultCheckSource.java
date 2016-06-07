@@ -14,7 +14,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
+import java.util.Collection;
 
 /**
  * Created by jmussler on 4/2/15.
@@ -79,8 +79,7 @@ public class DefaultCheckSource extends CheckSource {
             }
             LOG.info("Got {} checks from {}", defs.getCheckDefinitions().size(), getName());
             isFirstLoad = false;
-        }
-        catch(Throwable t) {
+        } catch (Throwable t) {
             LOG.error("Failed to get check definitions: {}", t.getMessage());
             if(!isFirstLoad) {
                 throw t;

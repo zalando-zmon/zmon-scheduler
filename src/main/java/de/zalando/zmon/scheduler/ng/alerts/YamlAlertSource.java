@@ -32,18 +32,13 @@ public class YamlAlertSource extends AlertSource {
         this.fileName = fileName;
     }
 
-    public YamlAlertSource(String name, int refresh, String fileName) {
-        super(name, refresh);
-        this.fileName = fileName;
-    }
-
     @Override
     public Collection<AlertDefinition> getCollection() {
         try {
-            List<AlertDefinition> list = mapper.readValue(new File(fileName), new TypeReference<List<AlertDefinition>>(){});
+            List<AlertDefinition> list = mapper.readValue(new File(fileName), new TypeReference<List<AlertDefinition>>() {
+            });
             return list;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
         return new ArrayList<>();

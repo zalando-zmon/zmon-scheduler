@@ -55,14 +55,15 @@ public class YamlEntityAdapter extends EntityAdapter {
     @Override
     public Collection<Entity> getCollection() {
         try {
-            List<Map<String,Object>> list = mapper.readValue(new File(fileName), new TypeReference<List<Map<String,Object>>>(){});
+            List<Map<String, Object>> list = mapper.readValue(new File(fileName), new TypeReference<List<Map<String, Object>>>() {
+            });
             List<Entity> entityList = new ArrayList<>();
 
-            for(Map<String,Object> m : list) {
+            for (Map<String, Object> m : list) {
                 String id = idGenerator.f(m);
-                if(null==id || id.equals("")) continue;
+                if (null == id || id.equals("")) continue;
                 Entity e = new Entity(id, getName());
-                if(type!=null) {
+                if (type != null) {
                     m.put("type", type);
                 }
                 e.addProperties(m);
@@ -70,8 +71,7 @@ public class YamlEntityAdapter extends EntityAdapter {
             }
 
             return entityList;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
         return new ArrayList<>();

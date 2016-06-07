@@ -5,6 +5,8 @@ package de.zalando.zmon.scheduler.ng.alerts;
  */
 public interface AlertChangeListener {
     void notifyAlertNew(AlertDefinition alert);
+
     void notifyAlertChange(AlertDefinition alert);
+
     void notifyAlertDelete(AlertDefinition alert);
 }

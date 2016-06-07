@@ -24,12 +24,15 @@ public class DeployCtlInstanceAdapter extends EntityAdapter {
     private String user;
     private String password;
 
-    private static class BaseEntity extends HashMap<String, Object> {}
-    private static class BaseEntityList extends ArrayList<BaseEntity> {}
+    private static class BaseEntity extends HashMap<String, Object> {
+    }
 
-    private static final List<String> FIELDS = Arrays.asList("environment","host","instance","path","project","project_organization","project_type","url","load_balancer_status");
-    private static final List<String> ZOMCAT_TYPES = Arrays.asList("maven-war","maven-pom","maven-grails-app");
-    
+    private static class BaseEntityList extends ArrayList<BaseEntity> {
+    }
+
+    private static final List<String> FIELDS = Arrays.asList("environment", "host", "instance", "path", "project", "project_organization", "project_type", "url", "load_balancer_status");
+    private static final List<String> ZOMCAT_TYPES = Arrays.asList("maven-war", "maven-pom", "maven-grails-app");
+
     public DeployCtlInstanceAdapter(String url, String user, String password, MetricRegistry metrics) {
         super("DeployCtlAdapter");
         this.url = url;
@@ -41,7 +44,7 @@ public class DeployCtlInstanceAdapter extends EntityAdapter {
 
     private HttpHeaders getWithAuth() {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Basic " + Base64.getEncoder().encodeToString((user+":"+password).getBytes()));
+        headers.add("Authorization", "Basic " + Base64.getEncoder().encodeToString((user + ":" + password).getBytes()));
         return headers;
     }
 
@@ -105,8 +108,7 @@ public class DeployCtlInstanceAdapter extends EntityAdapter {
                 entity.addProperties(base);
                 entities.add(entity);
             }
-        }
-        catch(Throwable ex) {
+        } catch (Throwable ex) {
             LOG.error("Failed to retrieve instance data from DeployCtl", ex);
         }
 

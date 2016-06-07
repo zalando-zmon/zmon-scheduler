@@ -35,7 +35,7 @@ public class InstantEvalHttpSubscriber implements Runnable {
 
         LOG.info("Subscribing for instant evaluations: {}", url);
         this.scheduler = scheduler;
-        if(url!=null && !url.equals("")) {
+        if (url != null && !url.equals("")) {
             executor.scheduleAtFixedRate(this, 60, 5, TimeUnit.SECONDS);
         }
     }
@@ -50,14 +50,14 @@ public class InstantEvalHttpSubscriber implements Runnable {
             headers.add("Authorization", "Bearer " + tokenWrapper.get());
             request = new HttpEntity<>(headers);
 
-            ResponseEntity<List<Integer>> response = rt.exchange(url, HttpMethod.GET, request, new ParameterizedTypeReference<List<Integer>>() {});
+            ResponseEntity<List<Integer>> response = rt.exchange(url, HttpMethod.GET, request, new ParameterizedTypeReference<List<Integer>>() {
+            });
 
-            for( Integer checkId : response.getBody()) {
+            for (Integer checkId : response.getBody()) {
                 LOG.info("Received instant evaluation request: {}", checkId);
                 scheduler.executeImmediate(checkId);
             }
-        }
-        catch(Throwable ex) {
+        } catch (Throwable ex) {
             LOG.error("", ex);
         }
     }

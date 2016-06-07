@@ -35,10 +35,10 @@ public class YamlCheckSource extends CheckSource {
     @Override
     public Collection<CheckDefinition> getCollection() {
         try {
-            List<CheckDefinition> list = mapper.readValue(new File(fileName), new TypeReference<List<CheckDefinition>>(){});
+            List<CheckDefinition> list = mapper.readValue(new File(fileName), new TypeReference<List<CheckDefinition>>() {
+            });
             return list;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
         return new ArrayList<>();

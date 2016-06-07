@@ -29,8 +29,11 @@ public class DDSClusterAdapter extends EntityAdapter {
         timer = metrics.timer("entity-adapter.dds.clusters");
     }
 
-    private static class BaseEntity extends HashMap<String, Object> {}
-    private static class BaseEntityList extends ArrayList<BaseEntity> {}
+    private static class BaseEntity extends HashMap<String, Object> {
+    }
+
+    private static class BaseEntityList extends ArrayList<BaseEntity> {
+    }
 
     @Override
     public Collection<Entity> getCollection() {
@@ -42,20 +45,18 @@ public class DDSClusterAdapter extends EntityAdapter {
 
         List<Entity> entities = new ArrayList<>();
 
-        for(BaseEntity base : list) {
-            Entity e = new Entity(base.get("cluster")+"@"+base.get("instance_name"),"DDSClusterAdapter");
-            base.put("environment",Environments.getNormalized((String)base.get("environment")));
+        for (BaseEntity base : list) {
+            Entity e = new Entity(base.get("cluster") + "@" + base.get("instance_name"), "DDSClusterAdapter");
+            base.put("environment", Environments.getNormalized((String) base.get("environment")));
             base.remove("id");
-            if(!base.containsKey("pci")) {
-                base.put("pci","false");
-            }
-            else {
+            if (!base.containsKey("pci")) {
+                base.put("pci", "false");
+            } else {
                 Object o = base.get("pci");
-                if(o instanceof Boolean) {
-                    if((Boolean)o) {
+                if (o instanceof Boolean) {
+                    if ((Boolean) o) {
                         base.put("pci", "true");
-                    }
-                    else {
+                    } else {
                         base.put("pci", "false");
                     }
                 }

@@ -4,18 +4,15 @@ package de.zalando.zmon.scheduler.ng.alerts;
  * Created by jmussler on 4/2/15.
  */
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
+import de.zalando.zmon.scheduler.ng.DefinitionStatus;
 import javax.validation.Valid;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
-
-import de.zalando.zmon.scheduler.ng.DefinitionStatus;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @XmlAccessorType(XmlAccessType.NONE)
 public class AlertDefinition {
@@ -39,7 +36,6 @@ public class AlertDefinition {
      * JAXB also doesn't support Maps.  It handles Lists great, but Maps are
      * not supported directly. Use of a XmlAdapter to map the maps into beans that JAXB can use.
      */
-
     private List<Map<String, String>> entities;
 
     private List<Map<String, String>> entitiesExclude;
@@ -272,14 +268,11 @@ public class AlertDefinition {
         }
 
         // we dont need to overly precise here, triggering cleanup too often, e.g. on filter/property reorder should not happen that often
-        if(entities != null && !entities.equals(b.entities)) {
+        if (entities != null && !entities.equals(b.entities)) {
             return true;
         }
 
-        if(entitiesExclude != null && !entitiesExclude.equals(b.entitiesExclude)) {
-            return true;
-        }
+        return entitiesExclude != null && !entitiesExclude.equals(b.entitiesExclude);
 
-        return false;
     }
 }

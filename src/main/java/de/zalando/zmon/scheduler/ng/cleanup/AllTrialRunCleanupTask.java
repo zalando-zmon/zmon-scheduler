@@ -29,17 +29,15 @@ public class AllTrialRunCleanupTask implements Runnable {
                 Set<String> keys = jedis.keys("zmon:trial_run:*");
                 // No pipeline here, considering this startup task to be fast enough
                 // Dont want this to fail on not cleaned appliance deployments
-                for(String k : keys) {
+                for (String k : keys) {
                     jedis.del(k);
                 }
 
                 LOG.info("Finished trial run cleanup: count={}", keys.size());
-            }
-            finally {
+            } finally {
                 jedis.close();
             }
-        }
-        catch(Throwable t) {
+        } catch (Throwable t) {
             LOG.error("Failed to cleanup old trial runs: msg={}", t.getMessage());
         }
     }
