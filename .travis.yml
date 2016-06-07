@@ -5,3 +5,12 @@ jdk:
 
 services:
  - redis-server
+
+before_script:
+  - pip install --user codecov
+
+script:
+  - mvn clean verify -Pcoverage
+
+after_success:
+  - codecov
