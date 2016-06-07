@@ -26,6 +26,7 @@ public class DefaultCheckSource extends CheckSource {
     private String url;
     private TokenWrapper tokens;
     private ClientHttpRequestFactory clientFactory;
+    private boolean isFirstLoad = true;
 
     private static final ObjectMapper mapper = createObjectMapper();
 
@@ -77,9 +78,13 @@ public class DefaultCheckSource extends CheckSource {
                 defs = rt.getForObject(url, CheckDefinitions.class);
             }
             LOG.info("Got {} checks from {}", defs.getCheckDefinitions().size(), getName());
+            isFirstLoad = false;
         }
         catch(Throwable t) {
             LOG.error("Failed to get check definitions: {}", t.getMessage());
+            if(!isFirstLoad) {
+                throw t;
+            }
         }
 
         return defs.getCheckDefinitions();

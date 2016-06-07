@@ -25,6 +25,7 @@ public class EntityServiceAdapter extends EntityAdapter {
 
     private final MetricRegistry metrics;
     private final Timer timer;
+    private boolean isFirstLoad = true;
 
     private ClientHttpRequestFactory clientFactory;
 
@@ -84,10 +85,14 @@ public class EntityServiceAdapter extends EntityAdapter {
                 entityList.add(entity);
             }
 
+            isFirstLoad = false;
             return entityList;
         }
         catch(Throwable t) {
             LOG.error("Loading entities failed: {}", t.getMessage());
+            if(!isFirstLoad) {
+                throw t;
+            }
         }
         return new ArrayList<>(0);
     }
