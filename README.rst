@@ -6,9 +6,11 @@ ZMON Scheduler
    :target: https://travis-ci.org/zalando-zmon/zmon-scheduler
    :alt: Build Status
 
-This is the replacement for our current Python "zmon-scheduler" as part of the ZMON infrastructure.
+.. image:: https://codecov.io/github/zalando-zmon/zmon-scheduler/coverage.svg?branch=master
+   :target: https://codecov.io/github/zalando-zmon/zmon-scheduler
+   :alt: Code Coverage
 
-This greatly improves scheduling throughput, better ontime scheduling not affected by background tasks as refreshes and makes real instant evaluation possible via ZMON frontend.
+The ZMON Scheduler is responsible for keeping track of all existing entities, checks and alerts and scheduling checks in time for applicable entities, which are then executed by the `ZMON Worker`_.
 
 Running Unit Tests
 ==================
@@ -38,4 +40,5 @@ Building the Docker Image
 See also the `ZMON Documentation`_.
 
 .. _main ZMON repository: https://github.com/zalando/zmon
-.. _ZMON Documentation: https://zmon.readthedocs.org/
+.. _ZMON Documentation: https://docs.zmon.io/
+.. _ZMON Worker: https://github.com/zalando-zmon/zmon-worker
