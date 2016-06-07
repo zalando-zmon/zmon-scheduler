@@ -26,7 +26,12 @@ public class AlertRepository extends CachedRepository<Integer, AlertSourceRegist
         Map<Integer, List<AlertDefinition>> newByCheckId = new HashMap<>();
 
         for (String name : registry.getSourceNames()) {
-            for (AlertDefinition ad : registry.get(name).getCollection()) {
+            Collection<AlertDefinition> alerts = registry.get(name).getCollection();
+            if (null == alerts) {
+                continue;
+            }
+
+            for (AlertDefinition ad : alerts) {
                 m.put(ad.getId(), ad);
                 if (newByCheckId.containsKey(ad.getCheckDefinitionId())) {
                     newByCheckId.get(ad.getCheckDefinitionId()).add(ad);

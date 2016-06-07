@@ -5,7 +5,6 @@ package de.zalando.zmon.scheduler.ng.alerts;
  */
 
 import de.zalando.zmon.scheduler.ng.DefinitionStatus;
-
 import javax.validation.Valid;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

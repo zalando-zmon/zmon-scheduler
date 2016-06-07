@@ -16,12 +16,13 @@ public abstract class CachedRepository<I, S, T> implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(CachedRepository.class);
 
     protected Map<I, T> currentMap;
-    protected S registry;
+    protected final S registry;
     protected static final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
 
     private long lastUpdated = 0;
 
     public CachedRepository(S r) {
+        assert(null != r);
         registry = r;
         executor.scheduleAtFixedRate(this, 180, 60, TimeUnit.SECONDS);
     }

@@ -73,7 +73,7 @@ public class TrialRunForwarder implements EntityChangeListener {
     }
 
     @Override
-    public void notifyEntityChange(EntityRepository repo, Entity e) {
+    public void notifyEntityChange(EntityRepository repo, Entity oldEntity, Entity newEntity) {
 
     }
 }
