@@ -3,6 +3,7 @@ package de.zalando.zmon.scheduler.ng.cleanup;
 import de.zalando.zmon.scheduler.ng.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
 import de.zalando.zmon.scheduler.ng.checks.CheckRepository;
+import de.zalando.zmon.scheduler.ng.entities.EntityChangeListener;
 import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,15 @@ public class CleanupConfiguration {
         LOG.info("Registering alertChangeCleaner...");
         AlertChangeCleaner l = new AlertChangeCleaner(alertRepo, checkRepo, entityRepo, config);
         alertRepo.registerChangeListener(l);
+        return l;
+    }
+
+    @Bean
+    @Autowired
+    public EntityChangedCleaner entityChangedCleaner(EntityRepository entityRepo, AlertRepository alertRepo, CheckRepository checkRepo, AlertChangeCleaner alertCleaner) {
+        LOG.info("Registering entityChangedCleaner...");
+        EntityChangedCleaner l = new EntityChangedCleaner(alertRepo, checkRepo, alertCleaner);
+        entityRepo.registerListener(l);
         return l;
     }
 }
