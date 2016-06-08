@@ -81,11 +81,10 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
             ObjectMapper mapper = new ObjectMapper();
             String v = mapper.writeValueAsString(typeMap);
             Jedis jedis = redisPool.getResource();
-
             try {
                 jedis.set(redis_properties_key.getBytes(), Snappy.compress(v.getBytes("UTF-8")));
             } finally {
-                redisPool.returnResource(jedis);
+                jedis.close();
             }
             LOG.info("Done writing auto complete data for front end");
         } catch (Exception ex) {
@@ -157,20 +156,9 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
         LOG.info("Number of entities added globaly: {}", addedIds.size());
         LOG.info("Number of entities with changed filter properties: {}", changedFilterProperties.size());
 
-        // now using unfiltered, thus code should solely rely on passed entity
-        for (String k : removedIds) {
-            for (EntityChangeListener l : currentListeners) {
-                l.notifyEntityRemove(this, unfilteredEntities.get(k));
-            }
-        }
-
-        for(String k : changedFilterProperties) {
-            for(EntityChangeListener l : currentListeners) {
-                l.notifyEntityChange(this, unfilteredEntities.get(k), mUnfiltered.get(k));
-            }
-        }
-
+        // switch to new entities, so all other code/calls use up to date data
         currentMap = m;
+        Map<String, Entity> oldUnfiltered = unfilteredEntities;
         unfilteredEntities = mUnfiltered;
 
         for (String k : addedIds) {
@@ -179,8 +167,20 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
             }
         }
 
-        createAutoCompleteData();
+        // now using unfiltered, thus code should solely rely on passed entity
+        for (String k : removedIds) {
+            for (EntityChangeListener l : currentListeners) {
+                l.notifyEntityRemove(this, oldUnfiltered.get(k));
+            }
+        }
 
+        for(String k : changedFilterProperties) {
+            for(EntityChangeListener l : currentListeners) {
+                l.notifyEntityChange(this, oldUnfiltered.get(k), unfilteredEntities.get(k));
+            }
+        }
+
+        createAutoCompleteData();
         LOG.info("Entity Repository refreshed: {} known filtered entities / {} total", currentMap.size(), unfilteredEntities.size());
     }
 
