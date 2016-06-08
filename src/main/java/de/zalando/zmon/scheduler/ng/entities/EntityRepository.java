@@ -36,7 +36,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     private String redis_properties_key = null;
 
     public synchronized void registerListener(EntityChangeListener l) {
-        LOG.info("Registering entity change listener ({}, {})", l.getClass(), currentMap.size());
+        LOG.info("Registering entity change listener: type={} count={}", l.getClass().getCanonicalName(), currentMap.size());
         Map<String, Entity> m = unfilteredEntities;
         for (String k : m.keySet()) {
             l.notifyEntityAdd(this, m.get(k));
@@ -80,12 +80,11 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
 
             ObjectMapper mapper = new ObjectMapper();
             String v = mapper.writeValueAsString(typeMap);
-            Jedis jedis = redisPool.getResource();
-            try {
+
+            try (Jedis jedis = redisPool.getResource()) {
                 jedis.set(redis_properties_key.getBytes(), Snappy.compress(v.getBytes("UTF-8")));
-            } finally {
-                jedis.close();
             }
+
             LOG.info("Done writing auto complete data for front end");
         } catch (Exception ex) {
             LOG.error("Error during generating auto complete data");

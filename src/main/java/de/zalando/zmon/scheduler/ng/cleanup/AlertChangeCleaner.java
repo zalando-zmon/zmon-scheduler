@@ -78,8 +78,7 @@ public class AlertChangeCleaner implements AlertChangeListener {
 
     public void doCleanup(int alertId, int checkId) {
         try {
-            Jedis j = redisPool.getResource();
-            try {
+            try (Jedis j = redisPool.getResource()) {
 
                 final String alertKey = "zmon:alerts:" + alertId;
                 final String alertMapKey = "zmon:alerts:" + alertId + ":entities";
@@ -103,8 +102,6 @@ public class AlertChangeCleaner implements AlertChangeListener {
                     p.hdel(alertMapKey, e);
                 }
                 p.sync();
-            } finally {
-                j.close();
             }
         } catch (Throwable t) {
             LOG.error("Uncaught/Unexpected exception: msg={} check_id={} alert_id={}", t, checkId, alertId);

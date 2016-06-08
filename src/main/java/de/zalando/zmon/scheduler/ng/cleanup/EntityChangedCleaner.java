@@ -44,11 +44,11 @@ public class EntityChangedCleaner implements EntityChangeListener {
         @Override
         public void run() {
             try {
-                for(CheckDefinition cd : checkRepo.get()) {
-                    if(AlertOverlapGenerator.matchCheckFilter(cd, oldEntity)) {
-                        for(AlertDefinition ad : alertRepo.getByCheckId(cd.getId())) {
-                            if(AlertOverlapGenerator.matchAlertFilter(ad, oldEntity)) {
-                                if(!AlertOverlapGenerator.matchCheckFilter(cd, newEntity)
+                for (CheckDefinition cd : checkRepo.get()) {
+                    if (AlertOverlapGenerator.matchCheckFilter(cd, oldEntity)) {
+                        for (AlertDefinition ad : alertRepo.getByCheckId(cd.getId())) {
+                            if (AlertOverlapGenerator.matchAlertFilter(ad, oldEntity)) {
+                                if (!AlertOverlapGenerator.matchCheckFilter(cd, newEntity)
                                         || !AlertOverlapGenerator.matchAlertFilter(ad, newEntity)) {
                                     // reuse code, this cleans up all non matching entities
                                     alertCleaner.notifyAlertChange(ad);
@@ -57,8 +57,7 @@ public class EntityChangedCleaner implements EntityChangeListener {
                         }
                     }
                 }
-            }
-            catch (Throwable t) {
+            } catch (Throwable t) {
                 LOG.error("Failed to cleanup changed entity: id={}", newEntity.getId());
             }
         }
