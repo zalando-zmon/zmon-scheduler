@@ -74,6 +74,10 @@ public class EntityChangedCleaner implements EntityChangeListener {
 
     }
 
+    protected void notifyEntityChangeNoWait(EntityRepository repo, Entity entityOld, Entity entityNew) {
+        executor.schedule(new EntityChangeCleanupTask(entityOld, entityNew), 0, TimeUnit.SECONDS);
+    }
+
     @Override
     public void notifyEntityChange(EntityRepository repo, Entity entityOld, Entity entityNew) {
         executor.schedule(new EntityChangeCleanupTask(entityOld, entityNew), 5, TimeUnit.SECONDS);
