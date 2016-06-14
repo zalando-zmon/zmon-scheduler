@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -32,10 +33,6 @@ public class AlertDefinition {
     @XmlElement
     private String responsibleTeam;
 
-    /* Map passing
-     * JAXB also doesn't support Maps.  It handles Lists great, but Maps are
-     * not supported directly. Use of a XmlAdapter to map the maps into beans that JAXB can use.
-     */
     private List<Map<String, String>> entities;
 
     private List<Map<String, String>> entitiesExclude;
