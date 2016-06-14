@@ -1,4 +1,4 @@
-FROM registry.opensource.zalan.do/stups/openjdk:8-26
+FROM registry.opensource.zalan.do/stups/openjdk:8-2-alpine
 
 EXPOSE 8085
 
