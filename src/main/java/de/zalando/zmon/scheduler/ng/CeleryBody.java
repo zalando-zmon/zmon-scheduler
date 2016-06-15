@@ -13,17 +13,10 @@ import java.util.Map;
 public class CeleryBody {
 
     public String expires;
-    public boolean utc = true;
     public final List<Object> args = new ArrayList<>(); // Order: CeleryCommandArg, CeleryAlertArg*
-    public String chord = null;
-    public String callbacks = null;
-    public String errbacks = null;
-    public String taskset = null;
     public String id;
-    public int retries = 0;
     public String task = "check_and_notify";
     public final List<Long> timelimit = new ArrayList<>(2);
-    public String eta;
     public final Map<String, Object> kwargs = new HashMap<>();
 
     public static class CeleryCommandArg {
