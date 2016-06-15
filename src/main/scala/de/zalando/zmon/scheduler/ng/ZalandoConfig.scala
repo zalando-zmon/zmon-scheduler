@@ -100,7 +100,7 @@ class SchedulerConfig {
   // Map certrain properties to queues e.g. "dc":"gth" => "dclocal:gth"
   @BeanProperty var queue_property_mapping : java.util.Map[String,java.util.List[java.util.Map[String,String]]] = new util.HashMap[String,java.util.List[java.util.Map[String,String]]]()
 
-  @BeanProperty var task_serializer : TaskSerializerType = TaskSerializerType.COMPRESSED_NESTED
+  @BeanProperty var task_serializer : TaskSerializerType = TaskSerializerType.PLAIN
 
   @BeanProperty var entity_properties_key : String = null
 
