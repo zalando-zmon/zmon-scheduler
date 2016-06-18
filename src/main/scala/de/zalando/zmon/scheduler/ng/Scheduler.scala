@@ -286,10 +286,6 @@ class SchedulerFactory {
       entityRepo.registerListener(downtimeForwarder)
     }
 
-    if (schedulerConfig.downtime_http_url != null) {
-      val downtimePoller = new DowntimeHttpSubscriber(downtimeService, schedulerConfig, tokenWrapper, httpClientFactory)
-    }
-
     if (schedulerConfig.trial_run_http_url != null) {
       val trialRunPoller = new TrialRunHttpSubscriber(newScheduler, schedulerConfig, tokenWrapper, httpClientFactory)
     }
