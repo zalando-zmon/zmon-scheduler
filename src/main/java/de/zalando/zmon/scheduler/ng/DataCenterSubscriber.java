@@ -13,8 +13,15 @@ public class DataCenterSubscriber<T> implements EntityChangeListener {
 
     private final Map<String, List<T>> pendingTasks = new HashMap<>();
     private final Collection<T> emptyList = new ArrayList<>(0);
+    private final boolean enabled;
+
+    public DataCenterSubscriber(boolean enabled) {
+        this.enabled = enabled;
+    }
 
     public void forwardRequest(T task) {
+        if(!enabled) return;
+
         synchronized (this) {
             for (String k : pendingTasks.keySet()) {
                 pendingTasks.get(k).add(task);

@@ -76,18 +76,17 @@ class SchedulerConfig {
   @BeanProperty var controller_user: String = null
   @BeanProperty var controller_password: String = null
 
-  @BeanProperty var enable_downtime_redis_sub : Boolean = false
-  @BeanProperty var redis_downtime_pubsub : String = ""
-  @BeanProperty var redis_downtime_requests : String = ""
-
   // Remote/AWS support
   // used to enable polling for instant eval via http with DC id
-  @BeanProperty var instant_eval_forward : Boolean = true
+  @BeanProperty var instant_eval_forward : Boolean = false
   @BeanProperty var instant_eval_http_url : String = null
 
   // used to enable polling for trial runs via http with DC id
-  @BeanProperty var trial_run_forward : Boolean = true
+  @BeanProperty var trial_run_forward : Boolean = false
   @BeanProperty var trial_run_http_url : String = null
+
+  @BeanProperty var downtime_forward : Boolean = false
+  @BeanProperty var downtime_http_url : String = null
 
   @BeanProperty var dummy_cities : String = null // "dummy_data/cities.json"
 

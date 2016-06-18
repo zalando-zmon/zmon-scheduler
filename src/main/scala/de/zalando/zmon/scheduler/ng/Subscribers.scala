@@ -52,14 +52,14 @@ abstract class RedisSubscriber(val host : String, val port : Int,  val pubSubKey
     }
     catch {
       case e : JedisConnectionException => {
-        jedisPool.returnBrokenResource(jedis)
+        jedis.close
         jedis = null
       }
       case e: Exception => RedisSubscriber.LOG.error("Error in subscription to " + pubSubKey, e)
     }
     finally {
       if(null!=jedis) {
-        jedisPool.returnResource(jedis)
+        jedis.close
       }
     }
   }
@@ -67,16 +67,4 @@ abstract class RedisSubscriber(val host : String, val port : Int,  val pubSubKey
 
 object SubscriberMapper {
   val mapper = new ObjectMapper()
-}
-
-class RedisDownTimeSubscriber(val scheduler : Scheduler, val config : SchedulerConfig, val alertRepo: AlertRepository ) extends RedisSubscriber(config.redis_host, config.redis_port, config.redis_downtime_requests) {
-
-  override def handleMessage(jedis : Jedis, channel: String, message : String ): Unit = {
-    val request = jedis.hget(config.redis_downtime_requests, message)
-    val node = SubscriberMapper.mapper.readTree(request)
-    if (node.has("alert_definition_id")) {
-      val alertId = node.get("alert_definition_id").asInt()
-      scheduler.executeImmediate(alertRepo.get(alertId).getCheckDefinitionId)
-    }
-  }
 }
