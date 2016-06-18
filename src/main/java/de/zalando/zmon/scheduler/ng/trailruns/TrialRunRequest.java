@@ -1,4 +1,4 @@
-package de.zalando.zmon.scheduler.ng;
+package de.zalando.zmon.scheduler.ng.trailruns;
 
 import de.zalando.zmon.scheduler.ng.alerts.Parameter;
 

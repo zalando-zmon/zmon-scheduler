@@ -5,6 +5,7 @@ import java.util.Date
 
 import de.zalando.zmon.scheduler.ng.CeleryBody.{TrialRunCeleryAlertArg, TrialRunCeleryCommand, CeleryAlertArg, CeleryCommandArg}
 import de.zalando.zmon.scheduler.ng.entities.Entity
+import de.zalando.zmon.scheduler.ng.trailruns.TrialRunRequest
 
 import scala.collection.mutable.ArrayBuffer
 

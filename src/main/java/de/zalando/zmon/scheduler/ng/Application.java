@@ -85,51 +85,6 @@ public class Application {
         return g.groupByAlertIds(entityFilters);
     }
 
-    @Autowired
-    private InstantEvalForwarder instantEvalForwarder;
-
-    @RequestMapping(value = "/api/v1/instant-evaluations/{dc}/")
-    Collection<Integer> getPendingInstantEvaluations(@PathVariable(value = "dc") String dcId) {
-        return instantEvalForwarder.getRequests(dcId);
-    }
-
-    @RequestMapping(value = "/api/v1/instant-evaluations/")
-    Collection<String> getKnownInstantEvalForwardDCs() {
-        return instantEvalForwarder.getKnwonDCs();
-    }
-
-    @Autowired
-    private TrialRunForwarder trialRunForwarder;
-
-    @RequestMapping(value = "/api/v1/trial-runs/{dc}/")
-    Collection<TrialRunRequest> getPendingTrialRuns(@PathVariable(value = "dc") String dcId) {
-        return trialRunForwarder.getRequests(dcId);
-    }
-
-    @RequestMapping(value = "/api/v1/checks/{id}/instant-eval", method = RequestMethod.POST)
-    public void triggerInstantEvaluationByCheck(@PathVariable(value = "id") int checkId) {
-        scheduler.executeImmediate(checkId);
-        instantEvalForwarder.forwardRequest(checkId);
-    }
-
-    @RequestMapping(value = "/api/v1/alerts/{id}/instant-eval", method = RequestMethod.POST)
-    public void triggerInstantEvaluation(@PathVariable(value = "id") int id) {
-        int checkId = alertRepo.get(id).getCheckDefinitionId();
-        scheduler.executeImmediate(checkId);
-        instantEvalForwarder.forwardRequest(checkId);
-    }
-
-    @RequestMapping(value = "/api/v1/trial-runs", method = RequestMethod.POST)
-    public void postTrialRun(@RequestBody TrialRunRequest trialRun) {
-        scheduler.scheduleTrialRun(trialRun);
-        trialRunForwarder.forwardRequest(trialRun);
-    }
-
-    @RequestMapping(value = "/api/v1/trial-runs/")
-    Collection<String> getKnownTrialRunDCs() {
-        return trialRunForwarder.getKnwonDCs();
-    }
-
     @RequestMapping(value = "/api/v1/entities")
     Collection<Entity> queryKnownEntities(@RequestParam(value = "filter") String sFilter,
                                           @RequestParam(value = "exclude_filter", defaultValue = "") String sExcludeFilter,

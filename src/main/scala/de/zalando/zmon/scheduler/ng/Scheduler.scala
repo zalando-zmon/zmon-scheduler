@@ -14,6 +14,8 @@ import de.zalando.zmon.scheduler.ng.alerts.AlertRepository
 import de.zalando.zmon.scheduler.ng.checks.{CheckChangeListener, CheckRepository}
 import de.zalando.zmon.scheduler.ng.cleanup.{AllTrialRunCleanupTask, TrialRunCleanupTask}
 import de.zalando.zmon.scheduler.ng.entities.{Entity, EntityRepository}
+import de.zalando.zmon.scheduler.ng.instantevaluations.{InstantEvalHttpSubscriber, InstantEvalForwarder}
+import de.zalando.zmon.scheduler.ng.trailruns.{TrialRunRequest, TrialRunHttpSubscriber, TrialRunForwarder}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.{Bean, Configuration}
