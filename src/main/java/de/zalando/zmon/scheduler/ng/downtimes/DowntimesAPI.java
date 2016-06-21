@@ -5,7 +5,8 @@ import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collection;
+import javax.swing.*;
+import java.util.*;
 
 /**
  * Created by jmussler on 18.06.16.
@@ -49,8 +50,10 @@ public class DowntimesAPI {
 
     @RequestMapping(value = "/api/v1/downtimes/{id}", method = RequestMethod.DELETE)
     void deleteDowntime(@PathVariable(value = "id") String id) {
-        downtimeService.deleteDowntime(id);
-        downtimeForwarder.forwardRequest(DowntimeForwardTask.DeleteDowntimeTask(id));
+        Set<String> ids = new TreeSet<>();
+        ids.add(id);
+        downtimeService.deleteDowntimes(ids);
+        downtimeForwarder.forwardRequest(DowntimeForwardTask.DeleteDowntimeTask(ids));
     }
 
     @RequestMapping(value = "/api/v1/downtime-groups/{groupdId}", method = RequestMethod.DELETE)

@@ -62,7 +62,7 @@ public class DowntimeHttpSubscriber implements Runnable {
                         service.storeDowntime(task.getRequest());
                         break;
                     case DELETE:
-                        service.deleteDowntime(task.getId());
+                        service.deleteDowntimes(task.getIds());
                         break;
                     case DELETE_GROUP:
                         service.deleteDowntimeGroup(task.getGroupId());

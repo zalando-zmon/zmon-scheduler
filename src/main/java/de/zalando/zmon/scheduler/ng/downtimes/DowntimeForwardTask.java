@@ -1,5 +1,7 @@
 package de.zalando.zmon.scheduler.ng.downtimes;
 
+import java.util.Collection;
+
 /**
  * Created by jmussler on 18.06.16.
  */
@@ -8,7 +10,7 @@ public class DowntimeForwardTask {
     private DowntimeRequest request;
     private DowntimeTaskType type;
     private String groupId;
-    private String id;
+    private Collection<String> ids;
 
     public DowntimeForwardTask() {
     }
@@ -27,19 +29,19 @@ public class DowntimeForwardTask {
         return t;
     }
 
-    public static DowntimeForwardTask DeleteDowntimeTask(String id) {
+    public static DowntimeForwardTask DeleteDowntimeTask(Collection<String> ids) {
         DowntimeForwardTask t = new DowntimeForwardTask();
         t.setType(DowntimeTaskType.DELETE);
-        t.setId(id);
+        t.setIds(ids);
         return t;
     }
 
-    public String getId() {
-        return id;
+    public Collection<String> getIds() {
+        return ids;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setIds(Collection<String> ids) {
+        this.ids = ids;
     }
 
     public DowntimeRequest getRequest() {
