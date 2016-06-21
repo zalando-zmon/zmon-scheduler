@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.{Bean, Configuration}
 import org.springframework.http.client.ClientHttpRequestFactory
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory
 import redis.clients.jedis.Jedis
 
 import scala.collection.JavaConversions._
@@ -374,7 +375,7 @@ class RedisMetricsUpdater(val config: SchedulerConfig, val metrics: SchedulerMet
 class Scheduler(val alertRepo: AlertRepository, val checkRepo: CheckRepository, val entityRepo: EntityRepository, val queueSelector: QueueSelector)
                (implicit val schedulerConfig: SchedulerConfig, val metrics: MetricRegistry) {
 
-  private val service = new ScheduledThreadPoolExecutor(schedulerConfig.thread_count)
+  private val service = new ScheduledThreadPoolExecutor(schedulerConfig.thread_count, new CustomizableThreadFactory("scheduler-pool"))
   private val shortIntervalService = new ScheduledThreadPoolExecutor(schedulerConfig.thread_count)
   private val scheduledChecks = scala.collection.concurrent.TrieMap[Integer, ScheduledCheck]()
   private val taskSerializer = new CommandSerializer(schedulerConfig.task_serializer)
