@@ -48,7 +48,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
     }
 
     @Autowired(required = false)
-    public EntityAdapterRegistry(SchedulerConfig config, ZalandoConfig zConfig, MetricRegistry metrics, ClientHttpRequestFactory clientFactory) {
+    public EntityAdapterRegistry(SchedulerConfig config, ZalandoConfig zConfig, MetricRegistry metrics, TokenWrapper tokens, ClientHttpRequestFactory clientFactory) {
         this.metrics = metrics;
 
         if (config.enable_global_entity()) {
@@ -75,7 +75,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
         }
 
         if (zConfig.entityservice != null && zConfig.entityservice.url != null) {
-            EntityServiceAdapter e = new EntityServiceAdapter(zConfig.entityservice.url + (config.urls_without_rest() ? "" : "/rest") + "/api/v1/entities/", metrics, null, clientFactory);
+            EntityServiceAdapter e = new EntityServiceAdapter(zConfig.entityservice.url + (config.urls_without_rest() ? "" : "/rest") + "/api/v1/entities/", metrics, tokens, clientFactory);
             register(e);
         }
 
