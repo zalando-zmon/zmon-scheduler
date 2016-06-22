@@ -23,20 +23,6 @@ class ZalandoControllerConfig {
 }
 
 @Component
-@Profile(Array("zalando"))
-@ConfigurationProperties(prefix = "zalando.checks")
-class ZalandoCheckConfig {
-  @BeanProperty var controller : ZalandoControllerConfig = null
-}
-
-@Component
-@Profile(Array("zalando"))
-@ConfigurationProperties(prefix = "zalando.alerts")
-class ZalandoAlertConfig {
-  @BeanProperty var controller : ZalandoControllerConfig = null
-}
-
-@Component
 @Configuration
 @ConfigurationProperties(prefix = "scheduler")
 class SchedulerConfig {

@@ -72,27 +72,20 @@ public class DefaultAlertSource extends AlertSource {
 
         AlertDefinitions defs = new AlertDefinitions();
         try {
-            if (tokens != null) {
-                final String accessToken = tokens.get();
-                LOG.info("Querying alert definitions with token " + accessToken.substring(0, Math.min(accessToken.length(), 3)) + "..");
-                final HttpEntity<String> request = new HttpEntity<>(getAuthenticationHeader());
-                ResponseEntity<AlertDefinitions> response;
-                Timer.Context ct = timer.time();
-                response = rt.exchange(url, HttpMethod.GET, request, AlertDefinitions.class);
-                ct.stop();
-                defs = response.getBody();
-            } else {
-                LOG.info("Querying without credentials");
-                Timer.Context ct = timer.time();
-                defs = rt.getForObject(url, AlertDefinitions.class);
-                ct.stop();
-            }
+            final String accessToken = tokens.get();
+            LOG.info("Querying alert definitions with token " + accessToken.substring(0, Math.min(accessToken.length(), 3)) + "..");
+            final HttpEntity<String> request = new HttpEntity<>(getAuthenticationHeader());
+            ResponseEntity<AlertDefinitions> response;
+            Timer.Context ct = timer.time();
+            response = rt.exchange(url, HttpMethod.GET, request, AlertDefinitions.class);
+            ct.stop();
+            defs = response.getBody();
 
             LOG.info("Got {} alerts from {}", defs.getAlertDefinitions().size(), getName());
             isFirstLoad = false;
         } catch (Throwable t) {
             LOG.error("Failed to get alert definitions: {}", t.getMessage());
-            if(!isFirstLoad) {
+            if (!isFirstLoad) {
                 // rethrow so that currently alerts are still used not not replaced by empty list
                 throw t;
             }
