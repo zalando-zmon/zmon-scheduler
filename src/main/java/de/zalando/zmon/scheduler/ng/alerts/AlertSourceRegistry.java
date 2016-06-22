@@ -32,16 +32,4 @@ public class AlertSourceRegistry extends SourceRegistry<AlertSource> {
         register(source);
     }
 
-    @Autowired(required = false)
-    public AlertSourceRegistry(final ZalandoAlertConfig zConfig, final SchedulerConfig config,
-                               final MetricRegistry metrics, ClientHttpRequestFactory clientFactory) {
-        this.metrics = metrics;
-
-        if (zConfig.controller() != null && zConfig.controller().getUrl() != null
-                && !"".equals(zConfig.controller().url())) {
-            final ZalandoControllerConfig conf = zConfig.controller();
-            final DefaultAlertSource source = new DefaultAlertSource(conf.name(), conf.url(), metrics, null, clientFactory);
-            register(source);
-        }
-    }
 }

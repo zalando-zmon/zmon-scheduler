@@ -23,12 +23,4 @@ public class CheckSourceRegistry extends SourceRegistry<CheckSource> {
         register(source);
     }
 
-    @Autowired(required = false)
-    public CheckSourceRegistry(ZalandoCheckConfig config, SchedulerConfig schedulerConfig, ClientHttpRequestFactory clientFactory) {
-        if (config.controller() != null && config.controller().getUrl() != null && !"".equals(config.controller().url())) {
-            ZalandoControllerConfig conf = config.controller();
-            DefaultCheckSource source = new DefaultCheckSource(conf.name(), conf.url(), null, clientFactory);
-            register(source);
-        }
-    }
 }

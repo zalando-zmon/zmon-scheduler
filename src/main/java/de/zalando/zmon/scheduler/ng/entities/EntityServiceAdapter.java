@@ -66,15 +66,9 @@ public class EntityServiceAdapter extends EntityAdapter {
         RestTemplate rt = new RestTemplate(clientFactory);
         HttpEntity<String> request;
 
-        if (tokens != null) {
-            final String accessToken = tokens.get();
-            LOG.info("Querying entities with token " + accessToken.substring(0, Math.min(accessToken.length(), 3)) + "..");
-            request = new HttpEntity<>(getWithAuth());
-        } else {
-            // FIXME: this branch is never reached
-            LOG.info("Querying entity service");
-            request = new HttpEntity<>(new HttpHeaders());
-        }
+        final String accessToken = tokens.get();
+        LOG.info("Querying entities with token " + accessToken.substring(0, Math.min(accessToken.length(), 3)) + "..");
+        request = new HttpEntity<>(getWithAuth());
 
         try {
             Timer.Context tC = timer.time();

@@ -66,22 +66,17 @@ public class DefaultCheckSource extends CheckSource {
 
         CheckDefinitions defs = new CheckDefinitions();
         try {
-            if (tokens != null) {
-                final String accessToken = tokens.get();
-                LOG.info("Querying check definitions with token " + accessToken.substring(0, Math.min(accessToken.length(), 3)) + "..");
-                HttpEntity<String> request = new HttpEntity<>(getWithAuth());
-                ResponseEntity<CheckDefinitions> response;
-                response = rt.exchange(url, HttpMethod.GET, request, CheckDefinitions.class);
-                defs = response.getBody();
-            } else {
-                LOG.info("Querying without credentials");
-                defs = rt.getForObject(url, CheckDefinitions.class);
-            }
+            final String accessToken = tokens.get();
+            LOG.info("Querying check definitions with token " + accessToken.substring(0, Math.min(accessToken.length(), 3)) + "..");
+            HttpEntity<String> request = new HttpEntity<>(getWithAuth());
+            ResponseEntity<CheckDefinitions> response;
+            response = rt.exchange(url, HttpMethod.GET, request, CheckDefinitions.class);
+            defs = response.getBody();
             LOG.info("Got {} checks from {}", defs.getCheckDefinitions().size(), getName());
             isFirstLoad = false;
         } catch (Throwable t) {
             LOG.error("Failed to get check definitions: {}", t.getMessage());
-            if(!isFirstLoad) {
+            if (!isFirstLoad) {
                 // rethrow so that currently used checks are still used and not replaced by empty list
                 throw t;
             }
