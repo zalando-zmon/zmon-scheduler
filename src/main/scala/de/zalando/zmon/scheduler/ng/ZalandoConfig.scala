@@ -46,8 +46,6 @@ class SchedulerConfig {
   @BeanProperty var redis_host : String = ""
   @BeanProperty var redis_port : Int = 6379
 
-  @BeanProperty var urls_without_rest : Boolean = false
-
   @BeanProperty var oauth2_access_token_url : String = null
   @BeanProperty var oauth2_scopes: java.util.List[String] = null
   @BeanProperty var oauth2_static_token: String = ""
