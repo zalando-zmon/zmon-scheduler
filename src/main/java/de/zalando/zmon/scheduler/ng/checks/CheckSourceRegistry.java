@@ -16,7 +16,7 @@ public class CheckSourceRegistry extends SourceRegistry<CheckSource> {
 
     }
 
-    @Autowired(required = false)
+    @Autowired
     public CheckSourceRegistry(SchedulerConfig config, final TokenWrapper tokens, ClientHttpRequestFactory clientFactory) {
         final String url = config.controller_url() + "/api/v1/checks/all-active-check-definitions";
         final DefaultCheckSource source = new DefaultCheckSource("check-source", url, tokens, clientFactory);

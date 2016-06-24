@@ -22,7 +22,7 @@ public class AlertSourceRegistry extends SourceRegistry<AlertSource> {
         this.metrics = metrics;
     }
 
-    @Autowired(required = false)
+    @Autowired
     public AlertSourceRegistry(final SchedulerConfig config, final MetricRegistry metrics, final TokenWrapper tokens, ClientHttpRequestFactory clientFactory) {
         this.metrics = metrics;
 
