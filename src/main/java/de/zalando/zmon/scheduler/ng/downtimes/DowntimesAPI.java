@@ -5,7 +5,6 @@ import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.*;
 import java.util.*;
 
 /**
