@@ -36,15 +36,16 @@ public class DowntimesAPI {
     }
 
     @RequestMapping(value = "/api/v1/downtimes", method = RequestMethod.POST)
-    void postDowntime(@RequestBody DowntimeRequest request) {
-        downtimeService.storeDowntime(request);
+    DowntimeRequestResult postDowntime(@RequestBody DowntimeRequest request) {
+        DowntimeRequestResult result = downtimeService.storeDowntime(request);
 
         // trigger evaluation locally
         for(DowntimeAlertRequest r : request.getDowntimeEntities()) {
             scheduler.executeImmediate(alertRepo.get(r.getAlertId()).getCheckDefinitionId());
         }
-
         downtimeForwarder.forwardRequest(DowntimeForwardTask.NewDowntimeTask(request));
+
+        return result;
     }
 
     @RequestMapping(value = "/api/v1/downtimes/{id}", method = RequestMethod.DELETE)

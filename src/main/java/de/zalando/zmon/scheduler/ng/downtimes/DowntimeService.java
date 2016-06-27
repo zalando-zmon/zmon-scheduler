@@ -31,7 +31,8 @@ public class DowntimeService {
         redisPool = new JedisPool(config.getRedis_host(), config.getRedis_port());
     }
 
-    private void storeInRedis(DowntimeRequest request, String groupId) {
+    private DowntimeRequestResult storeInRedis(DowntimeRequest request, String groupId) {
+        DowntimeRequestResult result = new DowntimeRequestResult(groupId);
         try (Jedis jedis = redisPool.getResource()) {
             // create pipeline
             final Pipeline p = jedis.pipelined();
@@ -46,6 +47,7 @@ public class DowntimeService {
                     final String id = UUID.randomUUID().toString();
 
                     final DowntimeData details = new DowntimeData();
+
                     details.setId(id);
                     details.setGroupId(groupId);
                     details.setComment(request.getComment());
@@ -58,13 +60,15 @@ public class DowntimeService {
                     try {
                         final String json = mapper.writeValueAsString(details);
                         p.hset(entitiesPattern + ":" + entity, id, json);
+                        result.getIds().put(entity, id);
                     } catch (final IOException e) {
-                        log.error("", e);
+                        log.error("creating entity downtime failed: entity={} groupId={}", entity, groupId);
                     }
                 }
             }
             p.sync();
         }
+        return result;
     }
 
     private static final class DowntimeDetailsFormat {
@@ -172,8 +176,8 @@ public class DowntimeService {
         }
     }
 
-    public void storeDowntime(DowntimeRequest request) {
+    public DowntimeRequestResult storeDowntime(DowntimeRequest request) {
         // store in Redis
-        storeInRedis(request, UUID.randomUUID().toString());
+        return storeInRedis(request, UUID.randomUUID().toString());
     }
 }
