@@ -10,6 +10,8 @@ public class DowntimeRequest {
     private Long startTime;
     private Long endTime;
     private String createdBy;
+    private String groupId;
+
     private List<DowntimeAlertRequest> downtimeEntities;
 
     public DowntimeRequest() {
@@ -53,5 +55,13 @@ public class DowntimeRequest {
 
     public void setDowntimeEntities(List<DowntimeAlertRequest> downtimeEntities) {
         this.downtimeEntities = downtimeEntities;
+    }
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
     }
 }

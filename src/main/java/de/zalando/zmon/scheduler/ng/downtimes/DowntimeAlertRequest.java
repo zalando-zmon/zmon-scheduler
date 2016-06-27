@@ -1,13 +1,15 @@
 package de.zalando.zmon.scheduler.ng.downtimes;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * Created by jmussler on 18.06.16.
  */
 public class DowntimeAlertRequest {
     private int alertId;
-    private List<String> entityIds;
+
+    // Stores entityId -> UUID map, UUID from controller to delete individual downtimes
+    private Map<String, String> entityIds;
 
     public DowntimeAlertRequest() {
     }
@@ -20,11 +22,11 @@ public class DowntimeAlertRequest {
         this.alertId = alertId;
     }
 
-    public List<String> getEntityIds() {
+    public Map<String, String> getEntityIds() {
         return entityIds;
     }
 
-    public void setEntityIds(List<String> entityIds) {
+    public void setEntityIds(Map<String, String> entityIds) {
         this.entityIds = entityIds;
     }
 }

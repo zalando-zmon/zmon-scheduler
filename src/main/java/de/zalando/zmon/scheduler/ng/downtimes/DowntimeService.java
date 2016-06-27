@@ -31,7 +31,9 @@ public class DowntimeService {
         redisPool = new JedisPool(config.getRedis_host(), config.getRedis_port());
     }
 
-    private DowntimeRequestResult storeInRedis(DowntimeRequest request, String groupId) {
+    private DowntimeRequestResult storeInRedis(DowntimeRequest request) {
+        final String groupId = request.getGroupId();
+
         DowntimeRequestResult result = new DowntimeRequestResult(groupId);
         try (Jedis jedis = redisPool.getResource()) {
             // create pipeline
@@ -40,29 +42,28 @@ public class DowntimeService {
                 p.sadd("zmon:downtimes", "" + downtimeEntities.getAlertId());
 
                 final String entitiesPattern = "zmon:downtimes:" + downtimeEntities.getAlertId();
-                for (final String entity : downtimeEntities.getEntityIds()) {
-                    p.sadd(entitiesPattern, entity);
-
-                    // generate id
-                    final String id = UUID.randomUUID().toString();
+                for (final Map.Entry<String, String> entry : downtimeEntities.getEntityIds().entrySet()) {
+                    final String entityId = entry.getKey();
+                    final String uuid = entry.getValue();
+                    p.sadd(entitiesPattern, entityId);
 
                     final DowntimeData details = new DowntimeData();
 
-                    details.setId(id);
+                    details.setId(uuid);
                     details.setGroupId(groupId);
                     details.setComment(request.getComment());
                     details.setStartTime(request.getStartTime());
                     details.setEndTime(request.getEndTime());
                     details.setAlertId(downtimeEntities.getAlertId());
-                    details.setEntity(entity);
+                    details.setEntity(entityId);
                     details.setCreatedBy(request.getCreatedBy());
 
                     try {
                         final String json = mapper.writeValueAsString(details);
-                        p.hset(entitiesPattern + ":" + entity, id, json);
-                        result.getIds().put(entity, id);
+                        p.hset(entitiesPattern + ":" + entityId, uuid, json);
+                        result.getIds().put(entityId, uuid);
                     } catch (final IOException e) {
-                        log.error("creating entity downtime failed: entity={} groupId={}", entity, groupId);
+                        log.error("creating entity downtime failed: entity={} groupId={}", entityId, groupId);
                     }
                 }
             }
@@ -90,7 +91,7 @@ public class DowntimeService {
     }
 
     private List<RedisResponseHolder<Integer, Set<String>>> fetchEntities(final Jedis jedis,
-                                                                     final Iterable<Integer> alertIdsWithDowntime) {
+                                                                          final Iterable<Integer> alertIdsWithDowntime) {
         final List<RedisResponseHolder<Integer, Set<String>>> asyncAlertEntities = new LinkedList<>();
 
         final Pipeline p = jedis.pipelined();
@@ -118,7 +119,7 @@ public class DowntimeService {
             final Pipeline p = jedis.pipelined();
             for (final RedisResponseHolder<Integer, Set<String>> response : asyncAlertEntities) {
                 for (final String entity : response.getResponse().get()) {
-                    deleteResults.add(p.hvals("zmon:downtimes:" + response.getKey() + ":" +entity));
+                    deleteResults.add(p.hvals("zmon:downtimes:" + response.getKey() + ":" + entity));
                 }
             }
 
@@ -178,6 +179,6 @@ public class DowntimeService {
 
     public DowntimeRequestResult storeDowntime(DowntimeRequest request) {
         // store in Redis
-        return storeInRedis(request, UUID.randomUUID().toString());
+        return storeInRedis(request);
     }
 }
