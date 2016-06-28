@@ -2,7 +2,6 @@ package de.zalando.zmon.scheduler.ng.downtimes;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import de.zalando.zmon.scheduler.ng.RedisResponseHolder;
 import de.zalando.zmon.scheduler.ng.SchedulerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +13,6 @@ import redis.clients.jedis.Pipeline;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by jmussler on 18.06.16.
@@ -134,11 +132,11 @@ For now do a very stupid delete, we just assume that the id is present and delet
 
     public void deleteDowntimes(final Collection<String> downtimeIds) {
         Map<DowntimeEntry, Collection<String>> toDeleteItems = new HashMap<>();
-        try(Jedis jedis = redisPool.getResource()) {
+        try (Jedis jedis = redisPool.getResource()) {
             Set<String> alertsInDowntime = jedis.smembers("zmon:downtimes");
-            for(String alertId : alertsInDowntime) {
+            for (String alertId : alertsInDowntime) {
                 Set<String> entities = jedis.smembers("zmon:downtimes:" + alertId);
-                for(String entity : entities) {
+                for (String entity : entities) {
                     toDeleteItems.put(new DowntimeEntry(alertId, entity), downtimeIds);
                 }
             }
@@ -150,12 +148,12 @@ For now do a very stupid delete, we just assume that the id is present and delet
         try (Jedis jedis = redisPool.getResource()) {
             for (Map.Entry<DowntimeEntry, Collection<String>> entry : toDeleteEntries.entrySet()) {
                 final String key = "zmon:downtimes:" + entry.getKey().alertId + ":" + entry.getKey().entity;
-                for(String id : entry.getValue()) {
+                for (String id : entry.getValue()) {
                     jedis.hdel(key, id);
                 }
                 String type = jedis.type(key);
                 if (null == type) {
-                    jedis.srem("zmon:downtimes:" + entry.getKey().alertId);
+                    jedis.srem("zmon:downtimes:" + entry.getKey().alertId, entry.getKey().entity);
                     if (jedis.smembers("zmon:downtimes:" + entry.getKey()).size() == 0) {
                         jedis.srem("zmon:downtimes", entry.getKey().alertId);
                     }
