@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Pipeline;
-import redis.clients.jedis.Response;
 
 import java.io.IOException;
 import java.util.*;
@@ -91,95 +90,77 @@ public class DowntimeService {
         }
     }
 
-    private List<RedisResponseHolder<Integer, Set<String>>> fetchEntities(final Jedis jedis,
-                                                                          final Iterable<Integer> alertIdsWithDowntime) {
-        final List<RedisResponseHolder<Integer, Set<String>>> asyncAlertEntities = new LinkedList<>();
-
-        final Pipeline p = jedis.pipelined();
-        for (final Integer alertDefinitionId : alertIdsWithDowntime) {
-            asyncAlertEntities.add(RedisResponseHolder.create(alertDefinitionId,
-                    p.smembers("zmon:alerts:" + alertDefinitionId)));
-        }
-
-        p.sync();
-
-        return asyncAlertEntities;
+    public DowntimeRequestResult storeDowntime(DowntimeRequest request) {
+        // store in Redis
+        return storeInRedis(request);
     }
 
-    private Set<Integer> alertsInDowntime(final Jedis jedis) {
-        return jedis.smembers("zmon:downtimes").stream().map(Integer::parseInt).collect(Collectors.toSet());
-    }
+/* Downtimes look like this in Redis:
+
+127.0.0.1:6379> keys *downtime*
+1) "zmon:downtimes:5"
+2) "zmon:downtimes:5:zmon-worker"
+3) "zmon:downtimes"
+4) "zmon:active_downtimes"
+
+
+127.0.0.1:6379> smembers zmon:downtimes
+1) "5"
+
+127.0.0.1:6379> smembers zmon:downtimes:5
+1) "zmon-worker"
+
+127.0.0.1:6379> hgetall zmon:downtimes:5:zmon-worker
+1) "0c64cd04-5adc-40b0-9f2b-cee405afec7f"
+2) "{\"comment\":\"Jan-M\",\"start_time\":1467128641,\"end_time\":1467130441,\"id\":\"0c64cd04-5adc-40b0-9f2b-cee405afec7f\",\"alert_id\":5,\"entity\":\"zmon-worker\",\"group_id\":\"fcd43031-a120-47d5-b4db-f78b52b10d70\",\"created_by\":\"test\"}"
+
+For now do a very stupid delete, we just assume that the id is present and delete for now, this does not hurt, otherwise we would do one more read anyways
+
+*/
 
     public void deleteDowntimeGroup(String groupId) {
-        final Collection<Response<List<String>>> deleteResults = new LinkedList<>();
-        try (Jedis jedis = redisPool.getResource()) {
-            final List<RedisResponseHolder<Integer, Set<String>>> asyncAlertEntities = fetchEntities(jedis,
-                    alertsInDowntime(jedis));
 
-            // this is slow but we are not expecting so many deletes
-            final Pipeline p = jedis.pipelined();
-            for (final RedisResponseHolder<Integer, Set<String>> response : asyncAlertEntities) {
-                for (final String entity : response.getResponse().get()) {
-                    deleteResults.add(p.hvals("zmon:downtimes:" + response.getKey() + ":" + entity));
-                }
-            }
+    }
 
-            p.sync();
-        }
+    public static class DowntimeEntry {
+        public String alertId;
+        public String entity;
 
-        final Map<String, DowntimeDetailsFormat> toRemoveJsonDetails = new HashMap<>();
-        for (final Response<List<String>> response : deleteResults) {
-            for (final String jsonDetails : response.get()) {
-                try {
-                    final DowntimeData details = mapper.readValue(jsonDetails, DowntimeData.class);
-                    if (groupId.equals(details.getGroupId())) {
-                        toRemoveJsonDetails.put(details.getId(), new DowntimeDetailsFormat(details, jsonDetails));
-                    }
-                } catch (final IOException e) {
-                    throw new RuntimeException("Could not read JSON: " + jsonDetails, e);
-                }
-            }
+        public DowntimeEntry(String alertId, String entity) {
+            this.entity = entity;
+            this.alertId = alertId;
         }
     }
 
     public void deleteDowntimes(final Collection<String> downtimeIds) {
-        if (!downtimeIds.isEmpty()) {
-            final Collection<Response<String>> deleteResults = new LinkedList<>();
-
-            try (Jedis jedis = redisPool.getResource()) {
-                final List<RedisResponseHolder<Integer, Set<String>>> asyncAlertEntities = fetchEntities(jedis,
-                        alertsInDowntime(jedis));
-
-                // this is slow but we are not expecting so many deletes
-                final Pipeline p = jedis.pipelined();
-                for (final RedisResponseHolder<Integer, Set<String>> response : asyncAlertEntities) {
-                    for (final String entity : response.getResponse().get()) {
-                        for (final String downtimeId : downtimeIds) {
-                            deleteResults.add(p.hget("zmon:downtimes:" + response.getKey() + ":" + entity, downtimeId));
-                        }
-                    }
+        Map<DowntimeEntry, Collection<String>> toDeleteItems = new HashMap<>();
+        try(Jedis jedis = redisPool.getResource()) {
+            Set<String> alertsInDowntime = jedis.smembers("zmon:downtimes");
+            for(String alertId : alertsInDowntime) {
+                Set<String> entities = jedis.smembers("zmon:downtimes:" + alertId);
+                for(String entity : entities) {
+                    toDeleteItems.put(new DowntimeEntry(alertId, entity), downtimeIds);
                 }
-
-                p.sync();
             }
+        }
+        doDelete(toDeleteItems);
+    }
 
-            final Map<String, DowntimeDetailsFormat> toRemoveJsonDetails = new HashMap<>();
-            for (final Response<String> response : deleteResults) {
-                final String jsonDetails = response.get();
-                if (jsonDetails != null) {
-                    try {
-                        final DowntimeData details = mapper.readValue(jsonDetails, DowntimeData.class);
-                        toRemoveJsonDetails.put(details.getId(), new DowntimeDetailsFormat(details, jsonDetails));
-                    } catch (final IOException e) {
-                        throw new RuntimeException("Could not read JSON: " + jsonDetails, e);
+    public void doDelete(Map<DowntimeEntry, Collection<String>> toDeleteEntries) {
+        try (Jedis jedis = redisPool.getResource()) {
+            for (Map.Entry<DowntimeEntry, Collection<String>> entry : toDeleteEntries.entrySet()) {
+                final String key = "zmon:downtimes:" + entry.getKey().alertId + ":" + entry.getKey().entity;
+                for(String id : entry.getValue()) {
+                    jedis.hdel(key, id);
+                }
+                String type = jedis.type(key);
+                if (null == type) {
+                    jedis.srem("zmon:downtimes:" + entry.getKey().alertId);
+                    if (jedis.smembers("zmon:downtimes:" + entry.getKey()).size() == 0) {
+                        jedis.srem("zmon:downtimes", entry.getKey().alertId);
                     }
                 }
             }
         }
-    }
-
-    public DowntimeRequestResult storeDowntime(DowntimeRequest request) {
-        // store in Redis
-        return storeInRedis(request);
     }
 }
