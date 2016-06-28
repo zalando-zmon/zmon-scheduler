@@ -1,6 +1,7 @@
 package de.zalando.zmon.scheduler.ng.downtimes;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import de.zalando.zmon.scheduler.ng.RedisResponseHolder;
 import de.zalando.zmon.scheduler.ng.SchedulerConfig;
 import org.slf4j.Logger;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 public class DowntimeService {
 
     private final JedisPool redisPool;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = (new ObjectMapper()).setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
     private final Logger log = LoggerFactory.getLogger(DowntimeService.class);
 
     @Autowired
