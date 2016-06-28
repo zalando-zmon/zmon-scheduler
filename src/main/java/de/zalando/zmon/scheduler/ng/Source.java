@@ -7,6 +7,5 @@ import java.util.Collection;
  */
 public interface Source<T> {
     String getName();
-
     Collection<T> getCollection();
 }

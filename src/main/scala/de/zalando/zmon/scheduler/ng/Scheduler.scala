@@ -11,9 +11,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository
-import de.zalando.zmon.scheduler.ng.checks.{CheckChangeListener, CheckRepository}
+import de.zalando.zmon.scheduler.ng.checks.{CheckChangedListener, CheckChangeListener, CheckRepository}
 import de.zalando.zmon.scheduler.ng.cleanup.{AllTrialRunCleanupTask, TrialRunCleanupTask}
+import de.zalando.zmon.scheduler.ng.downtimes.{DowntimeService, DowntimeHttpSubscriber, DowntimeForwarder}
 import de.zalando.zmon.scheduler.ng.entities.{Entity, EntityRepository}
+import de.zalando.zmon.scheduler.ng.instantevaluations.{InstantEvalHttpSubscriber, InstantEvalForwarder}
+import de.zalando.zmon.scheduler.ng.trailruns.{TrialRunRequest, TrialRunHttpSubscriber, TrialRunForwarder}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.{Bean, Configuration}
@@ -236,27 +239,6 @@ object SchedulerFactory {
   val LOG = LoggerFactory.getLogger(SchedulerFactory.getClass)
 }
 
-class CheckChangedListener(val scheduler: Scheduler) extends CheckChangeListener {
-  override def notifyNewCheck(repo: CheckRepository, checkId: Int): Unit = {
-    Scheduler.LOG.info("New check discovered: " + checkId)
-    scheduler.schedule(checkId, 0)
-  }
-
-  override def notifyCheckIntervalChange(repo: CheckRepository, checkId: Int): Unit = {
-    Scheduler.LOG.info("Check interval changed: " + checkId)
-    scheduler.executeImmediate(checkId)
-  }
-
-  override def notifyDeleteCheck(repo: CheckRepository, checkId: Int): Unit = {
-    Scheduler.LOG.info("Check removed or inactive: " + checkId)
-    scheduler.unschedule(checkId)
-  }
-
-  override def notifyFilterChange(checkId: Int): Unit = {
-
-  }
-}
-
 @Configuration
 class SchedulerFactory {
 
@@ -276,23 +258,22 @@ class SchedulerFactory {
                       queueSelector: QueueSelector,
                       instantForwarder: InstantEvalForwarder,
                       trialRunForwarder: TrialRunForwarder,
+                      downtimeForwarder: DowntimeForwarder,
+                      downtimeService: DowntimeService,
                       tokenWrapper: TokenWrapper,
                       httpClientFactory: ClientHttpRequestFactory)
                      (implicit schedulerConfig: SchedulerConfig, metrics: MetricRegistry): Scheduler = {
+
     SchedulerFactory.LOG.info("Creating scheduler instance")
-    val s = new Scheduler(alertRepo, checkRepo, entityRepo, queueSelector)
+    val newScheduler = new Scheduler(alertRepo, checkRepo, entityRepo, queueSelector)
 
     SchedulerFactory.LOG.info("Check ID filter: " + schedulerConfig.check_filter)
 
     SchedulerFactory.LOG.info("Initial scheduling of all checks")
     for (cd <- checkRepo.get()) {
-      s.scheduleCheck(cd.getId)
+      newScheduler.scheduleCheck(cd.getId)
     }
     SchedulerFactory.LOG.info("Initial scheduling of all checks done")
-
-    if (schedulerConfig.enable_downtime_redis_sub) {
-      val downtimeEvalListener = new RedisDownTimeSubscriber(s, schedulerConfig, alertRepo)
-    }
 
     if (schedulerConfig.instant_eval_forward) {
       entityRepo.registerListener(instantForwarder)
@@ -302,15 +283,19 @@ class SchedulerFactory {
       entityRepo.registerListener(trialRunForwarder)
     }
 
+    if (schedulerConfig.downtime_forward) {
+      entityRepo.registerListener(downtimeForwarder)
+    }
+
     if (schedulerConfig.trial_run_http_url != null) {
-      val trialRunPoller = new TrialRunHttpSubscriber(s, schedulerConfig, tokenWrapper, httpClientFactory);
+      val trialRunPoller = new TrialRunHttpSubscriber(newScheduler, schedulerConfig, tokenWrapper, httpClientFactory)
     }
 
     if (schedulerConfig.instant_eval_http_url != null) {
-      val instantEvalPoller = new InstantEvalHttpSubscriber(s, schedulerConfig, tokenWrapper, httpClientFactory);
+      val instantEvalPoller = new InstantEvalHttpSubscriber(newScheduler, schedulerConfig, tokenWrapper, httpClientFactory)
     }
 
-    s
+    newScheduler
   }
 }
 
