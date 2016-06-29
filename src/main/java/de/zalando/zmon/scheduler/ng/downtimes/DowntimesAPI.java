@@ -56,7 +56,7 @@ public class DowntimesAPI {
         downtimeForwarder.forwardRequest(DowntimeForwardTask.DeleteDowntimeTask(ids));
     }
 
-    @RequestMapping(value = "/api/v1/downtime-groups/{groupdId}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/api/v1/downtime-groups/{groupId}", method = RequestMethod.DELETE)
     void deleteDowntimeGroup(@PathVariable(value = "groupId") String groupId) {
         downtimeService.deleteDowntimeGroup(groupId);
         downtimeForwarder.forwardRequest(DowntimeForwardTask.DeleteGroupTask(groupId));
