@@ -3,6 +3,7 @@ package de.zalando.zmon.scheduler.ng.downtimes;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import de.zalando.zmon.scheduler.ng.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +25,17 @@ public class DowntimeService {
     private final ObjectMapper mapper = (new ObjectMapper()).setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
     private final Logger log = LoggerFactory.getLogger(DowntimeService.class);
 
+    private final EntityRepository entityRepository;
+
     @Autowired
-    public DowntimeService(SchedulerConfig config) {
+    public DowntimeService(SchedulerConfig config, EntityRepository entityRepository) {
         redisPool = new JedisPool(config.getRedis_host(), config.getRedis_port());
+        this.entityRepository = entityRepository;
     }
 
     private DowntimeRequestResult storeInRedis(DowntimeRequest request) {
         final String groupId = request.getGroupId();
+        final List<String> listOfIds = new ArrayList<>();
 
         DowntimeRequestResult result = new DowntimeRequestResult(groupId);
         try (Jedis jedis = redisPool.getResource()) {
@@ -42,12 +47,18 @@ public class DowntimeService {
                 final String entitiesPattern = "zmon:downtimes:" + downtimeEntities.getAlertId();
                 for (final Map.Entry<String, String> entry : downtimeEntities.getEntityIds().entrySet()) {
                     final String entityId = entry.getKey();
+
+                    if (!entityRepository.getCurrentMap().containsKey(entityId)) {
+                        continue;
+                    }
+
                     final String uuid = entry.getValue();
                     p.sadd(entitiesPattern, entityId);
 
                     final DowntimeData details = new DowntimeData();
 
                     details.setId(uuid);
+                    listOfIds.add(uuid); // store that this id is actually used in this DC
                     details.setGroupId(groupId);
                     details.setComment(request.getComment());
                     details.setStartTime(request.getStartTime());
@@ -63,6 +74,7 @@ public class DowntimeService {
                     } catch (final IOException e) {
                         log.error("creating entity downtime failed: entity={} groupId={}", entityId, groupId);
                     }
+                    p.sadd("zmon:downtime-groups:" + groupId, listOfIds.toArray(new String[listOfIds.size()]));
                 }
             }
             p.sync();
@@ -117,7 +129,10 @@ For now do a very stupid delete, we just assume that the id is present and delet
 */
 
     public void deleteDowntimeGroup(String groupId) {
-
+        try (Jedis jedis = redisPool.getResource()) {
+            Set<String> ids = jedis.smembers("zmon:downtime-groups:" + groupId);
+            deleteDowntimes(ids);
+        }
     }
 
     public static class DowntimeEntry {
