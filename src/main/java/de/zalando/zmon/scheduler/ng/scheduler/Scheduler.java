@@ -4,7 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import de.zalando.zmon.scheduler.ng.AlertOverlapGenerator;
 import de.zalando.zmon.scheduler.ng.JavaCommandSerializer;
 import de.zalando.zmon.scheduler.ng.SchedulePersistType;
-import de.zalando.zmon.scheduler.ng.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
 import de.zalando.zmon.scheduler.ng.checks.CheckRepository;
 import de.zalando.zmon.scheduler.ng.cleanup.AllTrialRunCleanupTask;

@@ -1,7 +1,7 @@
 package de.zalando.zmon.scheduler.ng.cleanup;
 
 import de.zalando.zmon.scheduler.ng.AlertOverlapGenerator;
-import de.zalando.zmon.scheduler.ng.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.alerts.AlertChangeListener;
 import de.zalando.zmon.scheduler.ng.alerts.AlertDefinition;
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;

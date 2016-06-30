@@ -1,4 +1,4 @@
-package de.zalando.zmon.scheduler.ng;
+package de.zalando.zmon.scheduler.ng.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;

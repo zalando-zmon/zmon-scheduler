@@ -4,7 +4,7 @@ import com.codahale.metrics.Meter;
 import de.zalando.zmon.scheduler.ng.Alert;
 import de.zalando.zmon.scheduler.ng.AlertOverlapGenerator;
 import de.zalando.zmon.scheduler.ng.Check;
-import de.zalando.zmon.scheduler.ng.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
 import de.zalando.zmon.scheduler.ng.checks.CheckDefinition;
 import de.zalando.zmon.scheduler.ng.checks.CheckRepository;

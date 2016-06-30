@@ -2,6 +2,7 @@ package de.zalando.zmon.scheduler.ng;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.zalando.zmon.scheduler.ng.config.StupsOAuthConfig;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Form;

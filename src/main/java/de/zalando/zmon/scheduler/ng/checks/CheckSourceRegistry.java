@@ -2,6 +2,7 @@ package de.zalando.zmon.scheduler.ng.checks;
 
 import com.codahale.metrics.MetricRegistry;
 import de.zalando.zmon.scheduler.ng.*;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;

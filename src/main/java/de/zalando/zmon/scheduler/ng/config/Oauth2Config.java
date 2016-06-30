@@ -1,5 +1,6 @@
-package de.zalando.zmon.scheduler.ng;
+package de.zalando.zmon.scheduler.ng.config;
 
+import de.zalando.zmon.scheduler.ng.TokenWrapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.zalando.stups.tokens.AccessTokenConfiguration;

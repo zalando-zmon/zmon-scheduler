@@ -1,7 +1,7 @@
 package de.zalando.zmon.scheduler.ng.trailruns;
 
 import de.zalando.zmon.scheduler.ng.DataCenterSubscriber;
-import de.zalando.zmon.scheduler.ng.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

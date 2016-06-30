@@ -1,6 +1,6 @@
 package de.zalando.zmon.scheduler.ng.trailruns;
 
-import de.zalando.zmon.scheduler.ng.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.TokenWrapper;
 import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
 import org.slf4j.Logger;

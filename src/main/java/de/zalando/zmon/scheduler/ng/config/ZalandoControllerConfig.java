@@ -1,4 +1,4 @@
-package de.zalando.zmon.scheduler.ng;
+package de.zalando.zmon.scheduler.ng.config;
 
 /**
  * Created by jmussler on 01.07.16.

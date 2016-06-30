@@ -2,6 +2,7 @@ package de.zalando.zmon.scheduler.ng.queue;
 
 import com.codahale.metrics.MetricRegistry;
 import de.zalando.zmon.scheduler.ng.*;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
 
 import java.util.ArrayList;

@@ -3,7 +3,7 @@ package de.zalando.zmon.scheduler.ng.queue;
 import de.zalando.zmon.scheduler.ng.Alert;
 import de.zalando.zmon.scheduler.ng.AlertOverlapGenerator;
 import de.zalando.zmon.scheduler.ng.Check;
-import de.zalando.zmon.scheduler.ng.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
 
 import java.util.Collection;

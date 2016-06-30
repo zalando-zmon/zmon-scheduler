@@ -1,5 +1,8 @@
-package de.zalando.zmon.scheduler.ng;
+package de.zalando.zmon.scheduler.ng.config;
 
+import de.zalando.zmon.scheduler.ng.SchedulePersistType;
+import de.zalando.zmon.scheduler.ng.TaskSerializerType;
+import de.zalando.zmon.scheduler.ng.TaskWriterType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;

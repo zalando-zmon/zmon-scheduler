@@ -5,7 +5,6 @@ package de.zalando.zmon.scheduler.ng.config;
  */
 
 import com.codahale.metrics.MetricRegistry;
-import de.zalando.zmon.scheduler.ng.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.TokenWrapper;
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
 import de.zalando.zmon.scheduler.ng.checks.CheckChangedListener;

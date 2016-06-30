@@ -1,10 +1,10 @@
 package de.zalando.zmon.scheduler.ng.entities;
 
 import com.codahale.metrics.MetricRegistry;
-import de.zalando.zmon.scheduler.ng.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.SourceRegistry;
 import de.zalando.zmon.scheduler.ng.TokenWrapper;
-import de.zalando.zmon.scheduler.ng.ZalandoConfig;
+import de.zalando.zmon.scheduler.ng.config.ZalandoConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
