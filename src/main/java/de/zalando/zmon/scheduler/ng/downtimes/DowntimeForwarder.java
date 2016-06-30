@@ -13,6 +13,6 @@ public class DowntimeForwarder extends DataCenterSubscriber<DowntimeForwardTask>
 
     @Autowired
     public DowntimeForwarder(SchedulerConfig config) {
-        super(config.downtime_forward());
+        super(config.isDowntimeForward());
     }
 }

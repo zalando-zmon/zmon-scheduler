@@ -30,7 +30,7 @@ public class DowntimeHttpSubscriber implements Runnable {
     private final RestTemplate restTemplate;
 
     public DowntimeHttpSubscriber(DowntimeService service, SchedulerConfig config, TokenWrapper tokenWrapper, RestTemplate restTemplate) {
-        url = config.getDowntime_http_url();
+        url = config.getDowntimeHttpUrl();
         this.service = service;
         this.tokenWrapper = tokenWrapper;
         this.restTemplate = restTemplate;

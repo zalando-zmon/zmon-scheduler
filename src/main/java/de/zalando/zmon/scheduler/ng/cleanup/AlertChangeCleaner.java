@@ -44,7 +44,7 @@ public class AlertChangeCleaner implements AlertChangeListener {
         GenericObjectPoolConfig poolConfig = new GenericObjectPoolConfig();
         poolConfig.setTestOnBorrow(true);
 
-        redisPool = new JedisPool(poolConfig, config.getRedis_host(), config.getRedis_port());
+        redisPool = new JedisPool(poolConfig, config.getRedisHost(), config.getRedisPort());
     }
 
     @Override

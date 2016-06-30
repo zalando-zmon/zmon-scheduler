@@ -18,7 +18,7 @@ public class DowntimeConfiguration {
 
     @Bean
     DowntimeHttpSubscriber downtimeHttpSubscriber(DowntimeService downtimeService, SchedulerConfig config, TokenWrapper tokenWrapper, RestTemplate restTemplate) {
-        if (config.downtime_http_url() != null) {
+        if (config.getDowntimeHttpUrl() != null) {
             LOG.info("Registering DowntimeHttpSubscriber");
             return new DowntimeHttpSubscriber(downtimeService, config, tokenWrapper, restTemplate);
         }

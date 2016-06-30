@@ -30,9 +30,9 @@ public class DowntimeService {
 
     @Autowired
     public DowntimeService(SchedulerConfig config, EntityRepository entityRepository) {
-        redisPool = new JedisPool(config.getRedis_host(), config.getRedis_port());
+        redisPool = new JedisPool(config.getRedisHost(), config.getRedisPort());
         this.entityRepository = entityRepository;
-        this.enableEntityFilter = config.downtime_entity_filter();
+        this.enableEntityFilter = config.isDowntimeEntityFilter();
     }
 
     private DowntimeRequestResult storeInRedis(DowntimeRequest request) {

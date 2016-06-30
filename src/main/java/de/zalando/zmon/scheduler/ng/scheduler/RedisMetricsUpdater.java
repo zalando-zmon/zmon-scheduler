@@ -22,10 +22,10 @@ public class RedisMetricsUpdater implements Runnable {
     public RedisMetricsUpdater(SchedulerConfig config, SchedulerMetrics metrics) {
         String n;
         try {
-            n = "s-p" + config.getServer_port() + "." + InetAddress.getLocalHost().getHostName();
+            n = "s-p" + config.getServerPort() + "." + InetAddress.getLocalHost().getHostName();
         }
         catch (UnknownHostException ex) {
-            n = "s-p" + config.getServer_port() + ".unknown";
+            n = "s-p" + config.getServerPort() + ".unknown";
         }
         name = n;
         this.config = config;
@@ -34,7 +34,7 @@ public class RedisMetricsUpdater implements Runnable {
 
     @Override
     public void run() {
-        try(Jedis jedis = new Jedis(config.getRedis_host(), config.getRedis_port())) {
+        try(Jedis jedis = new Jedis(config.getRedisHost(), config.getRedisPort())) {
             Pipeline p = jedis.pipelined();
             p.sadd("zmon:metrics", name);
             p.set("zmon:metrics:" + name + ":check.count", metrics.getTotalChecks() + "");
@@ -42,7 +42,7 @@ public class RedisMetricsUpdater implements Runnable {
             p.sync();
         }
         catch (Throwable t) {
-            logger.error("Metrics update failed: {} host={} port={}", t.getMessage(), config.getRedis_host(), "" + config.getRedis_port());
+            logger.error("Metrics update failed: {} host={} port={}", t.getMessage(), config.getRedisHost(), config.getRedisPort());
         }
     }
 }

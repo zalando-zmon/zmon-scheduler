@@ -13,6 +13,6 @@ public class TrialRunForwarder extends DataCenterSubscriber<TrialRunRequest> {
 
     @Autowired
     public TrialRunForwarder(SchedulerConfig config) {
-        super(config.trial_run_forward());
+        super(config.isTrialRunForward());
     }
 }

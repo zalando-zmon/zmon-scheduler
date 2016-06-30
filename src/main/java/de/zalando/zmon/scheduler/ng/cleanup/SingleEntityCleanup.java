@@ -45,7 +45,7 @@ public class SingleEntityCleanup implements EntityChangeListener{
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setTestOnBorrow(true);
 
-        jedisPool = new JedisPool(poolConfig, config.getRedis_host(), config.getRedis_port());
+        jedisPool = new JedisPool(poolConfig, config.getRedisHost(), config.getRedisPort());
     }
 
     @Override

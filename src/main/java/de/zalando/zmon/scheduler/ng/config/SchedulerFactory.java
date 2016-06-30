@@ -55,7 +55,7 @@ public class SchedulerFactory {
         LOG.info("Creating scheduler instance");
         Scheduler newScheduler = new Scheduler(alertRepo, checkRepo, entityRepo, queueSelector, config, metrics);
 
-        LOG.info("Check ID filter: {}", config.getCheck_filter());
+        LOG.info("Check ID filter: {}", config.getCheckFilter());
 
         LOG.info("Initial scheduling of all checks");
         for (CheckDefinition cd : checkRepo.get()) {
@@ -63,23 +63,23 @@ public class SchedulerFactory {
         }
         SchedulerFactory.LOG.info("Initial scheduling of all checks done");
 
-        if (config.getInstant_eval_forward()) {
+        if (config.isInstantEvalForward()) {
             entityRepo.registerListener(instantForwarder);
         }
 
-        if (config.getTrial_run_forward()) {
+        if (config.isTrialRunForward()) {
             entityRepo.registerListener(trialRunForwarder);
         }
 
-        if (config.getDowntime_forward()) {
+        if (config.isDowntimeForward()) {
             entityRepo.registerListener(downtimeForwarder);
         }
 
-        if (config.getTrial_run_http_url() != null) {
+        if (config.getTrialRunHttpUrl() != null) {
             TrialRunHttpSubscriber trialRunPoller = new TrialRunHttpSubscriber(newScheduler, config, tokenWrapper, restTemplate);
         }
 
-        if (config.getInstant_eval_http_url() != null) {
+        if (config.getInstantEvalHttpUrl() != null) {
             InstantEvalHttpSubscriber instantEvalPoller = new InstantEvalHttpSubscriber(newScheduler, config, tokenWrapper, restTemplate);
         }
 

@@ -31,7 +31,7 @@ public class TrialRunHttpSubscriber implements Runnable {
     private final RestTemplate restTemplate;
 
     public TrialRunHttpSubscriber(Scheduler scheduler, SchedulerConfig config, TokenWrapper tokenWrapper, RestTemplate restTemplate) {
-        url = config.trial_run_http_url();
+        url = config.getTrialRunHttpUrl();
         this.tokenWrapper = tokenWrapper;
         this.restTemplate = restTemplate;
 

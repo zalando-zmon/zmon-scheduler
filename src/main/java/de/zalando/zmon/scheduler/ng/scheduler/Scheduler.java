@@ -54,10 +54,10 @@ public class Scheduler {
         this.metrics = metrics;
         this.schedulerMetrics = new SchedulerMetrics(metrics);
 
-        taskSerializer = new JavaCommandSerializer(schedulerConfig.getTask_serializer());
+        taskSerializer = new JavaCommandSerializer(schedulerConfig.getTaskSerializer());
 
-        service = new ScheduledThreadPoolExecutor(schedulerConfig.getThread_count(), new CustomizableThreadFactory("scheduler-pool"));
-        shortIntervalService = new ScheduledThreadPoolExecutor(schedulerConfig.getThread_count(), new CustomizableThreadFactory("scheduler-pool-fast"));
+        service = new ScheduledThreadPoolExecutor(schedulerConfig.getThreadCount(), new CustomizableThreadFactory("scheduler-pool"));
+        shortIntervalService = new ScheduledThreadPoolExecutor(schedulerConfig.getThreadCount(), new CustomizableThreadFactory("scheduler-pool-fast"));
 
         service.scheduleAtFixedRate(new RedisMetricsUpdater(schedulerConfig, schedulerMetrics), 5, 3, TimeUnit.SECONDS);
         service.schedule(new AllTrialRunCleanupTask(schedulerConfig), 10, TimeUnit.SECONDS);
@@ -68,8 +68,8 @@ public class Scheduler {
             return false;
         }
 
-        if (schedulerConfig.getCheck_filter() != null && !schedulerConfig.getCheck_filter().isEmpty()) {
-            if (!schedulerConfig.getCheck_filter().contains(id)) {
+        if (schedulerConfig.getCheckFilter() != null && !schedulerConfig.getCheckFilter().isEmpty()) {
+            if (!schedulerConfig.getCheckFilter().contains(id)) {
                 return false;
             }
         }
@@ -107,7 +107,7 @@ public class Scheduler {
         long startDelay = 1L;
         long lastScheduled = 0L;
 
-        if (schedulerConfig.getLast_run_persist() != SchedulePersistType.DISABLED
+        if (schedulerConfig.getLastRunPersist() != SchedulePersistType.DISABLED
                 && lastScheduleAtStartup != null
                 && lastScheduleAtStartup.containsKey(id)) {
             lastScheduled = lastScheduleAtStartup.getOrDefault(id, 0L);
@@ -175,7 +175,7 @@ public class Scheduler {
         List<Entity> entitiesLocal = getEntitiesForTrialRun(entityRepo.get(), request.entities, request.entitiesExclude);
         Scheduler.LOG.info("Trial run matched entities: global=" + entitiesGlobal.size() + " local=" + entitiesLocal.size());
 
-        try(Jedis jedis = new Jedis(schedulerConfig.getRedis_host(), schedulerConfig.getRedis_port())) {
+        try(Jedis jedis = new Jedis(schedulerConfig.getRedisHost(), schedulerConfig.getRedisPort())) {
             String redisEntityKey = "zmon:trial_run:" + request.id;
             for (Entity entity : entitiesGlobal) {
                 jedis.sadd(redisEntityKey, entity.getId());
@@ -183,7 +183,7 @@ public class Scheduler {
 
             for (Entity entity : entitiesLocal) {
                 byte[] command = taskSerializer.writeTrialRun(entity, request);
-                queueSelector.execute(entity, command, schedulerConfig.getTrial_run_queue());
+                queueSelector.execute(entity, command, schedulerConfig.getTrialRunQueue());
             }
         }
         finally {

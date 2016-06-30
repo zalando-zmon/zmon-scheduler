@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -57,7 +56,7 @@ public class ScheduledCheck implements Runnable {
         this.metrics = metrics;
 
         this.check = new Check(id, checkRepo);
-        if(config.check_detail_metrics()) {
+        if(config.isCheckDetailMetrics()) {
             this.meter = metrics.getMetrics().meter("scheduler.check." + id);
         }
         else {

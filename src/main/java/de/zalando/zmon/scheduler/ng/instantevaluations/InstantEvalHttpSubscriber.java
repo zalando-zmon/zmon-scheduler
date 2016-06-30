@@ -31,7 +31,7 @@ public class InstantEvalHttpSubscriber implements Runnable {
     private final RestTemplate restTemplate;
 
     public InstantEvalHttpSubscriber(Scheduler scheduler, SchedulerConfig config, TokenWrapper tokenWrapper, RestTemplate restTemplate) {
-        url = config.instant_eval_http_url();
+        url = config.getInstantEvalHttpUrl();
         this.tokenWrapper = tokenWrapper;
         this.restTemplate = restTemplate;
 

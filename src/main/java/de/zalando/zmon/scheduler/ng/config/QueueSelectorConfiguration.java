@@ -17,11 +17,11 @@ public class QueueSelectorConfiguration {
     private static final Logger LOG = LoggerFactory.getLogger(QueueSelectorConfiguration.class);
 
     public static QueueWriter createWriter(SchedulerConfig schedulerConfig, MetricRegistry metrics) {
-        if(schedulerConfig.getTask_writer_type() == TaskWriterType.REDIS) {
-            LOG.info("Creating queue writer: Redis host={} port={}", schedulerConfig.getRedis_host(), schedulerConfig.getRedis_port());
-            return new JedisQueueWriter(schedulerConfig.getRedis_host(), schedulerConfig.getRedis_port(), metrics);
+        if(schedulerConfig.getTaskWriterType() == TaskWriterType.REDIS) {
+            LOG.info("Creating queue writer: Redis host={} port={}", schedulerConfig.getRedisHost(), schedulerConfig.getRedisPort());
+            return new JedisQueueWriter(schedulerConfig.getRedisHost(), schedulerConfig.getRedisPort(), metrics);
         }
-        else if (schedulerConfig.getTask_writer_type() == TaskWriterType.ARRAY_LIST) {
+        else if (schedulerConfig.getTaskWriterType() == TaskWriterType.ARRAY_LIST) {
             LOG.info("creating queue writer: ArrayQueueWriter");
             return new ArrayQueueWriter(metrics);
         }
