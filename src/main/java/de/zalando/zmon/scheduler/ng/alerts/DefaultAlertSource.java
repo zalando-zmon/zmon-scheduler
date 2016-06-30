@@ -27,23 +27,15 @@ public class DefaultAlertSource extends AlertSource {
 
     private final String url;
     private final TokenWrapper tokens;
-    private final ClientHttpRequestFactory clientFactory;
+    private final RestTemplate restTemplate;
     private boolean isFirstLoad = true;
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultAlertSource.class);
 
-    private static final ObjectMapper mapper = createObjectMapper();
-
-    private static ObjectMapper createObjectMapper() {
-        ObjectMapper m = new ObjectMapper();
-        m.setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
-        return m;
-    }
-
     @Autowired
-    public DefaultAlertSource(final String name, final String url, final MetricRegistry metrics, final TokenWrapper tokens, final ClientHttpRequestFactory clientFactory) {
+    public DefaultAlertSource(final String name, final String url, final MetricRegistry metrics, final TokenWrapper tokens, final RestTemplate restTemplate) {
         super(name);
-        this.clientFactory = clientFactory;
+        this.restTemplate = restTemplate;
         LOG.info("configuring alert source url={}", url);
         this.url = url;
         this.tokens = tokens;
@@ -63,12 +55,7 @@ public class DefaultAlertSource extends AlertSource {
 
     @Override
     public Collection<AlertDefinition> getCollection() {
-        RestTemplate rt = new RestTemplate(clientFactory);
 
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        converter.setObjectMapper(mapper);
-        rt.getMessageConverters().clear();
-        rt.getMessageConverters().add(converter);
 
         AlertDefinitions defs = new AlertDefinitions();
         try {
@@ -77,7 +64,7 @@ public class DefaultAlertSource extends AlertSource {
             final HttpEntity<String> request = new HttpEntity<>(getAuthenticationHeader());
             ResponseEntity<AlertDefinitions> response;
             Timer.Context ct = timer.time();
-            response = rt.exchange(url, HttpMethod.GET, request, AlertDefinitions.class);
+            response = restTemplate.exchange(url, HttpMethod.GET, request, AlertDefinitions.class);
             ct.stop();
             defs = response.getBody();
 

@@ -59,6 +59,7 @@ public class TrialRunHttpSubscriber implements Runnable {
             for (TrialRunRequest trialRunRequest : response.getBody()) {
                 LOG.info("Received trial run request: {}", trialRunRequest);
                 scheduler.scheduleTrialRun(trialRunRequest);
+                scheduler.scheduleTrialRun(trialRunRequest);
             }
         } catch (Throwable ex) {
             LOG.error("", ex);
