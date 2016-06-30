@@ -17,7 +17,7 @@ import de.zalando.zmon.scheduler.ng.downtimes.{DowntimeService, DowntimeForwarde
 import de.zalando.zmon.scheduler.ng.entities.{Entity, EntityRepository}
 import de.zalando.zmon.scheduler.ng.instantevaluations.{InstantEvalHttpSubscriber, InstantEvalForwarder}
 import de.zalando.zmon.scheduler.ng.queue.QueueSelector
-import de.zalando.zmon.scheduler.ng.scheduler.{ScheduledCheck, SchedulerMetrics, RedisMetricsUpdater}
+import de.zalando.zmon.scheduler.ng.scheduler.{SchedulePersister, ScheduledCheck, SchedulerMetrics, RedisMetricsUpdater}
 import de.zalando.zmon.scheduler.ng.trailruns.{TrialRunRequest, TrialRunHttpSubscriber, TrialRunForwarder}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -62,35 +62,6 @@ object filter {
   }
 }
 
-object SchedulePersister {
-
-  val mapper = new ObjectMapper with ScalaObjectMapper
-  mapper.registerModule(DefaultScalaModule)
-
-  def loadSchedule(): Map[Integer, Long] = {
-    try {
-      mapper.readValue(new File("schedule.json"), new TypeReference[Map[Integer, Long]] {})
-    }
-    catch {
-      case e: Exception => {
-        return Map[Integer, Long]()
-      }
-    }
-  }
-
-  def writeSchedule(schedule: collection.concurrent.Map[Integer, Long]) = {
-    if (schedule.size > 0) {
-      mapper.writeValue(new File("schedule.json"), schedule)
-    }
-  }
-}
-
-class SchedulePersister(val scheduledChecks: scala.collection.concurrent.TrieMap[Integer, ScheduledCheck]) extends Runnable {
-  override def run(): Unit = {
-    SchedulePersister.writeSchedule(scheduledChecks.filter(_._2.getLastRun > 0).map(x => (x._1, x._2.getLastRun)))
-  }
-}
-
 object Scheduler {
   val LOG = LoggerFactory.getLogger(Scheduler.getClass())
 }
@@ -106,7 +77,7 @@ class Scheduler(val alertRepo: AlertRepository, val checkRepo: CheckRepository, 
   implicit val schedulerMetrics = new SchedulerMetrics(metrics)
   val lastScheduleAtStartup = SchedulePersister.loadSchedule()
 
-  service.scheduleAtFixedRate(new SchedulePersister(scheduledChecks), 5, 15, TimeUnit.SECONDS)
+  // service.scheduleAtFixedRate(new SchedulePersister(scheduledChecks), 5, 15, TimeUnit.SECONDS)
   service.scheduleAtFixedRate(new RedisMetricsUpdater(schedulerConfig, schedulerMetrics), 5, 3, TimeUnit.SECONDS)
   service.schedule(new AllTrialRunCleanupTask(schedulerConfig), 10, TimeUnit.SECONDS);
 
@@ -168,7 +139,7 @@ class Scheduler(val alertRepo: AlertRepository, val checkRepo: CheckRepository, 
     if (schedulerConfig.last_run_persist != SchedulePersistType.DISABLED
       && lastScheduleAtStartup != null
       && lastScheduleAtStartup.contains(id)) {
-      lastScheduled = lastScheduleAtStartup.getOrElse(id, 0L)
+      lastScheduled = lastScheduleAtStartup.getOrDefault(id, 0L)
       startDelay += math.max(rate - (System.currentTimeMillis() - lastScheduled) / 1000, 0)
     }
     else {
