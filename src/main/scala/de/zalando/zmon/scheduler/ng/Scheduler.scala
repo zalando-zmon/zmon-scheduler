@@ -11,16 +11,15 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository
-import de.zalando.zmon.scheduler.ng.checks.{CheckChangedListener, CheckChangeListener, CheckRepository}
+import de.zalando.zmon.scheduler.ng.checks.{CheckChangedListener, CheckRepository}
 import de.zalando.zmon.scheduler.ng.cleanup.{AllTrialRunCleanupTask, TrialRunCleanupTask}
-import de.zalando.zmon.scheduler.ng.downtimes.{DowntimeService, DowntimeHttpSubscriber, DowntimeForwarder}
+import de.zalando.zmon.scheduler.ng.downtimes.{DowntimeService, DowntimeForwarder}
 import de.zalando.zmon.scheduler.ng.entities.{Entity, EntityRepository}
 import de.zalando.zmon.scheduler.ng.instantevaluations.{InstantEvalHttpSubscriber, InstantEvalForwarder}
 import de.zalando.zmon.scheduler.ng.trailruns.{TrialRunRequest, TrialRunHttpSubscriber, TrialRunForwarder}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.{Bean, Configuration}
-import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory
 import org.springframework.web.client.RestTemplate
 import redis.clients.jedis.Jedis
@@ -61,60 +60,6 @@ object filter {
   }
 }
 
-class Check(val id: Integer, val repo: CheckRepository) {
-
-  def getCheckDef() = {
-    repo.get(id)
-  }
-
-  def matchEntity(entity: Entity): Boolean = {
-    val properties = entity.getFilterProperties
-    for (filterMap <- repo.get(id).getEntities) {
-      // OR on entity level definition in checks
-      if (filter.overlaps(filterMap, properties)) {
-        return true
-      }
-    }
-    false
-  }
-
-}
-
-class Alert(var id: Integer, val repo: AlertRepository) {
-
-  def getAlertDef() = {
-    repo.get(id)
-  }
-
-  def matchEntity(entity: Entity): Boolean = {
-    val properties = entity.getFilterProperties
-    val entityFilters = repo.get(id).getEntities
-    if (entityFilters.size() == 0) {
-      val excludeEntityFilter = repo.get(id).getEntitiesExclude
-      if (excludeEntityFilter != null) {
-        for (outFilter <- excludeEntityFilter) {
-          if (filter.overlaps(outFilter, properties)) {
-            return false
-          }
-        }
-      }
-      return true
-    }
-
-    for (inFilter <- entityFilters) {
-      if (filter.overlaps(inFilter, properties)) {
-        for (outFilter <- repo.get(id).getEntitiesExclude) {
-          if (filter.overlaps(outFilter, properties)) {
-            return false
-          }
-        }
-        return true
-      }
-    }
-    false
-  }
-}
-
 object ScheduledCheck {
   val LOG = LoggerFactory.getLogger(ScheduledCheck.getClass)
 }
@@ -128,7 +73,7 @@ class ScheduledCheck(val id: Integer,
 
   var lastRun: Long = 0
   val check = new Check(id, checkRepo)
-  val checkMeter: Meter = if (config.check_detail_metrics) metrics.metrics.meter("scheduler.check." + check.id) else null
+  val checkMeter: Meter = if (config.check_detail_metrics) metrics.metrics.meter("scheduler.check." + check.getId()) else null
 
   private var taskFuture: ScheduledFuture[_] = null
 
@@ -136,14 +81,14 @@ class ScheduledCheck(val id: Integer,
     this.synchronized {
       if (taskFuture == null && delay > 0) {
         // set last run to roughly last execution during first scheduling
-        lastRun = System.currentTimeMillis() - (check.getCheckDef.getInterval * 1000L - delay * 1000L)
+        lastRun = System.currentTimeMillis() - (check.getCheckDefinition.getInterval * 1000L - delay * 1000L)
       }
 
       if (taskFuture != null) {
         taskFuture.cancel(false) // this should only happen for immediate evaluation triggered by UI or interval change
       }
 
-      taskFuture = service.scheduleAtFixedRate(this, delay, check.getCheckDef.getInterval, TimeUnit.SECONDS)
+      taskFuture = service.scheduleAtFixedRate(this, delay, check.getCheckDefinition.getInterval, TimeUnit.SECONDS)
     }
   }
 
@@ -157,7 +102,7 @@ class ScheduledCheck(val id: Integer,
   def execute(entity: Entity, alerts: ArrayBuffer[Alert]): Unit = {
     if (cancel) {
       taskFuture.cancel(false)
-      ScheduledCheck.LOG.info("canceling future execs of: " + check.id)
+      ScheduledCheck.LOG.info("canceling future execs of: " + check.getId())
       return
     }
 
@@ -185,9 +130,9 @@ class ScheduledCheck(val id: Integer,
     lastRunEntities.clear()
     var setLastRun = false
 
-    val checkDef = check.getCheckDef()
+    val checkDef = check.getCheckDefinition()
     if (null == checkDef) {
-      Scheduler.LOG.warn("Probably inactive/deleted check still scheduled: " + check.id)
+      Scheduler.LOG.warn("Probably inactive/deleted check still scheduled: " + check.getId())
       return new ArrayBuffer[Entity]()
     }
 

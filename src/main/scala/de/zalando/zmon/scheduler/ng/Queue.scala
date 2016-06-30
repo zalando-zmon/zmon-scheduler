@@ -122,7 +122,7 @@ class RepoSelector(implicit val config : SchedulerConfig ) extends Selector {
 
     for((k, v) <- config.queue_mapping_by_url) {
 
-      if(null != check.getCheckDef().getSourceUrl() && check.getCheckDef().getSourceUrl().startsWith(k)) {
+      if(null != check.getCheckDefinition().getSourceUrl() && check.getCheckDefinition().getSourceUrl().startsWith(k)) {
         return v
       }
 
@@ -143,7 +143,7 @@ class HardCodedSelector(implicit val config: SchedulerConfig) extends Selector {
 
   override def getQueue()(implicit entity : Entity, check: Check, alerts : ArrayBuffer[Alert]) : String = {
     if(null == check) return null
-    mapById.getOrElse(check.id, null)
+    mapById.getOrElse(check.getId(), null)
   }
 }
 

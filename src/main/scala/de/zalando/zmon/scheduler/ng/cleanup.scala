@@ -65,13 +65,13 @@ class EntityCleanupTask(val pool: JedisPool, val entity : Entity, val config: Sc
         if (!viableAlerts.isEmpty) {
           val jedis = pool.getResource
           try {
-            jedis.del("zmon:checks:" + check.id + ":" + entity.getId)
+            jedis.del("zmon:checks:" + check.getId() + ":" + entity.getId)
             checksCleaned += 1
 
             for(alert <- viableAlerts) {
-              jedis.srem("zmon:alerts:" + alert.id, entity.getId)
-              jedis.del("zmon:alerts:" + alert.id + ":" + entity.getId)
-              jedis.hdel("zmon:alerts:" + alert.id + ":entities", entity.getId)
+              jedis.srem("zmon:alerts:" + alert.getId(), entity.getId)
+              jedis.del("zmon:alerts:" + alert.getId() + ":" + entity.getId)
+              jedis.hdel("zmon:alerts:" + alert.getId() + ":entities", entity.getId)
               alertsCleaned += 1
             }
           }

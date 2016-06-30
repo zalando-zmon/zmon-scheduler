@@ -68,16 +68,16 @@ class CommandSerializer(val serializerType : TaskSerializerType) {
 
   def write(entity : Entity, check : Check, alerts : ArrayBuffer[Alert], scheduledTime : Long ): Array[Byte] = {
     val body = new CeleryBody()
-    val checkDef = check.getCheckDef()
+    val checkDef = check.getCheckDefinition()
 
     body.expires = expiresTime(checkDef.getInterval)// "2015-12-31T00:00:00.000+00:00"
-    body.id="check-"+check.id+"-"+entity.getId+"-"+System.currentTimeMillis()
+    body.id="check-"+check.getId()+"-"+entity.getId+"-"+System.currentTimeMillis()
 
     body.timelimit.add(checkDef.getInterval)
     body.timelimit.add(checkDef.getInterval * 2)
 
     val command = new CeleryCommandArg()
-    command.check_id = check.id
+    command.check_id = check.getId()
     command.check_name = checkDef.getName
     command.interval = checkDef.getInterval
     command.command = checkDef.getCommand
@@ -90,10 +90,10 @@ class CommandSerializer(val serializerType : TaskSerializerType) {
 
     for(alert <- alerts) {
       val alertArg = new CeleryAlertArg()
-      val alertDef = alert.getAlertDef
+      val alertDef = alert.getAlertDefinition
 
-      alertArg.id = alert.id
-      alertArg.check_id = check.id
+      alertArg.id = alert.getId()
+      alertArg.check_id = check.getId()
       alertArg.condition = alertDef.getCondition
       alertArg.name = alertDef.getName
       alertArg.notifications = alertDef.getNotifications
