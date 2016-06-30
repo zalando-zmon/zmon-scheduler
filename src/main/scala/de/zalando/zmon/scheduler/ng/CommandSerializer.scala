@@ -38,11 +38,11 @@ class CommandSerializer(val serializerType : TaskSerializerType) {
     command.check_id = "TR:"+request.id
     command.check_name = request.name
     command.interval = request.interval
-    command.command = request.check_command
+    command.command = request.checkCommand
     command.entity = entity.getProperties
     body.args.add(command)
 
-    val alertList : java.util.List[TrialRunCeleryAlertArg] = new java.util.ArrayList[TrialRunCeleryAlertArg]();
+    val alertList : java.util.List[TrialRunCeleryAlertArg] = new java.util.ArrayList[TrialRunCeleryAlertArg]()
     body.args.add(alertList)
 
     val alertArg = new TrialRunCeleryAlertArg()
@@ -50,7 +50,7 @@ class CommandSerializer(val serializerType : TaskSerializerType) {
 
     alertArg.id = "TR:" + request.id
     alertArg.check_id = "TR:" + request.id
-    alertArg.condition = request.alert_condition
+    alertArg.condition = request.alertCondition
     alertArg.name = request.name
     alertArg.period = request.period
     if(alertArg.period == null) {

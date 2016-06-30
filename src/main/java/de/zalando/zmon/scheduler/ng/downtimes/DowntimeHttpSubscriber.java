@@ -9,7 +9,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -28,13 +27,14 @@ public class DowntimeHttpSubscriber implements Runnable {
     private final String url;
     private final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
     private final TokenWrapper tokenWrapper;
-    private final ClientHttpRequestFactory clientFactory;
+    private final RestTemplate restTemplate;
 
-    public DowntimeHttpSubscriber(DowntimeService service, SchedulerConfig config, TokenWrapper tokenWrapper, ClientHttpRequestFactory clientFactory) {
+    public DowntimeHttpSubscriber(DowntimeService service, SchedulerConfig config, TokenWrapper tokenWrapper, RestTemplate restTemplate) {
         url = config.getDowntime_http_url();
         this.service = service;
         this.tokenWrapper = tokenWrapper;
-        this.clientFactory = clientFactory;
+        this.restTemplate = restTemplate;
+
 
         LOG.info("Subscribing for downtimes: {}", url);
         if (url != null && !url.equals("")) {
@@ -45,14 +45,13 @@ public class DowntimeHttpSubscriber implements Runnable {
     @Override
     public void run() {
         try {
-            RestTemplate rt = new RestTemplate(clientFactory);
             HttpEntity<String> request;
 
             HttpHeaders headers = new HttpHeaders();
             headers.add("Authorization", "Bearer " + tokenWrapper.get());
             request = new HttpEntity<>(headers);
 
-            ResponseEntity<List<DowntimeForwardTask>> response = rt.exchange(url, HttpMethod.GET, request, new ParameterizedTypeReference<List<DowntimeForwardTask>>() {
+            ResponseEntity<List<DowntimeForwardTask>> response = restTemplate.exchange(url, HttpMethod.GET, request, new ParameterizedTypeReference<List<DowntimeForwardTask>>() {
             });
 
             for (DowntimeForwardTask task : response.getBody()) {

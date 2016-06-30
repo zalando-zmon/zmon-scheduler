@@ -10,7 +10,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -29,12 +28,12 @@ public class InstantEvalHttpSubscriber implements Runnable {
     private final Scheduler scheduler;
     private final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
     private final TokenWrapper tokenWrapper;
-    private final ClientHttpRequestFactory clientFactory;
+    private final RestTemplate restTemplate;
 
-    public InstantEvalHttpSubscriber(Scheduler scheduler, SchedulerConfig config, TokenWrapper tokenWrapper, ClientHttpRequestFactory clientFactory) {
+    public InstantEvalHttpSubscriber(Scheduler scheduler, SchedulerConfig config, TokenWrapper tokenWrapper, RestTemplate restTemplate) {
         url = config.instant_eval_http_url();
         this.tokenWrapper = tokenWrapper;
-        this.clientFactory = clientFactory;
+        this.restTemplate = restTemplate;
 
         LOG.info("Subscribing for instant evaluations: {}", url);
         this.scheduler = scheduler;
@@ -46,14 +45,14 @@ public class InstantEvalHttpSubscriber implements Runnable {
     @Override
     public void run() {
         try {
-            RestTemplate rt = new RestTemplate(clientFactory);
+
             HttpEntity<String> request;
 
             HttpHeaders headers = new HttpHeaders();
             headers.add("Authorization", "Bearer " + tokenWrapper.get());
             request = new HttpEntity<>(headers);
 
-            ResponseEntity<List<Integer>> response = rt.exchange(url, HttpMethod.GET, request, new ParameterizedTypeReference<List<Integer>>() {
+            ResponseEntity<List<Integer>> response = restTemplate.exchange(url, HttpMethod.GET, request, new ParameterizedTypeReference<List<Integer>>() {
             });
 
             for (Integer checkId : response.getBody()) {

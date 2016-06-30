@@ -29,12 +29,12 @@ public class TrialRunHttpSubscriber implements Runnable {
     private final Scheduler scheduler;
     private final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
     private final TokenWrapper tokenWrapper;
-    private final ClientHttpRequestFactory clientFactory;
+    private final RestTemplate restTemplate;
 
-    public TrialRunHttpSubscriber(Scheduler scheduler, SchedulerConfig config, TokenWrapper tokenWrapper, ClientHttpRequestFactory clientFactory) {
+    public TrialRunHttpSubscriber(Scheduler scheduler, SchedulerConfig config, TokenWrapper tokenWrapper, RestTemplate restTemplate) {
         url = config.trial_run_http_url();
         this.tokenWrapper = tokenWrapper;
-        this.clientFactory = clientFactory;
+        this.restTemplate = restTemplate;
 
         LOG.info("Subscribing for trial runs: {}", url);
         this.scheduler = scheduler;
@@ -46,14 +46,13 @@ public class TrialRunHttpSubscriber implements Runnable {
     @Override
     public void run() {
         try {
-            RestTemplate rt = new RestTemplate(clientFactory);
             HttpEntity<String> request;
 
             HttpHeaders headers = new HttpHeaders();
             headers.add("Authorization", "Bearer " + tokenWrapper.get());
             request = new HttpEntity<>(headers);
 
-            ResponseEntity<List<TrialRunRequest>> response = rt.exchange(url, HttpMethod.GET, request, new ParameterizedTypeReference<List<TrialRunRequest>>() {
+            ResponseEntity<List<TrialRunRequest>> response = restTemplate.exchange(url, HttpMethod.GET, request, new ParameterizedTypeReference<List<TrialRunRequest>>() {
             });
 
             for (TrialRunRequest trialRunRequest : response.getBody()) {

@@ -10,13 +10,13 @@ import java.util.Map;
  */
 public class TrialRunRequest {
     public Long interval;
-    public String created_by;
+    public String createdBy;
     public String name;
     public String id;
-    public String check_command;
-    public String alert_condition;
+    public String checkCommand;
+    public String alertCondition;
     public List<Map<String, String>> entities;
-    public List<Map<String, String>> entities_exclude;
+    public List<Map<String, String>> entitiesExclude;
     public Map<String, Parameter> parameters;
     public String period;
 }
