@@ -26,11 +26,13 @@ public class DowntimeService {
     private final Logger log = LoggerFactory.getLogger(DowntimeService.class);
 
     private final EntityRepository entityRepository;
+    private final boolean enableEntityFilter;
 
     @Autowired
     public DowntimeService(SchedulerConfig config, EntityRepository entityRepository) {
         redisPool = new JedisPool(config.getRedis_host(), config.getRedis_port());
         this.entityRepository = entityRepository;
+        this.enableEntityFilter = config.downtime_entity_filter();
     }
 
     private DowntimeRequestResult storeInRedis(DowntimeRequest request) {
@@ -48,7 +50,7 @@ public class DowntimeService {
                 for (final Map.Entry<String, String> entry : downtimeEntities.getEntityIds().entrySet()) {
                     final String entityId = entry.getKey();
 
-                    if (!entityRepository.getCurrentMap().containsKey(entityId)) {
+                    if (enableEntityFilter && !entityRepository.getCurrentMap().containsKey(entityId)) {
                         continue;
                     }
 

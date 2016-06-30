@@ -4,7 +4,6 @@ import java.util
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.context.annotation.Profile
 import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Component
 
@@ -69,6 +68,7 @@ class SchedulerConfig {
   @BeanProperty var trial_run_forward : Boolean = false
   @BeanProperty var trial_run_http_url : String = null
 
+  @BeanProperty var downtime_entity_filter : Boolean = true
   @BeanProperty var downtime_forward : Boolean = false
   @BeanProperty var downtime_http_url : String = null
 
