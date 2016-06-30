@@ -24,7 +24,7 @@ public class TrialRunCleanupTask implements Runnable {
     public void run() {
         try {
             LOG.info("Trial run cleanup: id={}", this.trialRunId);
-            Jedis jedis = new Jedis(config.getRedis_host(), config.getRedis_port());
+            Jedis jedis = new Jedis(config.getRedisHost(), config.getRedisPort());
             try {
                 jedis.del("zmon:trial_run:" + trialRunId);
                 jedis.del("zmon:trial_run:" + trialRunId + ":results");

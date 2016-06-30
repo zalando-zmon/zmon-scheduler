@@ -30,7 +30,7 @@ public class QueueSelector {
         selectors.add(new HardCodedSelector(config));
         selectors.add(propertySelector);
 
-        serializer = new JavaCommandSerializer(config.getTask_serializer());
+        serializer = new JavaCommandSerializer(config.getTaskSerializer());
     }
 
     public void execute(Entity entity, byte[] command) {
@@ -44,7 +44,7 @@ public class QueueSelector {
         }
 
         if (null == queue) {
-            queue =  config.getDefault_queue();
+            queue =  config.getDefaultQueue();
         }
 
         writer.exec(queue, command);
@@ -62,7 +62,7 @@ public class QueueSelector {
         }
 
         if (null == queue) {
-            queue = config.getDefault_queue();
+            queue = config.getDefaultQueue();
         }
 
         writer.exec(queue, command);

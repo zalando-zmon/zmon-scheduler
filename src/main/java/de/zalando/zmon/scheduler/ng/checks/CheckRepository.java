@@ -81,7 +81,7 @@ public class CheckRepository extends CachedRepository<Integer, CheckSourceRegist
     @Autowired
     public CheckRepository(CheckSourceRegistry registry, SchedulerConfig config) {
         super(registry);
-        this.checkMinInterval = config.getCheck_min_interval();
+        this.checkMinInterval = config.getCheckMinInterval();
         currentMap = new HashMap<>();
         fill();
     }

@@ -19,7 +19,7 @@ public class HardCodedSelector implements Selector {
     private final Map<Integer, String> queueMapping = new HashMap<>();
 
     public HardCodedSelector(SchedulerConfig config) {
-        for(Map.Entry<String, List<Integer>> entry : config.getQueue_mapping().entrySet()) {
+        for(Map.Entry<String, List<Integer>> entry : config.getQueueMapping().entrySet()) {
             for(Integer id : entry.getValue()) {
                 queueMapping.put(id, entry.getKey());
             }

@@ -27,7 +27,7 @@ public class PropertyQueueSelector implements Selector {
             return null;
         }
 
-        for(Map.Entry<String, List<Map<String, String>>> entry : config.getQueue_property_mapping().entrySet()) {
+        for(Map.Entry<String, List<Map<String, String>>> entry : config.getQueuePropertyMapping().entrySet()) {
             for(Map<String, String> ps : entry.getValue()) {
                 if(AlertOverlapGenerator.filter(ps, entity.getFilterProperties())) {
                     return entry.getKey();

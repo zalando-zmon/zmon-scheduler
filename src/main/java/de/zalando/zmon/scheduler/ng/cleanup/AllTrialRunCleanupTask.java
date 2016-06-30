@@ -24,7 +24,7 @@ public class AllTrialRunCleanupTask implements Runnable {
     public void run() {
         try {
             LOG.info("Starting cleanup of old trial run results");
-            Jedis jedis = new Jedis(config.getRedis_host(), config.getRedis_port());
+            Jedis jedis = new Jedis(config.getRedisHost(), config.getRedisPort());
             try {
                 Set<String> keys = jedis.keys("zmon:trial_run:*");
                 // No pipeline here, considering this startup task to be fast enough

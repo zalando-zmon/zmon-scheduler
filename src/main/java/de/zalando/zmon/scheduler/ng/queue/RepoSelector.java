@@ -26,7 +26,7 @@ public class RepoSelector implements Selector {
             return null;
         }
 
-        for(Map.Entry<String, String> entry : config.getQueue_mapping_by_url().entrySet()) {
+        for(Map.Entry<String, String> entry : config.getQueueMmappingByUrl().entrySet()) {
             CheckDefinition checkDefinition = check.getCheckDefinition();
             if (null != checkDefinition) {
                 if (null != checkDefinition.getSourceUrl() && checkDefinition.getSourceUrl().startsWith(entry.getKey())) {

@@ -13,6 +13,6 @@ public class InstantEvalForwarder extends DataCenterSubscriber<Integer> {
 
     @Autowired
     public InstantEvalForwarder(SchedulerConfig config) {
-        super(config.instant_eval_forward());
+        super(config.isInstantEvalForward());
     }
 }
