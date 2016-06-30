@@ -17,7 +17,7 @@ import de.zalando.zmon.scheduler.ng.downtimes.{DowntimeService, DowntimeForwarde
 import de.zalando.zmon.scheduler.ng.entities.{Entity, EntityRepository}
 import de.zalando.zmon.scheduler.ng.instantevaluations.{InstantEvalHttpSubscriber, InstantEvalForwarder}
 import de.zalando.zmon.scheduler.ng.queue.QueueSelector
-import de.zalando.zmon.scheduler.ng.scheduler.{SchedulerMetrics, RedisMetricsUpdater}
+import de.zalando.zmon.scheduler.ng.scheduler.{ScheduledCheck, SchedulerMetrics, RedisMetricsUpdater}
 import de.zalando.zmon.scheduler.ng.trailruns.{TrialRunRequest, TrialRunHttpSubscriber, TrialRunForwarder}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -62,127 +62,6 @@ object filter {
   }
 }
 
-object ScheduledCheck {
-  val LOG = LoggerFactory.getLogger(ScheduledCheck.getClass)
-}
-
-class ScheduledCheck(val id: Integer,
-                     private val selector: QueueSelector,
-                     private val checkRepo: CheckRepository,
-                     private val alertRepo: AlertRepository,
-                     val entityRepo: EntityRepository)
-                    (implicit private val config: SchedulerConfig, private val metrics: SchedulerMetrics) extends Runnable {
-
-  var lastRun: Long = 0
-  val check = new Check(id, checkRepo)
-  val checkMeter: Meter = if (config.check_detail_metrics) metrics.getMetrics.meter("scheduler.check." + check.getId()) else null
-
-  private var taskFuture: ScheduledFuture[_] = null
-
-  def schedule(service: ScheduledExecutorService, delay: Long): Unit = {
-    this.synchronized {
-      if (taskFuture == null && delay > 0) {
-        // set last run to roughly last execution during first scheduling
-        lastRun = System.currentTimeMillis() - (check.getCheckDefinition.getInterval * 1000L - delay * 1000L)
-      }
-
-      if (taskFuture != null) {
-        taskFuture.cancel(false) // this should only happen for immediate evaluation triggered by UI or interval change
-      }
-
-      taskFuture = service.scheduleAtFixedRate(this, delay, check.getCheckDefinition.getInterval, TimeUnit.SECONDS)
-    }
-  }
-
-  @volatile
-  var cancel: Boolean = false
-
-  def cancelExecution(): Unit = {
-    cancel = true
-  }
-
-  def execute(entity: Entity, alerts: ArrayBuffer[Alert]): Unit = {
-    if (cancel) {
-      taskFuture.cancel(false)
-      ScheduledCheck.LOG.info("canceling future execs of: " + check.getId())
-      return
-    }
-
-    selector.execute(entity, check, alerts, lastRun)
-
-    if (checkMeter != null) {
-      checkMeter.mark()
-    }
-    metrics.incTotal()
-  }
-
-  val lastRunEntities: mutable.ArrayBuffer[Entity] = new ArrayBuffer[Entity]()
-
-  def getAlerts(): mutable.MutableList[Alert] = {
-    val alerts = collection.mutable.MutableList[Alert]()
-
-    for (ad <- alertRepo.getByCheckId(id)) {
-      alerts += new Alert(ad.getId, alertRepo)
-    }
-
-    alerts
-  }
-
-  def runCheck(dryRun: Boolean = false): mutable.ArrayBuffer[Entity] = {
-    lastRunEntities.clear()
-    var setLastRun = false
-
-    val checkDef = check.getCheckDefinition()
-    if (null == checkDef) {
-      Scheduler.LOG.warn("Probably inactive/deleted check still scheduled: " + check.getId())
-      return new ArrayBuffer[Entity]()
-    }
-
-    if (checkDef.getInterval <= 15 && (System.currentTimeMillis() - lastRun < (checkDef.getInterval * 750L))) {
-      // for low interval checks on trial basis skip executions too close to each other (75% of interval)
-      // this is only appearing at points where all intervals mix up in huge batch of tasks ( e.g. 180 mark or 300 mark )
-      return new ArrayBuffer[Entity]()
-    }
-
-    for (entity <- entityRepo.get()) {
-      if (check.matchEntity(entity)) {
-        val viableAlerts = ArrayBuffer[Alert]()
-        for (alert <- getAlerts()) {
-          if (alert.matchEntity(entity)) {
-            viableAlerts += alert
-          }
-        }
-
-        if (!viableAlerts.isEmpty) {
-          if (!dryRun) {
-            if (!setLastRun) {
-              // use new last run time across all commands, to allow syncing data retrieved time stamp on worker side
-              lastRun = System.currentTimeMillis()
-              setLastRun = true
-            }
-            execute(entity, viableAlerts)
-          }
-          lastRunEntities.add(entity)
-        }
-      }
-    }
-
-    return lastRunEntities
-  }
-
-  override def run(): Unit = {
-    try {
-      runCheck()
-    }
-    catch {
-      case e: Throwable => {
-        metrics.incError()
-        ScheduledCheck.LOG.error("Error in execution of check: " + id, e)
-      }
-    }
-  }
-}
-
 object SchedulePersister {
 
   val mapper = new ObjectMapper with ScalaObjectMapper
@@ -208,7 +87,7 @@ object SchedulePersister {
 
 class SchedulePersister(val scheduledChecks: scala.collection.concurrent.TrieMap[Integer, ScheduledCheck]) extends Runnable {
   override def run(): Unit = {
-    SchedulePersister.writeSchedule(scheduledChecks.filter(_._2.lastRun > 0).map(x => (x._1, x._2.lastRun)))
+    SchedulePersister.writeSchedule(scheduledChecks.filter(_._2.getLastRun > 0).map(x => (x._1, x._2.getLastRun)))
   }
 }
 
@@ -254,10 +133,10 @@ class Scheduler(val alertRepo: AlertRepository, val checkRepo: CheckRepository, 
     this.synchronized {
       var scheduledCheck = scheduledChecks.getOrElse(id, null)
       if (scheduledCheck == null) {
-        scheduledCheck = new ScheduledCheck(id, queueSelector, checkRepo, alertRepo, entityRepo)
+        scheduledCheck = new ScheduledCheck(id, queueSelector, checkRepo, alertRepo, entityRepo, schedulerConfig, schedulerMetrics)
         scheduledChecks.put(id, scheduledCheck)
       }
-      val result = scheduledCheck.lastRun
+      val result = scheduledCheck.getLastRun
       if (checkRepo.get(id).getInterval < 30) {
         scheduledCheck.schedule(shortIntervalService, delay)
       }

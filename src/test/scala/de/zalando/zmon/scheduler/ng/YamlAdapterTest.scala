@@ -6,7 +6,7 @@ import de.zalando.zmon.scheduler.ng.checks.{CheckRepository, CheckSourceRegistry
 import de.zalando.zmon.scheduler.ng.config.QueueSelectorConfiguration
 import de.zalando.zmon.scheduler.ng.entities.{EntityRepository, EntityAdapterRegistry, YamlEntityAdapter}
 import de.zalando.zmon.scheduler.ng.queue.QueueSelector
-import de.zalando.zmon.scheduler.ng.scheduler.SchedulerMetrics
+import de.zalando.zmon.scheduler.ng.scheduler.{ScheduledCheck, SchedulerMetrics}
 import org.scalatest._
 
 /**
@@ -38,7 +38,7 @@ class YamlAdapterTest extends FlatSpec with Matchers {
   val writer = QueueSelectorConfiguration.createWriter(config, metrics)
   val selector = new QueueSelector(writer, config, metrics)
 
-  val check1 = new ScheduledCheck(1, selector, checkRepo, alertRepo, entityRepo)
+  val check1 = new ScheduledCheck(1, selector, checkRepo, alertRepo, entityRepo, config, schedulerMetrics)
 
   "Entities" should "contain 5 entites" in {
     ea.getCollection.size() should be (5)
@@ -53,7 +53,7 @@ class YamlAdapterTest extends FlatSpec with Matchers {
   }
 
   "Check 1" should "match 2 entities" in {
-    check1.runCheck(true).size should be (2)
+    check1.runCheck(true).size() should be (2)
   }
 
 }
