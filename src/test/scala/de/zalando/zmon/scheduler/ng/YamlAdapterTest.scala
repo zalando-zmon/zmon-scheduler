@@ -6,6 +6,7 @@ import de.zalando.zmon.scheduler.ng.checks.{CheckRepository, CheckSourceRegistry
 import de.zalando.zmon.scheduler.ng.config.QueueSelectorConfiguration
 import de.zalando.zmon.scheduler.ng.entities.{EntityRepository, EntityAdapterRegistry, YamlEntityAdapter}
 import de.zalando.zmon.scheduler.ng.queue.QueueSelector
+import de.zalando.zmon.scheduler.ng.scheduler.SchedulerMetrics
 import org.scalatest._
 
 /**
@@ -32,7 +33,7 @@ class YamlAdapterTest extends FlatSpec with Matchers {
   val entityRepo = new EntityRepository(er)
 
   implicit val config = new SchedulerConfig()
-  implicit val schedulerMetrics = new SchedulerMetrics()
+  implicit val schedulerMetrics = new SchedulerMetrics(metrics)
 
   val writer = QueueSelectorConfiguration.createWriter(config, metrics)
   val selector = new QueueSelector(writer, config, metrics)

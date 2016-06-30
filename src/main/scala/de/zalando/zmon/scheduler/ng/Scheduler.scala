@@ -17,6 +17,7 @@ import de.zalando.zmon.scheduler.ng.downtimes.{DowntimeService, DowntimeForwarde
 import de.zalando.zmon.scheduler.ng.entities.{Entity, EntityRepository}
 import de.zalando.zmon.scheduler.ng.instantevaluations.{InstantEvalHttpSubscriber, InstantEvalForwarder}
 import de.zalando.zmon.scheduler.ng.queue.QueueSelector
+import de.zalando.zmon.scheduler.ng.scheduler.{SchedulerMetrics, RedisMetricsUpdater}
 import de.zalando.zmon.scheduler.ng.trailruns.{TrialRunRequest, TrialRunHttpSubscriber, TrialRunForwarder}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -74,7 +75,7 @@ class ScheduledCheck(val id: Integer,
 
   var lastRun: Long = 0
   val check = new Check(id, checkRepo)
-  val checkMeter: Meter = if (config.check_detail_metrics) metrics.metrics.meter("scheduler.check." + check.getId()) else null
+  val checkMeter: Meter = if (config.check_detail_metrics) metrics.getMetrics.meter("scheduler.check." + check.getId()) else null
 
   private var taskFuture: ScheduledFuture[_] = null
 
@@ -112,7 +113,7 @@ class ScheduledCheck(val id: Integer,
     if (checkMeter != null) {
       checkMeter.mark()
     }
-    metrics.totalChecks.mark()
+    metrics.incTotal()
   }
 
   val lastRunEntities: mutable.ArrayBuffer[Entity] = new ArrayBuffer[Entity]()
@@ -175,7 +176,7 @@ class ScheduledCheck(val id: Integer,
     }
     catch {
       case e: Throwable => {
-        metrics.errorCount.mark()
+        metrics.incError()
         ScheduledCheck.LOG.error("Error in execution of check: " + id, e)
       }
     }
@@ -246,11 +247,6 @@ class SchedulerFactory {
   }
 }
 
-class SchedulerMetrics(implicit val metrics: MetricRegistry) {
-  val totalChecks = metrics.meter("scheduler.total-checks")
-  val errorCount = metrics.meter("scheduler.total-errors")
-}
-
 object SchedulePersister {
 
   val mapper = new ObjectMapper with ScalaObjectMapper
@@ -284,26 +280,6 @@ object Scheduler {
   val LOG = LoggerFactory.getLogger(Scheduler.getClass())
 }
 
-class RedisMetricsUpdater(val config: SchedulerConfig, val metrics: SchedulerMetrics) extends Runnable {
-  val name = "s-p" + config.server_port + "." + InetAddress.getLocalHost.getHostName()
-
-  override def run(): Unit = {
-    try {
-      val jedis = new Jedis(config.redis_host, config.redis_port);
-      val p = jedis.pipelined()
-      p.sadd("zmon:metrics", name)
-      p.set("zmon:metrics:" + name + ":check.count", metrics.totalChecks.getCount + "")
-      p.set("zmon:metrics:" + name + ":ts", System.currentTimeMillis() / 1000 + "")
-      p.sync()
-    }
-    catch {
-      case e: Exception => {
-        Scheduler.LOG.error("Metrics update failed: {} host={} port={}", e.getMessage(), config.redis_host, "" + config.redis_port)
-      }
-    }
-  }
-}
-
 class Scheduler(val alertRepo: AlertRepository, val checkRepo: CheckRepository, val entityRepo: EntityRepository, val queueSelector: QueueSelector)
                (implicit val schedulerConfig: SchedulerConfig, val metrics: MetricRegistry) {
 
@@ -312,7 +288,7 @@ class Scheduler(val alertRepo: AlertRepository, val checkRepo: CheckRepository, 
   private val scheduledChecks = scala.collection.concurrent.TrieMap[Integer, ScheduledCheck]()
   private val taskSerializer = new JavaCommandSerializer(schedulerConfig.task_serializer)
 
-  implicit val schedulerMetrics = new SchedulerMetrics()
+  implicit val schedulerMetrics = new SchedulerMetrics(metrics)
   val lastScheduleAtStartup = SchedulePersister.loadSchedule()
 
   service.scheduleAtFixedRate(new SchedulePersister(scheduledChecks), 5, 15, TimeUnit.SECONDS)
