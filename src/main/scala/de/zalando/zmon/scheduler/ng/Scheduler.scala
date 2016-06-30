@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.{Bean, Configuration}
 import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory
+import org.springframework.web.client.RestTemplate
 import redis.clients.jedis.Jedis
 
 import scala.collection.JavaConversions._
@@ -261,7 +262,7 @@ class SchedulerFactory {
                       downtimeForwarder: DowntimeForwarder,
                       downtimeService: DowntimeService,
                       tokenWrapper: TokenWrapper,
-                      httpClientFactory: ClientHttpRequestFactory)
+                      restTemplate: RestTemplate)
                      (implicit schedulerConfig: SchedulerConfig, metrics: MetricRegistry): Scheduler = {
 
     SchedulerFactory.LOG.info("Creating scheduler instance")
@@ -288,11 +289,11 @@ class SchedulerFactory {
     }
 
     if (schedulerConfig.trial_run_http_url != null) {
-      val trialRunPoller = new TrialRunHttpSubscriber(newScheduler, schedulerConfig, tokenWrapper, httpClientFactory)
+      val trialRunPoller = new TrialRunHttpSubscriber(newScheduler, schedulerConfig, tokenWrapper, restTemplate)
     }
 
     if (schedulerConfig.instant_eval_http_url != null) {
-      val instantEvalPoller = new InstantEvalHttpSubscriber(newScheduler, schedulerConfig, tokenWrapper, httpClientFactory)
+      val instantEvalPoller = new InstantEvalHttpSubscriber(newScheduler, schedulerConfig, tokenWrapper, restTemplate)
     }
 
     newScheduler
@@ -479,8 +480,8 @@ class Scheduler(val alertRepo: AlertRepository, val checkRepo: CheckRepository, 
   }
 
   def scheduleTrialRun(request: TrialRunRequest): Unit = {
-    val entitiesGlobal = getEntitiesForTrialRun(entityRepo.getUnfiltered(), request.entities, request.entities_exclude)
-    val entitiesLocal = getEntitiesForTrialRun(entityRepo.get(), request.entities, request.entities_exclude)
+    val entitiesGlobal = getEntitiesForTrialRun(entityRepo.getUnfiltered(), request.entities, request.entitiesExclude)
+    val entitiesLocal = getEntitiesForTrialRun(entityRepo.get(), request.entities, request.entitiesExclude)
     Scheduler.LOG.info("Trial run matched entities: global=" + entitiesGlobal.size + " local=" + entitiesLocal.size)
 
     var jedis: Jedis = null;

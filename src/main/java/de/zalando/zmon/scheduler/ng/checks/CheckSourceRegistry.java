@@ -3,8 +3,8 @@ package de.zalando.zmon.scheduler.ng.checks;
 import com.codahale.metrics.MetricRegistry;
 import de.zalando.zmon.scheduler.ng.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Created by jmussler on 4/2/15.
@@ -17,9 +17,9 @@ public class CheckSourceRegistry extends SourceRegistry<CheckSource> {
     }
 
     @Autowired
-    public CheckSourceRegistry(SchedulerConfig config, final TokenWrapper tokens, ClientHttpRequestFactory clientFactory) {
+    public CheckSourceRegistry(SchedulerConfig config, final TokenWrapper tokens, RestTemplate restTemplate) {
         final String url = config.controller_url() + "/api/v1/checks/all-active-check-definitions";
-        final DefaultCheckSource source = new DefaultCheckSource("check-source", url, tokens, clientFactory);
+        final DefaultCheckSource source = new DefaultCheckSource("check-source", url, tokens, restTemplate);
         register(source);
     }
 
