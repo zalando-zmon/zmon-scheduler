@@ -16,6 +16,7 @@ import de.zalando.zmon.scheduler.ng.cleanup.{AllTrialRunCleanupTask, TrialRunCle
 import de.zalando.zmon.scheduler.ng.downtimes.{DowntimeService, DowntimeForwarder}
 import de.zalando.zmon.scheduler.ng.entities.{Entity, EntityRepository}
 import de.zalando.zmon.scheduler.ng.instantevaluations.{InstantEvalHttpSubscriber, InstantEvalForwarder}
+import de.zalando.zmon.scheduler.ng.queue.QueueSelector
 import de.zalando.zmon.scheduler.ng.trailruns.{TrialRunRequest, TrialRunHttpSubscriber, TrialRunForwarder}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -106,7 +107,7 @@ class ScheduledCheck(val id: Integer,
       return
     }
 
-    selector.execute()(entity, check, alerts, lastRun)
+    selector.execute(entity, check, alerts, lastRun)
 
     if (checkMeter != null) {
       checkMeter.mark()
@@ -439,7 +440,7 @@ class Scheduler(val alertRepo: AlertRepository, val checkRepo: CheckRepository, 
 
       for (entity <- entitiesLocal) {
         val command = taskSerializer.writeTrialRun(entity, request)
-        queueSelector.execute(command, schedulerConfig.trial_run_queue)(entity)
+        queueSelector.execute(entity, command, schedulerConfig.trial_run_queue)
       }
     }
     finally {

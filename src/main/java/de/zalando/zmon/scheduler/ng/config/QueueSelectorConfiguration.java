@@ -2,6 +2,7 @@ package de.zalando.zmon.scheduler.ng.config;
 
 import com.codahale.metrics.MetricRegistry;
 import de.zalando.zmon.scheduler.ng.*;
+import de.zalando.zmon.scheduler.ng.queue.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
