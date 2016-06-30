@@ -147,9 +147,9 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
 
         Set<String> currentIds = unfilteredEntities.keySet();
         Set<String> futureIds = mUnfiltered.keySet();
-        Set<String> removedIds = currentIds.stream().filter(x->!futureIds.contains(x)).collect(Collectors.toSet());
-        Set<String> changedFilterProperties = futureIds.stream().filter(x->unfilteredEntities.containsKey(x) && !mUnfiltered.get(x).getFilterProperties().equals(unfilteredEntities.get(x).getFilterProperties())).collect(Collectors.toSet());
-        Set<String> addedIds = futureIds.stream().filter(x->!currentIds.contains(x)).collect(Collectors.toSet());
+        Set<String> removedIds = currentIds.stream().filter(x -> !futureIds.contains(x)).collect(Collectors.toSet());
+        Set<String> changedFilterProperties = futureIds.stream().filter(x -> unfilteredEntities.containsKey(x) && !mUnfiltered.get(x).getFilterProperties().equals(unfilteredEntities.get(x).getFilterProperties())).collect(Collectors.toSet());
+        Set<String> addedIds = futureIds.stream().filter(x -> !currentIds.contains(x)).collect(Collectors.toSet());
 
         LOG.info("Number of entities removed globaly: {}", removedIds.size());
         LOG.info("Number of entities added globaly: {}", addedIds.size());
@@ -173,8 +173,8 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
             }
         }
 
-        for(String k : changedFilterProperties) {
-            for(EntityChangeListener l : currentListeners) {
+        for (String k : changedFilterProperties) {
+            for (EntityChangeListener l : currentListeners) {
                 l.notifyEntityChange(this, oldUnfiltered.get(k), unfilteredEntities.get(k));
             }
         }

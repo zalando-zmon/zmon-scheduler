@@ -20,7 +20,7 @@ public class DataCenterSubscriber<T> implements EntityChangeListener {
     }
 
     public void forwardRequest(T task) {
-        if(!enabled) return;
+        if (!enabled) return;
 
         synchronized (this) {
             for (String k : pendingTasks.keySet()) {

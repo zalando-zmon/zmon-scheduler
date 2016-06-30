@@ -56,7 +56,7 @@ public class DowntimeHttpSubscriber implements Runnable {
 
             for (DowntimeForwardTask task : response.getBody()) {
                 LOG.info("Received downtime request: type={}", task.getType());
-                switch(task.getType()) {
+                switch (task.getType()) {
                     case NEW:
                         service.storeDowntime(task.getRequest());
                         break;

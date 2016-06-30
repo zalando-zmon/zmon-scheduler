@@ -40,7 +40,7 @@ public class DowntimesAPI {
         DowntimeRequestResult result = downtimeService.storeDowntime(request);
 
         // trigger evaluation locally
-        for(DowntimeAlertRequest r : request.getDowntimeEntities()) {
+        for (DowntimeAlertRequest r : request.getDowntimeEntities()) {
             scheduler.executeImmediate(alertRepo.get(r.getAlertId()).getCheckDefinitionId());
         }
         downtimeForwarder.forwardRequest(DowntimeForwardTask.NewDowntimeTask(request));

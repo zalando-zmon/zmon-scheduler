@@ -22,7 +22,7 @@ public abstract class CachedRepository<I, S, T> implements Runnable {
     private long lastUpdated = 0;
 
     public CachedRepository(S r) {
-        assert(null != r);
+        assert (null != r);
         registry = r;
         executor.scheduleAtFixedRate(this, 180, 60, TimeUnit.SECONDS);
     }
