@@ -17,26 +17,6 @@ import scala.collection.JavaConversions._
  * Created by jmussler on 4/10/15.
  */
 
-object WriterFactory {
-
-  val LOG = LoggerFactory.getLogger(WriterFactory.getClass())
-
-  def createWriter(schedulerConfig : SchedulerConfig, metrics: MetricRegistry): QueueWriter = {
-    if(schedulerConfig.task_writer_type == TaskWriterType.REDIS) {
-      LOG.info(s"Creating queue writer: Redis host=${schedulerConfig.redis_host} port=${schedulerConfig.redis_port}")
-      return new JedisQueueWriter(schedulerConfig.redis_host, schedulerConfig.redis_port, metrics)
-    }
-    else if (schedulerConfig.task_writer_type == TaskWriterType.ARRAY_LIST) {
-      LOG.info("creating queue writer: ArrayQueueWriter")
-      return new ArrayQueueWriter(metrics)
-    }
-    else {
-      LOG.info("Creating queue writer: LOG writer")
-      new LogQueueWriter(metrics)
-    }
-  }
-}
-
 abstract class QueueWriter(metrics : MetricRegistry) {
   private val queueMetrics = new QueueMetrics(metrics)
 
@@ -94,21 +74,6 @@ class LogQueueWriter(metrics : MetricRegistry) extends QueueWriter(metrics) {
 
   override def write(queue : String, command : Array[Byte] ): Unit = {
     LogQueueWriter.LOG.info("q: " + queue + " command: " + command)
-  }
-}
-
-@Configuration
-class QueueSelectorFactory {
-  @Autowired
-  @Bean
-  def getWriter(config: SchedulerConfig, metrics : MetricRegistry): QueueWriter = {
-    WriterFactory.createWriter(config, metrics)
-  }
-
-  @Autowired
-  @Bean
-  def getSelector(writer : QueueWriter, config :SchedulerConfig, metrics : MetricRegistry): QueueSelector = {
-    new QueueSelector(writer)(config, metrics)
   }
 }
 
