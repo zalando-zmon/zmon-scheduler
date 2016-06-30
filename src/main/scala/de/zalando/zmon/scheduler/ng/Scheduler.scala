@@ -310,7 +310,7 @@ class Scheduler(val alertRepo: AlertRepository, val checkRepo: CheckRepository, 
   private val service = new ScheduledThreadPoolExecutor(schedulerConfig.thread_count, new CustomizableThreadFactory("scheduler-pool"))
   private val shortIntervalService = new ScheduledThreadPoolExecutor(schedulerConfig.thread_count)
   private val scheduledChecks = scala.collection.concurrent.TrieMap[Integer, ScheduledCheck]()
-  private val taskSerializer = new CommandSerializer(schedulerConfig.task_serializer)
+  private val taskSerializer = new JavaCommandSerializer(schedulerConfig.task_serializer)
 
   implicit val schedulerMetrics = new SchedulerMetrics()
   val lastScheduleAtStartup = SchedulePersister.loadSchedule()
