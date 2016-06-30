@@ -2,9 +2,9 @@ package de.zalando.zmon.scheduler.ng.entities;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.zalando.zmon.scheduler.ng.AlertOverlapGenerator;
 import de.zalando.zmon.scheduler.ng.CachedRepository;
 import de.zalando.zmon.scheduler.ng.SchedulerConfig;
-import de.zalando.zmon.scheduler.ng.filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,7 +131,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
                     // SKIP ( use this for DC vs AWS Distinction as legacy entities do not have skipField set )
                 } else if (null != baseFilter && baseFilter.size() > 0) {
                     for (Map<String, String> f : baseFilter) {
-                        if (filter.overlaps(f, e.getFilterProperties())) {
+                        if (AlertOverlapGenerator.filter(f, e.getFilterProperties())) {
                             m.put(e.getId(), e);
                         }
                     }

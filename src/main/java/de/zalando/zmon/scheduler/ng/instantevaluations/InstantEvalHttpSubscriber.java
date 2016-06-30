@@ -1,8 +1,8 @@
 package de.zalando.zmon.scheduler.ng.instantevaluations;
 
-import de.zalando.zmon.scheduler.ng.Scheduler;
 import de.zalando.zmon.scheduler.ng.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.TokenWrapper;
+import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;

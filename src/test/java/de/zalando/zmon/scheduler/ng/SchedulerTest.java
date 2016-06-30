@@ -8,6 +8,7 @@ import de.zalando.zmon.scheduler.ng.checks.CheckRepository;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
 import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
 import de.zalando.zmon.scheduler.ng.queue.QueueSelector;
+import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
 import de.zalando.zmon.scheduler.ng.trailruns.TrialRunRequest;
 import org.junit.Test;
 

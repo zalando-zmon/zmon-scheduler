@@ -5,7 +5,6 @@ package de.zalando.zmon.scheduler.ng.config;
  */
 
 import com.codahale.metrics.MetricRegistry;
-import de.zalando.zmon.scheduler.ng.Scheduler;
 import de.zalando.zmon.scheduler.ng.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.TokenWrapper;
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
@@ -18,6 +17,7 @@ import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
 import de.zalando.zmon.scheduler.ng.instantevaluations.InstantEvalForwarder;
 import de.zalando.zmon.scheduler.ng.instantevaluations.InstantEvalHttpSubscriber;
 import de.zalando.zmon.scheduler.ng.queue.QueueSelector;
+import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
 import de.zalando.zmon.scheduler.ng.trailruns.TrialRunForwarder;
 import de.zalando.zmon.scheduler.ng.trailruns.TrialRunHttpSubscriber;
 import org.slf4j.Logger;

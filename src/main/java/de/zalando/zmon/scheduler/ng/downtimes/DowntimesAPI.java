@@ -1,7 +1,7 @@
 package de.zalando.zmon.scheduler.ng.downtimes;
 
-import de.zalando.zmon.scheduler.ng.Scheduler;
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
+import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
