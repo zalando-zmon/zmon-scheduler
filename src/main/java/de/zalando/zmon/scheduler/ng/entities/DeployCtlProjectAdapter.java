@@ -17,7 +17,6 @@ public class DeployCtlProjectAdapter extends EntityAdapter {
 
     private final static Logger LOG = LoggerFactory.getLogger(DeployCtlProjectAdapter.class);
 
-    private MetricRegistry metrics;
     private Timer timer;
 
     private String url;
@@ -38,7 +37,6 @@ public class DeployCtlProjectAdapter extends EntityAdapter {
         this.url = url;
         this.user = user;
         this.password = password;
-        this.metrics = metrics;
         this.timer = metrics.timer("entity-adapter.deployctlprojects");
     }
 

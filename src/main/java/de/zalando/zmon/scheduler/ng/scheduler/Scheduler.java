@@ -105,7 +105,7 @@ public class Scheduler {
 
         long rate = checkRepo.get(id).getInterval();
         long startDelay = 1L;
-        long lastScheduled = 0L;
+        long lastScheduled;
 
         if (schedulerConfig.getLastRunPersist() != SchedulePersistType.DISABLED
                 && lastScheduleAtStartup != null
@@ -133,7 +133,7 @@ public class Scheduler {
     }
 
     public List<Entity> queryKnownEntities(List<Map<String, String>> filter, List<Map<String, String>> excludeFilter, boolean applyBaseFilter) {
-        List<Entity> entities = null;
+        List<Entity> entities;
 
         if (applyBaseFilter) {
             entities = getEntitiesForTrialRun(entityRepo.get(), filter, excludeFilter);

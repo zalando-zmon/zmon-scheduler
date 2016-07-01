@@ -18,7 +18,6 @@ public class CmdbAdapter extends EntityAdapter {
     private final String url;
     private final String user;
     private final String password;
-    private final MetricRegistry metrics;
     private final Timer timer;
 
     private static final List<String> FIELDS = Arrays.asList("teams", "data_center_code", "host", "host_role_id", "role_name", "type", "external_ip", "internal_ip", "virt_type", "physcial_machine", "physical_machine_model");
@@ -30,7 +29,6 @@ public class CmdbAdapter extends EntityAdapter {
         this.url = url;
         this.user = user;
         this.password = password;
-        this.metrics = metrics;
         this.timer = metrics.timer("entity-adapter.cmdb");
     }
 

@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 public class DDSDatabaseAdapter extends EntityAdapter {
 
     private String url;
-    private final MetricRegistry metrics;
     private final Timer timer;
 
     private static final Logger LOG = LoggerFactory.getLogger(DDSDatabaseAdapter.class);
@@ -23,7 +22,6 @@ public class DDSDatabaseAdapter extends EntityAdapter {
     public DDSDatabaseAdapter(String url, MetricRegistry metrics) {
         super("DDSDatabaseAdapter");
         this.url = url;
-        this.metrics = metrics;
         timer = metrics.timer("entity-adapter.dds.databases");
     }
 

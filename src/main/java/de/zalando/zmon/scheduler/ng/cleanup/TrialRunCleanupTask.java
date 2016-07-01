@@ -24,12 +24,9 @@ public class TrialRunCleanupTask implements Runnable {
     public void run() {
         try {
             LOG.info("Trial run cleanup: id={}", this.trialRunId);
-            Jedis jedis = new Jedis(config.getRedisHost(), config.getRedisPort());
-            try {
+            try (Jedis jedis = new Jedis(config.getRedisHost(), config.getRedisPort())) {
                 jedis.del("zmon:trial_run:" + trialRunId);
                 jedis.del("zmon:trial_run:" + trialRunId + ":results");
-            } finally {
-                jedis.close();
             }
         } catch (Throwable t) {
             LOG.error("Failed to cleanup trial run data: id={} msg={}", this.trialRunId, t.getMessage());

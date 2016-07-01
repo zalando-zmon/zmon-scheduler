@@ -10,14 +10,11 @@ import java.util.Map;
  */
 public class SchedulePersister implements Runnable {
 
-    private final static ObjectMapper mapper = new ObjectMapper();
-
     public static Map<Integer, Long> loadSchedule() {
         return new HashMap<>();
     }
 
     public static void writeSchedule(Map<Integer, Long> schedule) {
-        return;
     }
 
     @Override

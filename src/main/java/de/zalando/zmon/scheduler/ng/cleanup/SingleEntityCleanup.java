@@ -1,6 +1,7 @@
 package de.zalando.zmon.scheduler.ng.cleanup;
 
 import de.zalando.zmon.scheduler.ng.AlertOverlapGenerator;
+import de.zalando.zmon.scheduler.ng.alerts.AlertDefinition;
 import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
 import de.zalando.zmon.scheduler.ng.checks.CheckDefinition;
@@ -93,7 +94,7 @@ public class SingleEntityCleanup implements EntityChangeListener{
                 if (AlertOverlapGenerator.matchCheckFilter(checkDef, entity)) {
                     List<Integer> alerts = alertRepo.getByCheckId(checkDef.getId()).stream()
                                                       .filter(x->AlertOverlapGenerator.matchAlertFilter(x, entity))
-                                                      .map(x->x.getId())
+                                                      .map(AlertDefinition::getId)
                                                       .collect(Collectors.toList());
 
                     if (!alerts.isEmpty()) {
