@@ -17,6 +17,7 @@ import de.zalando.zmon.scheduler.ng.checks.CheckSourceRegistry;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
 import de.zalando.zmon.scheduler.ng.entities.EntityAdapterRegistry;
 import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
+import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

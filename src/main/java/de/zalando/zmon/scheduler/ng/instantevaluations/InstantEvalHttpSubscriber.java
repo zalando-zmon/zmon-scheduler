@@ -1,8 +1,8 @@
 package de.zalando.zmon.scheduler.ng.instantevaluations;
 
-import de.zalando.zmon.scheduler.ng.Scheduler;
-import de.zalando.zmon.scheduler.ng.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.TokenWrapper;
+import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -31,7 +31,7 @@ public class InstantEvalHttpSubscriber implements Runnable {
     private final RestTemplate restTemplate;
 
     public InstantEvalHttpSubscriber(Scheduler scheduler, SchedulerConfig config, TokenWrapper tokenWrapper, RestTemplate restTemplate) {
-        url = config.instant_eval_http_url();
+        url = config.getInstantEvalHttpUrl();
         this.tokenWrapper = tokenWrapper;
         this.restTemplate = restTemplate;
 

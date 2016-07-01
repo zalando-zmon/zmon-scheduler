@@ -1,5 +1,6 @@
-package de.zalando.zmon.scheduler.ng;
+package de.zalando.zmon.scheduler.ng.config;
 
+import de.zalando.zmon.scheduler.ng.TokenWrapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.zalando.stups.tokens.AccessTokenConfiguration;
@@ -19,13 +20,13 @@ public class Oauth2Config {
     * */
     @Bean
     public TokenWrapper accessTokens(SchedulerConfig config) {
-        if (config.getOauth2_access_token_url() == null) {
-            return new TokenWrapper(config.getOauth2_static_token());
+        if (config.getOauth2AccessTokenUrl() == null) {
+            return new TokenWrapper(config.getOauth2StaticToken());
         } else {
-            AccessTokenConfiguration tokenConfig = Tokens.createAccessTokensWithUri(URI.create(config.getOauth2_access_token_url()))
+            AccessTokenConfiguration tokenConfig = Tokens.createAccessTokensWithUri(URI.create(config.getOauth2AccessTokenUrl()))
                     .manageToken("zmon-read");
 
-            for (String scope : config.getOauth2_scopes()) {
+            for (String scope : config.getOauth2Scopes()) {
                 tokenConfig.addScope(scope);
             }
 

@@ -1,6 +1,6 @@
 package de.zalando.zmon.scheduler.ng.checks;
 
-import de.zalando.zmon.scheduler.ng.Scheduler;
+import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

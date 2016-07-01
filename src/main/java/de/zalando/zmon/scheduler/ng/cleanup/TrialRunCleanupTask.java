@@ -1,6 +1,6 @@
 package de.zalando.zmon.scheduler.ng.cleanup;
 
-import de.zalando.zmon.scheduler.ng.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -24,12 +24,9 @@ public class TrialRunCleanupTask implements Runnable {
     public void run() {
         try {
             LOG.info("Trial run cleanup: id={}", this.trialRunId);
-            Jedis jedis = new Jedis(config.getRedis_host(), config.getRedis_port());
-            try {
+            try (Jedis jedis = new Jedis(config.getRedisHost(), config.getRedisPort())) {
                 jedis.del("zmon:trial_run:" + trialRunId);
                 jedis.del("zmon:trial_run:" + trialRunId + ":results");
-            } finally {
-                jedis.close();
             }
         } catch (Throwable t) {
             LOG.error("Failed to cleanup trial run data: id={} msg={}", this.trialRunId, t.getMessage());

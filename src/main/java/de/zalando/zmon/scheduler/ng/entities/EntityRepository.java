@@ -2,9 +2,9 @@ package de.zalando.zmon.scheduler.ng.entities;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.zalando.zmon.scheduler.ng.AlertOverlapGenerator;
 import de.zalando.zmon.scheduler.ng.CachedRepository;
-import de.zalando.zmon.scheduler.ng.SchedulerConfig;
-import de.zalando.zmon.scheduler.ng.filter;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,7 +131,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
                     // SKIP ( use this for DC vs AWS Distinction as legacy entities do not have skipField set )
                 } else if (null != baseFilter && baseFilter.size() > 0) {
                     for (Map<String, String> f : baseFilter) {
-                        if (filter.overlaps(f, e.getFilterProperties())) {
+                        if (AlertOverlapGenerator.filter(f, e.getFilterProperties())) {
                             m.put(e.getId(), e);
                         }
                     }
@@ -198,23 +198,23 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     public EntityRepository(EntityAdapterRegistry registry, SchedulerConfig config) {
         super(registry);
 
-        this.skipField = config.entity_skip_on_field();
+        this.skipField = config.getEntitySkipOnField();
 
-        if (config.entity_properties_key() != null && !"".equals(config.entity_properties_key())) {
-            this.redisPool = new JedisPool(config.redis_host(), config.redis_port());
-            this.redis_properties_key = config.entity_properties_key();
+        if (config.getEntityPropertiesKey() != null && !"".equals(config.getEntityPropertiesKey())) {
+            this.redisPool = new JedisPool(config.getRedisHost(), config.getRedisPort());
+            this.redis_properties_key = config.getEntityPropertiesKey();
         }
 
-        if (config.entity_base_filter() == null && config.entity_base_filter_str() != null) {
+        if (config.getEntityBaseFilter() == null && config.getEntityBaseFilterStr() != null) {
             ObjectMapper m = new ObjectMapper();
             try {
-                baseFilter = m.readValue(config.entity_base_filter_str(), new TypeReference<List<Map<String, String>>>() {
+                baseFilter = m.readValue(config.getEntityBaseFilterStr(), new TypeReference<List<Map<String, String>>>() {
                 });
             } catch (IOException e) {
                 LOG.error("failed to read string for base config", e);
             }
         } else {
-            baseFilter = config.entity_base_filter();
+            baseFilter = config.getEntityBaseFilter();
         }
 
         currentMap = new HashMap<>();

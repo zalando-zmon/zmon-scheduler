@@ -17,7 +17,6 @@ import java.util.List;
 public class DDSClusterAdapter extends EntityAdapter {
 
     private String url;
-    private final MetricRegistry metrics;
     private final Timer timer;
 
     private static final Logger LOG = LoggerFactory.getLogger(DDSClusterAdapter.class);
@@ -25,7 +24,6 @@ public class DDSClusterAdapter extends EntityAdapter {
     public DDSClusterAdapter(String url, MetricRegistry metrics) {
         super("DDSClusterAdapter");
         this.url = url;
-        this.metrics = metrics;
         timer = metrics.timer("entity-adapter.dds.clusters");
     }
 

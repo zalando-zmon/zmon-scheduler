@@ -1,7 +1,7 @@
 package de.zalando.zmon.scheduler.ng.downtimes;
 
-import de.zalando.zmon.scheduler.ng.Scheduler;
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
+import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,12 +38,12 @@ public class DowntimesAPI {
     @RequestMapping(value = "/api/v1/downtimes", method = RequestMethod.POST)
     DowntimeRequestResult postDowntime(@RequestBody DowntimeRequest request) {
         DowntimeRequestResult result = downtimeService.storeDowntime(request);
+        downtimeForwarder.forwardRequest(DowntimeForwardTask.NewDowntimeTask(request));
 
         // trigger evaluation locally
         for (DowntimeAlertRequest r : request.getDowntimeEntities()) {
             scheduler.executeImmediate(alertRepo.get(r.getAlertId()).getCheckDefinitionId());
         }
-        downtimeForwarder.forwardRequest(DowntimeForwardTask.NewDowntimeTask(request));
 
         return result;
     }

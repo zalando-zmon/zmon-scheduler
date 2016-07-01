@@ -1,7 +1,7 @@
 package de.zalando.zmon.scheduler.ng.cleanup;
 
 import de.zalando.zmon.scheduler.ng.AlertOverlapGenerator;
-import de.zalando.zmon.scheduler.ng.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.alerts.AlertChangeListener;
 import de.zalando.zmon.scheduler.ng.alerts.AlertDefinition;
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
@@ -44,7 +44,7 @@ public class AlertChangeCleaner implements AlertChangeListener {
         GenericObjectPoolConfig poolConfig = new GenericObjectPoolConfig();
         poolConfig.setTestOnBorrow(true);
 
-        redisPool = new JedisPool(poolConfig, config.getRedis_host(), config.getRedis_port());
+        redisPool = new JedisPool(poolConfig, config.getRedisHost(), config.getRedisPort());
     }
 
     @Override

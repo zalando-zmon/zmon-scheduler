@@ -1,10 +1,10 @@
 package de.zalando.zmon.scheduler.ng.entities;
 
 import com.codahale.metrics.MetricRegistry;
-import de.zalando.zmon.scheduler.ng.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.SourceRegistry;
 import de.zalando.zmon.scheduler.ng.TokenWrapper;
-import de.zalando.zmon.scheduler.ng.ZalandoConfig;
+import de.zalando.zmon.scheduler.ng.config.ZalandoConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,18 +32,18 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
         this.metrics = metrics;
         register(EMPTY_ADAPTER);
 
-        if (config.enable_global_entity()) {
+        if (config.isEnableGlobalEntity()) {
             register(new GlobalAdapter());
         }
 
-        if (config.entity_service_url() != null && !config.entity_service_url().equals("")) {
-            final String entityServiceUrl = config.entity_service_url() + "/api/v1/entities/";
+        if (config.getEntityServiceUrl() != null && !config.getEntityServiceUrl().equals("")) {
+            final String entityServiceUrl = config.getEntityServiceUrl() + "/api/v1/entities/";
             EntityServiceAdapter e = new EntityServiceAdapter(entityServiceUrl, metrics, tokens, clientFactory);
             register(e);
         }
 
-        if (config.dummy_cities() != null && !config.dummy_cities().equals("")) {
-            register(new YamlEntityAdapter("dummy-cities", config.dummy_cities(), "city"));
+        if (config.getDummyCities() != null && !config.getDummyCities().equals("")) {
+            register(new YamlEntityAdapter("dummy-cities", config.getDummyCities(), "city"));
         }
     }
 
@@ -51,12 +51,12 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
     public EntityAdapterRegistry(SchedulerConfig config, ZalandoConfig zConfig, MetricRegistry metrics, TokenWrapper tokens, ClientHttpRequestFactory clientFactory) {
         this.metrics = metrics;
 
-        if (config.enable_global_entity()) {
+        if (config.isEnableGlobalEntity()) {
             register(new GlobalAdapter());
         }
 
-        if (config.dummy_cities() != null && !config.dummy_cities().equals("")) {
-            register(new YamlEntityAdapter("dummy-cities", config.dummy_cities(), "city", m -> (m.get("country") + "-" + m.get("city"))));
+        if (config.getDummyCities() != null && !config.getDummyCities().equals("")) {
+            register(new YamlEntityAdapter("dummy-cities", config.getDummyCities(), "city", m -> (m.get("country") + "-" + m.get("city"))));
         }
 
         if (zConfig.cmdb != null && zConfig.cmdb.url != null) {

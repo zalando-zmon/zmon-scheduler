@@ -1,8 +1,8 @@
 package de.zalando.zmon.scheduler.ng.trailruns;
 
-import de.zalando.zmon.scheduler.ng.Scheduler;
-import de.zalando.zmon.scheduler.ng.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.TokenWrapper;
+import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -10,7 +10,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -32,7 +31,7 @@ public class TrialRunHttpSubscriber implements Runnable {
     private final RestTemplate restTemplate;
 
     public TrialRunHttpSubscriber(Scheduler scheduler, SchedulerConfig config, TokenWrapper tokenWrapper, RestTemplate restTemplate) {
-        url = config.trial_run_http_url();
+        url = config.getTrialRunHttpUrl();
         this.tokenWrapper = tokenWrapper;
         this.restTemplate = restTemplate;
 

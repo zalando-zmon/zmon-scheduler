@@ -2,6 +2,7 @@ package de.zalando.zmon.scheduler.ng.alerts;
 
 import com.codahale.metrics.MetricRegistry;
 import de.zalando.zmon.scheduler.ng.*;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class AlertSourceRegistry extends SourceRegistry<AlertSource> {
     public AlertSourceRegistry(final SchedulerConfig config, final MetricRegistry metrics, final TokenWrapper tokens, RestTemplate restTemplate) {
         this.metrics = metrics;
 
-        final String url = config.controller_url() + "/api/v1/checks/all-active-alert-definitions";
+        final String url = config.getControllerUrl() + "/api/v1/checks/all-active-alert-definitions";
         final DefaultAlertSource source = new DefaultAlertSource("alert-source", url, metrics, tokens, restTemplate);
 
         register(source);

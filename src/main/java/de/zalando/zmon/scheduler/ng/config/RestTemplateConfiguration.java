@@ -1,4 +1,4 @@
-package de.zalando.zmon.scheduler.ng;
+package de.zalando.zmon.scheduler.ng.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
@@ -21,7 +21,7 @@ public class RestTemplateConfiguration {
     public ClientHttpRequestFactory getFactory() {
         HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
         factory.setReadTimeout(30000);
-        factory.setConnectTimeout(2000);
+        factory.setConnectTimeout(3000);
         return factory;
     }
 

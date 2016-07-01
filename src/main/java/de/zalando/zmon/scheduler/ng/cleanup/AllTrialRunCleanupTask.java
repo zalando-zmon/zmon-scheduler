@@ -1,6 +1,6 @@
 package de.zalando.zmon.scheduler.ng.cleanup;
 
-import de.zalando.zmon.scheduler.ng.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -24,8 +24,7 @@ public class AllTrialRunCleanupTask implements Runnable {
     public void run() {
         try {
             LOG.info("Starting cleanup of old trial run results");
-            Jedis jedis = new Jedis(config.getRedis_host(), config.getRedis_port());
-            try {
+            try (Jedis jedis = new Jedis(config.getRedisHost(), config.getRedisPort())) {
                 Set<String> keys = jedis.keys("zmon:trial_run:*");
                 // No pipeline here, considering this startup task to be fast enough
                 // Dont want this to fail on not cleaned appliance deployments
@@ -34,8 +33,6 @@ public class AllTrialRunCleanupTask implements Runnable {
                 }
 
                 LOG.info("Finished trial run cleanup: count={}", keys.size());
-            } finally {
-                jedis.close();
             }
         } catch (Throwable t) {
             LOG.error("Failed to cleanup old trial runs: msg={}", t.getMessage());

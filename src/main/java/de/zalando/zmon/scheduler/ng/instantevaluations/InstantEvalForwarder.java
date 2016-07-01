@@ -1,7 +1,7 @@
 package de.zalando.zmon.scheduler.ng.instantevaluations;
 
 import de.zalando.zmon.scheduler.ng.DataCenterSubscriber;
-import de.zalando.zmon.scheduler.ng.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +13,6 @@ public class InstantEvalForwarder extends DataCenterSubscriber<Integer> {
 
     @Autowired
     public InstantEvalForwarder(SchedulerConfig config) {
-        super(config.instant_eval_forward());
+        super(config.isInstantEvalForward());
     }
 }
