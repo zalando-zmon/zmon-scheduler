@@ -45,25 +45,26 @@ public class DowntimeHttpSubscriber implements Runnable {
     @Override
     public void run() {
         try {
-            HttpEntity<String> request;
-
             HttpHeaders headers = new HttpHeaders();
             headers.add("Authorization", "Bearer " + tokenWrapper.get());
-            request = new HttpEntity<>(headers);
+            HttpEntity<String> request = new HttpEntity<>(headers);
 
             ResponseEntity<List<DowntimeForwardTask>> response = restTemplate.exchange(url, HttpMethod.GET, request, new ParameterizedTypeReference<List<DowntimeForwardTask>>() {
             });
 
             for (DowntimeForwardTask task : response.getBody()) {
-                LOG.info("Received downtime request: type={}", task.getType());
+
                 switch (task.getType()) {
                     case NEW:
+                        LOG.info("Received downtime request: type={} groupdId={}", task.getType(), task.getRequest().getGroupId());
                         service.storeDowntime(task.getRequest());
                         break;
                     case DELETE:
+                        LOG.info("Received downtime request: type={} ids={}", task.getType(), task.getIds());
                         service.deleteDowntimes(task.getIds());
                         break;
                     case DELETE_GROUP:
+                        LOG.info("Received downtime request: type={} (unexpected)", task.getType());
                         service.deleteDowntimeGroup(task.getGroupId());
                         break;
                 }

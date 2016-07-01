@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Pipeline;
 
 import java.io.IOException;
@@ -21,18 +20,18 @@ import java.util.*;
 @Component
 public class DowntimeService {
 
-    private final JedisPool redisPool;
     private final ObjectMapper mapper = (new ObjectMapper()).setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
     private final Logger log = LoggerFactory.getLogger(DowntimeService.class);
 
+    private final SchedulerConfig config;
     private final EntityRepository entityRepository;
     private final boolean enableEntityFilter;
 
     @Autowired
     public DowntimeService(SchedulerConfig config, EntityRepository entityRepository) {
-        redisPool = new JedisPool(config.getRedisHost(), config.getRedisPort());
         this.entityRepository = entityRepository;
         this.enableEntityFilter = config.isDowntimeEntityFilter();
+        this.config = config;
     }
 
     private DowntimeRequestResult storeInRedis(DowntimeRequest request) {
@@ -40,7 +39,7 @@ public class DowntimeService {
         final List<String> listOfIds = new ArrayList<>();
 
         DowntimeRequestResult result = new DowntimeRequestResult(groupId);
-        try (Jedis jedis = redisPool.getResource()) {
+        try (Jedis jedis = new Jedis(config.getRedisHost(), config.getRedisPort())) {
             // create pipeline
             final Pipeline p = jedis.pipelined();
             for (final DowntimeAlertRequest downtimeEntities : request.getDowntimeEntities()) {
@@ -131,7 +130,7 @@ For now do a very stupid delete, we just assume that the id is present and delet
 */
 
     public void deleteDowntimeGroup(String groupId) {
-        try (Jedis jedis = redisPool.getResource()) {
+        try (Jedis jedis = new Jedis(config.getRedisHost(), config.getRedisPort())) {
             Set<String> ids = jedis.smembers("zmon:downtime-groups:" + groupId);
             deleteDowntimes(ids);
         }
@@ -149,7 +148,7 @@ For now do a very stupid delete, we just assume that the id is present and delet
 
     public void deleteDowntimes(final Collection<String> downtimeIds) {
         Map<DowntimeEntry, Collection<String>> toDeleteItems = new HashMap<>();
-        try (Jedis jedis = redisPool.getResource()) {
+        try (Jedis jedis = new Jedis(config.getRedisHost(), config.getRedisPort())) {
             Set<String> alertsInDowntime = jedis.smembers("zmon:downtimes");
             for (String alertId : alertsInDowntime) {
                 Set<String> entities = jedis.smembers("zmon:downtimes:" + alertId);
@@ -162,7 +161,7 @@ For now do a very stupid delete, we just assume that the id is present and delet
     }
 
     public void doDelete(Map<DowntimeEntry, Collection<String>> toDeleteEntries) {
-        try (Jedis jedis = redisPool.getResource()) {
+        try (Jedis jedis = new Jedis(config.getRedisHost(), config.getRedisPort())) {
             for (Map.Entry<DowntimeEntry, Collection<String>> entry : toDeleteEntries.entrySet()) {
                 final String key = "zmon:downtimes:" + entry.getKey().alertId + ":" + entry.getKey().entity;
                 for (String id : entry.getValue()) {
