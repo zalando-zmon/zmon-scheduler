@@ -205,7 +205,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
             this.redis_properties_key = config.getEntityPropertiesKey();
         }
 
-        if (config.getEntityBaseFilterStr() == null && config.getEntityBaseFilterStr() != null) {
+        if (config.getEntityBaseFilter() == null && config.getEntityBaseFilterStr() != null) {
             ObjectMapper m = new ObjectMapper();
             try {
                 baseFilter = m.readValue(config.getEntityBaseFilterStr(), new TypeReference<List<Map<String, String>>>() {
