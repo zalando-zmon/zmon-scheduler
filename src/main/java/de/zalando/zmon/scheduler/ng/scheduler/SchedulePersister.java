@@ -25,36 +25,3 @@ public class SchedulePersister implements Runnable {
 
     }
 }
-
-/* Unnecessary and not used
-
-object SchedulePersister {
-
-  val mapper = new ObjectMapper with ScalaObjectMapper
-  mapper.registerModule(DefaultScalaModule)
-
-  def loadSchedule(): Map[Integer, Long] = {
-    try {
-      mapper.readValue(new File("schedule.json"), new TypeReference[Map[Integer, Long]] {})
-    }
-    catch {
-      case e: Exception => {
-        return Map[Integer, Long]()
-      }
-    }
-  }
-
-  def writeSchedule(schedule: collection.concurrent.Map[Integer, Long]) = {
-    if (schedule.size > 0) {
-      mapper.writeValue(new File("schedule.json"), schedule)
-    }
-  }
-}
-
-class SchedulePersister(val scheduledChecks: scala.collection.concurrent.TrieMap[Integer, ScheduledCheck]) extends Runnable {
-  override def run(): Unit = {
-    SchedulePersister.writeSchedule(scheduledChecks.filter(_._2.getLastRun > 0).map(x => (x._1, x._2.getLastRun)))
-  }
-}
-
- */
