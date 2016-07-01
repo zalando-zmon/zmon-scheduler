@@ -60,8 +60,11 @@ public class Scheduler {
 
         taskSerializer = new JavaCommandSerializer(schedulerConfig.getTaskSerializer());
 
-        service = new ScheduledThreadPoolExecutor(schedulerConfig.getThreadCount(), new CustomizableThreadFactory("scheduler-pool"));
-        shortIntervalService = new ScheduledThreadPoolExecutor(schedulerConfig.getThreadCount(), new CustomizableThreadFactory("scheduler-pool-fast"));
+        service = new ScheduledThreadPoolExecutor(schedulerConfig.getThreadCount(), new CustomizableThreadFactory("sc-pool-"));
+        service.setRemoveOnCancelPolicy(true);
+
+        shortIntervalService = new ScheduledThreadPoolExecutor(schedulerConfig.getThreadCount(), new CustomizableThreadFactory("sc-pool-fast-"));
+        shortIntervalService.setRemoveOnCancelPolicy(true);
 
         service.scheduleAtFixedRate(new RedisMetricsUpdater(schedulerConfig, schedulerMetrics), 5, 3, TimeUnit.SECONDS);
         service.schedule(new AllTrialRunCleanupTask(schedulerConfig), 10, TimeUnit.SECONDS);
@@ -72,7 +75,8 @@ public class Scheduler {
             return false;
         }
 
-        if (schedulerConfig.getCheckFilter() != null && !schedulerConfig.getCheckFilter().isEmpty()) {
+        if (schedulerConfig.getCheckFilter() != null) {
+            /* This is a positive filter, run only checks from the list */
             if (!schedulerConfig.getCheckFilter().contains(id)) {
                 return false;
             }

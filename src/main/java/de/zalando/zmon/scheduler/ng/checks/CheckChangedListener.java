@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CheckChangedListener implements CheckChangeListener {
 
-    private Scheduler scheduler;
+    private final Scheduler scheduler;
     private final Logger log = LoggerFactory.getLogger(CheckChangedListener.class);
 
     public CheckChangedListener(Scheduler scheduler) {
