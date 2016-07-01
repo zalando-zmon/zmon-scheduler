@@ -91,24 +91,6 @@ public class DowntimeService {
         return result;
     }
 
-//    private static final class DowntimeDetailsFormat {
-//        private final DowntimeData downtimeDetails;
-//        private final String json;
-//
-//        private DowntimeDetailsFormat(final DowntimeData downtimeDetails, final String json) {
-//            this.downtimeDetails = downtimeDetails;
-//            this.json = json;
-//        }
-//
-//        public DowntimeData getDowntimeDetails() {
-//            return downtimeDetails;
-//        }
-//
-//        public String getJson() {
-//            return json;
-//        }
-//    }
-
     public DowntimeRequestResult storeDowntime(DowntimeRequest request) {
         // store in Redis
         return storeInRedis(request);
