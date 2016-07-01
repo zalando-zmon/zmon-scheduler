@@ -16,7 +16,6 @@ import de.zalando.zmon.scheduler.ng.trailruns.TrialRunRequest;
 public class JavaCommandSerializer {
 
     private final CeleryWriter writer;
-//    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
     public JavaCommandSerializer(TaskSerializerType type) {
         writer = CeleryWriter.create(type);
