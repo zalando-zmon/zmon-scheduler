@@ -73,6 +73,10 @@ public class AlertOverlapGenerator {
         return filteredEntities;
     }
 
+    public static boolean matchAnyFilter(List<Map<String, String>> filters, Map<String, Object> properties) {
+        return filters.stream().anyMatch(x->filter(x, properties));
+    }
+
     public static boolean filter(Map<String, String> f, Map<String, Object> ps) {
         for (Map.Entry<String, String> entry : f.entrySet()) {
             if (!ps.containsKey(entry.getKey())) {

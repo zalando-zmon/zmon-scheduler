@@ -11,13 +11,17 @@ import java.util.Map;
 public class Entity {
     private final Map<String, Object> filterProperties = new HashMap<>();
     private final Map<String, Object> properties = new HashMap<>();
-    private String id;
+    private final String id;
 
-    public Entity(String id, String adapterName) {
+    public Entity(String id) {
         this.id = id;
 
         filterProperties.put("id", id);
         properties.put("id", id);
+    }
+
+    public Entity(String id, String adapterName) {
+        this(id);
     }
 
     public String getId() {

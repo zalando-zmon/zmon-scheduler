@@ -156,22 +156,14 @@ public class Scheduler {
 
     private List<Entity> getEntitiesForTrialRun(Collection<Entity> entityBase, List<Map<String, String>> includeFilter, List<Map<String, String>> excludeFilters) {
         List<Entity> entityList = new ArrayList<>();
-        for (Entity e :entityBase) {
-            for (Map<String, String> oneFilter : includeFilter) {
-                if (AlertOverlapGenerator.filter(oneFilter, e.getFilterProperties())) {
-                    if (excludeFilters != null && excludeFilters.size() > 0) {
-                        boolean exclude = false;
-                        for (Map<String, String> exFilter : excludeFilters) {
-                            if (AlertOverlapGenerator.filter(exFilter, e.getFilterProperties())) {
-                                exclude = true;
-                            }
-                        }
-                        if (!exclude) {
-                            entityList.add(e);
-                        }
-                    }
-                    else {
-                        entityList.add(e);
+        for (Entity entity : entityBase) {
+            if(AlertOverlapGenerator.matchAnyFilter(includeFilter, entity.getFilterProperties())) {
+                if (null == excludeFilters || excludeFilters.size() == 0) {
+                    entityList.add(entity);
+                }
+                else {
+                    if(!AlertOverlapGenerator.matchAnyFilter(excludeFilters, entity.getFilterProperties())) {
+                        entityList.add(entity);
                     }
                 }
             }

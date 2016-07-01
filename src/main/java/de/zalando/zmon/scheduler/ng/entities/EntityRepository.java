@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xerial.snappy.Snappy;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 
 import java.io.IOException;
 import java.util.*;
@@ -32,8 +31,53 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     // Need this to write globally aware change listener
     private Map<String, Entity> unfilteredEntities;
 
-    private JedisPool redisPool = null;
-    private String redis_properties_key = null;
+    private final String redisHost;
+    private final int redisPort;
+    private String redisPropertiesKey = null;
+
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    public EntityRepository(EntityAdapterRegistry registry) {
+        super(registry);
+
+        skipField = null;
+
+        baseFilter = new ArrayList<>();
+        currentMap = new HashMap<>();
+        unfilteredEntities = new HashMap<>();
+
+        redisPort = 0;
+        redisHost = null;
+
+        fill();
+    }
+
+    @Autowired
+    public EntityRepository(EntityAdapterRegistry registry, SchedulerConfig config) {
+        super(registry);
+
+        this.skipField = config.getEntitySkipOnField();
+
+        this.redisHost = config.getRedisHost();
+        this.redisPort = config.getRedisPort();
+        this.redisPropertiesKey = config.getEntityPropertiesKey();
+
+        if (config.getEntityBaseFilter() == null && config.getEntityBaseFilterStr() != null) {
+            ObjectMapper m = new ObjectMapper();
+            try {
+                baseFilter = m.readValue(config.getEntityBaseFilterStr(), new TypeReference<List<Map<String, String>>>() {
+                });
+            } catch (IOException e) {
+                LOG.error("failed to read string for base config", e);
+            }
+        } else {
+            baseFilter = config.getEntityBaseFilter();
+        }
+
+        currentMap = new HashMap<>();
+        unfilteredEntities = new HashMap<>();
+        fill();
+    }
 
     public synchronized void registerListener(EntityChangeListener l) {
         LOG.info("Registering entity change listener: type={} count={}", l.getClass().getCanonicalName(), currentMap.size());
@@ -49,7 +93,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     }
 
     private void createAutoCompleteData() {
-        if (redisPool == null || redis_properties_key == null || redis_properties_key.equals("")) {
+        if (redisPropertiesKey == null || redisPropertiesKey.equals("")) {
             return;
         }
 
@@ -78,11 +122,10 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
 
             typeMap.remove("GLOBAL");
 
-            ObjectMapper mapper = new ObjectMapper();
             String v = mapper.writeValueAsString(typeMap);
 
-            try (Jedis jedis = redisPool.getResource()) {
-                jedis.set(redis_properties_key.getBytes(), Snappy.compress(v.getBytes("UTF-8")));
+            try (Jedis jedis = new Jedis(redisHost, redisPort)) {
+                jedis.set(redisPropertiesKey.getBytes(), Snappy.compress(v.getBytes("UTF-8")));
             }
 
             LOG.info("Done writing auto complete data for front end");
@@ -130,10 +173,8 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
                 if (null != skipField && e.getFilterProperties().containsKey(skipField)) {
                     // SKIP ( use this for DC vs AWS Distinction as legacy entities do not have skipField set )
                 } else if (null != baseFilter && baseFilter.size() > 0) {
-                    for (Map<String, String> f : baseFilter) {
-                        if (AlertOverlapGenerator.filter(f, e.getFilterProperties())) {
-                            m.put(e.getId(), e);
-                        }
+                    if (AlertOverlapGenerator.matchAnyFilter(baseFilter, e.getFilterProperties())) {
+                        m.put(e.getId(), e);
                     }
                 } else {
                     m.put(e.getId(), e);
@@ -186,51 +227,11 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     private static final Entity NULL_ENTITY;
 
     static {
-        NULL_ENTITY = new Entity("--NULL--ENTITY--", "--ENTITY--REPO--");
+        NULL_ENTITY = new Entity("--NULL--ENTITY--");
     }
 
     @Override
     protected Entity getNullObject() {
         return NULL_ENTITY;
-    }
-
-    @Autowired
-    public EntityRepository(EntityAdapterRegistry registry, SchedulerConfig config) {
-        super(registry);
-
-        this.skipField = config.getEntitySkipOnField();
-
-        if (config.getEntityPropertiesKey() != null && !"".equals(config.getEntityPropertiesKey())) {
-            this.redisPool = new JedisPool(config.getRedisHost(), config.getRedisPort());
-            this.redis_properties_key = config.getEntityPropertiesKey();
-        }
-
-        if (config.getEntityBaseFilter() == null && config.getEntityBaseFilterStr() != null) {
-            ObjectMapper m = new ObjectMapper();
-            try {
-                baseFilter = m.readValue(config.getEntityBaseFilterStr(), new TypeReference<List<Map<String, String>>>() {
-                });
-            } catch (IOException e) {
-                LOG.error("failed to read string for base config", e);
-            }
-        } else {
-            baseFilter = config.getEntityBaseFilter();
-        }
-
-        currentMap = new HashMap<>();
-        unfilteredEntities = new HashMap<>();
-        fill();
-    }
-
-    public EntityRepository(EntityAdapterRegistry registry) {
-        super(registry);
-
-        skipField = null;
-
-        baseFilter = new ArrayList<>();
-        currentMap = new HashMap<>();
-        unfilteredEntities = new HashMap<>();
-
-        fill();
     }
 }
