@@ -75,9 +75,10 @@ public class Scheduler {
             return false;
         }
 
-        if (schedulerConfig.getCheckFilter() != null) {
+        final Collection<Integer> checkFilter = schedulerConfig.getCheckFilter();
+        if (checkFilter != null && !checkFilter.isEmpty()) {
             /* This is a positive filter, run only checks from the list */
-            if (!schedulerConfig.getCheckFilter().contains(id)) {
+            if (!checkFilter.contains(id)) {
                 return false;
             }
         }
