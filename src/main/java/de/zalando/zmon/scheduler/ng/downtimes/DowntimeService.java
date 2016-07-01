@@ -1,19 +1,26 @@
 package de.zalando.zmon.scheduler.ng.downtimes;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
-import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Pipeline;
-
-import java.io.IOException;
-import java.util.*;
 
 /**
  * Created by jmussler on 18.06.16.
@@ -84,23 +91,23 @@ public class DowntimeService {
         return result;
     }
 
-    private static final class DowntimeDetailsFormat {
-        private final DowntimeData downtimeDetails;
-        private final String json;
-
-        private DowntimeDetailsFormat(final DowntimeData downtimeDetails, final String json) {
-            this.downtimeDetails = downtimeDetails;
-            this.json = json;
-        }
-
-        public DowntimeData getDowntimeDetails() {
-            return downtimeDetails;
-        }
-
-        public String getJson() {
-            return json;
-        }
-    }
+//    private static final class DowntimeDetailsFormat {
+//        private final DowntimeData downtimeDetails;
+//        private final String json;
+//
+//        private DowntimeDetailsFormat(final DowntimeData downtimeDetails, final String json) {
+//            this.downtimeDetails = downtimeDetails;
+//            this.json = json;
+//        }
+//
+//        public DowntimeData getDowntimeDetails() {
+//            return downtimeDetails;
+//        }
+//
+//        public String getJson() {
+//            return json;
+//        }
+//    }
 
     public DowntimeRequestResult storeDowntime(DowntimeRequest request) {
         // store in Redis

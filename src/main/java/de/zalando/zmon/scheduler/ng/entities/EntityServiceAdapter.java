@@ -1,8 +1,10 @@
 package de.zalando.zmon.scheduler.ng.entities;
 
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
-import de.zalando.zmon.scheduler.ng.TokenWrapper;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +15,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+
+import de.zalando.zmon.scheduler.ng.TokenWrapper;
 
 /**
  * Created by jmussler on 4/2/15.
@@ -26,7 +28,6 @@ public class EntityServiceAdapter extends EntityAdapter {
     private String url;
     private TokenWrapper tokens;
 
-    private final MetricRegistry metrics;
     private final Timer timer;
     private boolean isFirstLoad = true;
 
@@ -41,7 +42,6 @@ public class EntityServiceAdapter extends EntityAdapter {
         LOG.info("configuring entity service url={}", url);
         this.url = url;
         this.tokens = tokens;
-        this.metrics = metrics;
         this.timer = metrics.timer("entity-adapter.entity-service");
     }
 

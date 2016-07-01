@@ -1,13 +1,14 @@
 package de.zalando.zmon.scheduler.ng.alerts;
 
-import com.codahale.metrics.MetricRegistry;
-import de.zalando.zmon.scheduler.ng.*;
-import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+
+import com.codahale.metrics.MetricRegistry;
+
+import de.zalando.zmon.scheduler.ng.SourceRegistry;
+import de.zalando.zmon.scheduler.ng.TokenWrapper;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 
 /**
  * Created by jmussler on 4/7/15.
@@ -15,17 +16,17 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class AlertSourceRegistry extends SourceRegistry<AlertSource> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AlertSourceRegistry.class);
+//    private static final Logger LOG = LoggerFactory.getLogger(AlertSourceRegistry.class);
 
-    private final MetricRegistry metrics;
+//    private final MetricRegistry metrics;
 
     public AlertSourceRegistry(final MetricRegistry metrics) {
-        this.metrics = metrics;
+//        this.metrics = metrics;
     }
 
     @Autowired
     public AlertSourceRegistry(final SchedulerConfig config, final MetricRegistry metrics, final TokenWrapper tokens, RestTemplate restTemplate) {
-        this.metrics = metrics;
+//        this.metrics = metrics;
 
         final String url = config.getControllerUrl() + "/api/v1/checks/all-active-alert-definitions";
         final DefaultAlertSource source = new DefaultAlertSource("alert-source", url, metrics, tokens, restTemplate);

@@ -1,19 +1,5 @@
 package de.zalando.zmon.scheduler.ng.scheduler;
 
-import com.codahale.metrics.Meter;
-import de.zalando.zmon.scheduler.ng.Alert;
-import de.zalando.zmon.scheduler.ng.AlertOverlapGenerator;
-import de.zalando.zmon.scheduler.ng.Check;
-import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
-import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
-import de.zalando.zmon.scheduler.ng.checks.CheckDefinition;
-import de.zalando.zmon.scheduler.ng.checks.CheckRepository;
-import de.zalando.zmon.scheduler.ng.entities.Entity;
-import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
-import de.zalando.zmon.scheduler.ng.queue.QueueSelector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -21,6 +7,22 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.codahale.metrics.Meter;
+
+import de.zalando.zmon.scheduler.ng.Alert;
+import de.zalando.zmon.scheduler.ng.AlertOverlapGenerator;
+import de.zalando.zmon.scheduler.ng.Check;
+import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
+import de.zalando.zmon.scheduler.ng.checks.CheckDefinition;
+import de.zalando.zmon.scheduler.ng.checks.CheckRepository;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.entities.Entity;
+import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
+import de.zalando.zmon.scheduler.ng.queue.QueueSelector;
 
 /**
  * Created by jmussler on 30.06.16.
@@ -32,14 +34,12 @@ public class ScheduledCheck implements Runnable {
     private final int id;
     private final Check check;
     private final Meter meter;
-    private final SchedulerConfig config;
     private final AlertRepository alertRepo;
-    private final CheckRepository checkRepo;
     private final EntityRepository entityRepo;
     private final QueueSelector selector;
     private final SchedulerMetrics metrics;
 
-    private ScheduledFuture taskFuture = null;
+    private ScheduledFuture<?> taskFuture = null;
     private volatile boolean cancel = false;
 
     private final List<Entity> lastRunEntities = new ArrayList<>(0);
@@ -50,8 +50,6 @@ public class ScheduledCheck implements Runnable {
         this.id = id;
         this.alertRepo = alertRepo;
         this.entityRepo = entityRepo;
-        this.checkRepo = checkRepo;
-        this.config = config;
         this.selector = selector;
         this.metrics = metrics;
 

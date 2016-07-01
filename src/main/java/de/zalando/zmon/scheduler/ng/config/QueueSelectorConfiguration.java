@@ -1,12 +1,18 @@
 package de.zalando.zmon.scheduler.ng.config;
 
-import com.codahale.metrics.MetricRegistry;
-import de.zalando.zmon.scheduler.ng.*;
-import de.zalando.zmon.scheduler.ng.queue.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.codahale.metrics.MetricRegistry;
+
+import de.zalando.zmon.scheduler.ng.TaskWriterType;
+import de.zalando.zmon.scheduler.ng.queue.ArrayQueueWriter;
+import de.zalando.zmon.scheduler.ng.queue.JedisQueueWriter;
+import de.zalando.zmon.scheduler.ng.queue.LogQueueWriter;
+import de.zalando.zmon.scheduler.ng.queue.QueueSelector;
+import de.zalando.zmon.scheduler.ng.queue.QueueWriter;
 
 /**
  * Created by jmussler on 30.06.16.
@@ -37,7 +43,7 @@ public class QueueSelectorConfiguration {
     }
 
     @Bean
-    public QueueSelector getSelector(QueueWriter writer, SchedulerConfig config, MetricRegistry metrics) {
-        return new QueueSelector(writer, config, metrics);
+    public QueueSelector getSelector(QueueWriter writer, SchedulerConfig config) {
+        return new QueueSelector(writer, config);
     }
 }

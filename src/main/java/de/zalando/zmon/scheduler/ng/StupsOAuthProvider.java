@@ -1,8 +1,13 @@
 package de.zalando.zmon.scheduler.ng;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import de.zalando.zmon.scheduler.ng.config.StupsOAuthConfig;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Form;
@@ -11,14 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import de.zalando.zmon.scheduler.ng.config.StupsOAuthConfig;
 
 /**
  * Created by jmussler on 5/11/15.
@@ -33,15 +34,11 @@ public class StupsOAuthProvider {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private final StupsOAuthConfig config;
-    private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
-
     private final Map<String, TokenContainer> tokens = new HashMap<>();
 
     public static class TokenContainer {
         private String token = "";
         private Set<String> scopes;
-        private long expires = 0;
 
         public TokenContainer(Set<String> scopes) {
             this.scopes = scopes;
@@ -53,7 +50,6 @@ public class StupsOAuthProvider {
 
         public void updateToken(String t, long e) {
             token = t;
-            expires = e;
         }
 
         public String getToken() {
@@ -107,7 +103,6 @@ public class StupsOAuthProvider {
 
     @Autowired
     public StupsOAuthProvider(StupsOAuthConfig config) {
-        this.config = config;
         for (String k : config.getScopes().keySet()) {
             tokens.put(k, new TokenContainer(config.scopes.get(k)));
         }

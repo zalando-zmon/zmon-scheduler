@@ -1,15 +1,15 @@
 package de.zalando.zmon.scheduler.ng.entities;
 
-import com.codahale.metrics.MetricRegistry;
-import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
-import de.zalando.zmon.scheduler.ng.SourceRegistry;
-import de.zalando.zmon.scheduler.ng.TokenWrapper;
-import de.zalando.zmon.scheduler.ng.config.ZalandoConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
+
+import com.codahale.metrics.MetricRegistry;
+
+import de.zalando.zmon.scheduler.ng.SourceRegistry;
+import de.zalando.zmon.scheduler.ng.TokenWrapper;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.config.ZalandoConfig;
 
 /**
  * Created by jmussler on 4/1/15.
@@ -17,19 +17,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(EntityAdapterRegistry.class);
-
     private final static EntityAdapter EMPTY_ADAPTER = new EmptyAdapter();
 
-    private final MetricRegistry metrics;
-
     public EntityAdapterRegistry(MetricRegistry metrics) {
-        this.metrics = metrics;
     }
 
     @Autowired(required = false)
     public EntityAdapterRegistry(SchedulerConfig config, MetricRegistry metrics, TokenWrapper tokens, ClientHttpRequestFactory clientFactory) {
-        this.metrics = metrics;
         register(EMPTY_ADAPTER);
 
         if (config.isEnableGlobalEntity()) {
@@ -49,7 +43,6 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
 
     @Autowired(required = false)
     public EntityAdapterRegistry(SchedulerConfig config, ZalandoConfig zConfig, MetricRegistry metrics, TokenWrapper tokens, ClientHttpRequestFactory clientFactory) {
-        this.metrics = metrics;
 
         if (config.isEnableGlobalEntity()) {
             register(new GlobalAdapter());

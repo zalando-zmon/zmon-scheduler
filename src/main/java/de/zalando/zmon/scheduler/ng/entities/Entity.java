@@ -12,11 +12,9 @@ public class Entity {
     private final Map<String, Object> filterProperties = new HashMap<>();
     private final Map<String, Object> properties = new HashMap<>();
     private String id;
-    private String adapterName;
 
     public Entity(String id, String adapterName) {
         this.id = id;
-        this.adapterName = adapterName;
 
         filterProperties.put("id", id);
         properties.put("id", id);
@@ -42,7 +40,7 @@ public class Entity {
                 filterProperties.put(e.getKey(), e.getValue() + "");
             } else if (e.getValue() instanceof java.util.Collection) {
                 List<Object> list = new ArrayList<>();
-                for (Object o : (java.util.List) e.getValue()) {
+                for (Object o : (java.util.List<?>) e.getValue()) {
                     if (o instanceof String || o instanceof Integer)
                         list.add(o);
                 }

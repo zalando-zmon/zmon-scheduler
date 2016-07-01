@@ -1,15 +1,14 @@
 package de.zalando.zmon.scheduler.ng;
 
-import de.zalando.zmon.scheduler.ng.alerts.AlertDefinition;
-import de.zalando.zmon.scheduler.ng.checks.CheckDefinition;
-import de.zalando.zmon.scheduler.ng.entities.Entity;
-import de.zalando.zmon.scheduler.ng.trailruns.TrialRunRequest;
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
+import de.zalando.zmon.scheduler.ng.alerts.AlertDefinition;
+import de.zalando.zmon.scheduler.ng.checks.CheckDefinition;
+import de.zalando.zmon.scheduler.ng.entities.Entity;
+import de.zalando.zmon.scheduler.ng.trailruns.TrialRunRequest;
 
 /**
  * Created by jmussler on 30.06.16.
@@ -17,7 +16,7 @@ import java.util.List;
 public class JavaCommandSerializer {
 
     private final CeleryWriter writer;
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+//    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
     public JavaCommandSerializer(TaskSerializerType type) {
         writer = CeleryWriter.create(type);

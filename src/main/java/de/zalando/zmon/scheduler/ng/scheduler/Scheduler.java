@@ -1,26 +1,32 @@
 package de.zalando.zmon.scheduler.ng.scheduler;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
+
 import com.codahale.metrics.MetricRegistry;
+
 import de.zalando.zmon.scheduler.ng.AlertOverlapGenerator;
 import de.zalando.zmon.scheduler.ng.JavaCommandSerializer;
 import de.zalando.zmon.scheduler.ng.SchedulePersistType;
-import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
 import de.zalando.zmon.scheduler.ng.checks.CheckRepository;
 import de.zalando.zmon.scheduler.ng.cleanup.AllTrialRunCleanupTask;
 import de.zalando.zmon.scheduler.ng.cleanup.TrialRunCleanupTask;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
 import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
 import de.zalando.zmon.scheduler.ng.queue.QueueSelector;
 import de.zalando.zmon.scheduler.ng.trailruns.TrialRunRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import redis.clients.jedis.Jedis;
-
-import java.util.*;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by jmussler on 30.06.16.
@@ -34,7 +40,6 @@ public class Scheduler {
     private final EntityRepository entityRepo;
     private final QueueSelector queueSelector;
     private final SchedulerConfig schedulerConfig;
-    private final MetricRegistry metrics;
     private final SchedulerMetrics schedulerMetrics;
 
     private final ScheduledThreadPoolExecutor service;
@@ -51,7 +56,6 @@ public class Scheduler {
         this.entityRepo = entityRepository;
         this.queueSelector = queueSelector;
         this.schedulerConfig = schedulerConfig;
-        this.metrics = metrics;
         this.schedulerMetrics = new SchedulerMetrics(metrics);
 
         taskSerializer = new JavaCommandSerializer(schedulerConfig.getTaskSerializer());
