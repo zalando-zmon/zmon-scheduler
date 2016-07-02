@@ -15,7 +15,7 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import com.codahale.metrics.MetricRegistry;
 
 import de.zalando.zmon.scheduler.ng.AlertOverlapGenerator;
-import de.zalando.zmon.scheduler.ng.JavaCommandSerializer;
+import de.zalando.zmon.scheduler.ng.CommandSerializer;
 import de.zalando.zmon.scheduler.ng.SchedulePersistType;
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
 import de.zalando.zmon.scheduler.ng.checks.CheckRepository;
@@ -47,7 +47,7 @@ public class Scheduler {
 
     private final Map<Integer, ScheduledCheck> scheduledChecks = new HashMap<>();
 
-    private final JavaCommandSerializer taskSerializer;
+    private final CommandSerializer taskSerializer;
     private final Map<Integer, Long> lastScheduleAtStartup = SchedulePersister.loadSchedule();
 
     public Scheduler(AlertRepository alertRepo, CheckRepository checkRepo, EntityRepository entityRepository, QueueSelector queueSelector, SchedulerConfig schedulerConfig, MetricRegistry metrics) {
@@ -58,7 +58,7 @@ public class Scheduler {
         this.schedulerConfig = schedulerConfig;
         this.schedulerMetrics = new SchedulerMetrics(metrics);
 
-        taskSerializer = new JavaCommandSerializer(schedulerConfig.getTaskSerializer());
+        taskSerializer = new CommandSerializer(schedulerConfig.getTaskSerializer());
 
         service = new ScheduledThreadPoolExecutor(schedulerConfig.getThreadCount(), new CustomizableThreadFactory("sc-pool-"));
         service.setRemoveOnCancelPolicy(true);

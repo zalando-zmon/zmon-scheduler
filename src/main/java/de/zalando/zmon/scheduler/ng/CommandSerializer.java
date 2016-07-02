@@ -13,11 +13,11 @@ import de.zalando.zmon.scheduler.ng.trailruns.TrialRunRequest;
 /**
  * Created by jmussler on 30.06.16.
  */
-public class JavaCommandSerializer {
+public class CommandSerializer {
 
     private final CeleryWriter writer;
 
-    public JavaCommandSerializer(TaskSerializerType type) {
+    public CommandSerializer(TaskSerializerType type) {
         writer = CeleryWriter.create(type);
     }
 

@@ -8,7 +8,7 @@ import com.codahale.metrics.MetricRegistry;
 
 import de.zalando.zmon.scheduler.ng.Alert;
 import de.zalando.zmon.scheduler.ng.Check;
-import de.zalando.zmon.scheduler.ng.JavaCommandSerializer;
+import de.zalando.zmon.scheduler.ng.CommandSerializer;
 import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
 
@@ -20,7 +20,7 @@ public class QueueSelector {
     private final QueueWriter writer;
     private final SchedulerConfig config;
     private final List<Selector> selectors = new ArrayList<>();
-    private final JavaCommandSerializer serializer;
+    private final CommandSerializer serializer;
     private final PropertyQueueSelector propertySelector;
     
     public QueueSelector(QueueWriter writer, SchedulerConfig config){
@@ -32,7 +32,7 @@ public class QueueSelector {
         selectors.add(new HardCodedSelector(config));
         selectors.add(propertySelector);
         
-        serializer = new JavaCommandSerializer(config.getTaskSerializer());
+        serializer = new CommandSerializer(config.getTaskSerializer());
     }
 
     @Deprecated
