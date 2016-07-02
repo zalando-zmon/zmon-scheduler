@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 /**
  * Created by jmussler on 02.06.16.
  */
-public class AlertChangeCleaner implements AlertChangeListener {
+public class AlertChangedCleaner implements AlertChangeListener {
 
     private final static Logger LOG = LoggerFactory.getLogger(AlertChangeListener.class);
 
@@ -36,7 +36,7 @@ public class AlertChangeCleaner implements AlertChangeListener {
 
     private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
 
-    public AlertChangeCleaner(AlertRepository alertRepo, CheckRepository checkRepository, EntityRepository entityRepo, SchedulerConfig config) {
+    public AlertChangedCleaner(AlertRepository alertRepo, CheckRepository checkRepository, EntityRepository entityRepo, SchedulerConfig config) {
         this.alertRepository = alertRepo;
         this.checkRepository = checkRepository;
         this.entityRepository = entityRepo;
@@ -54,7 +54,7 @@ public class AlertChangeCleaner implements AlertChangeListener {
 
     @Override
     public void notifyAlertChange(AlertDefinition alert) {
-        final AlertChangeCleaner c = this;
+        final AlertChangedCleaner c = this;
         // schedule twice, 1 fast for UI/UX the long run is only for multi scheduler setup where results may come in too late.
         executor.schedule(() -> c.doCleanup(alert.getId(), alert.getCheckDefinitionId()), 10, TimeUnit.SECONDS);
         executor.schedule(() -> c.doCleanup(alert.getId(), alert.getCheckDefinitionId()), 90, TimeUnit.SECONDS);

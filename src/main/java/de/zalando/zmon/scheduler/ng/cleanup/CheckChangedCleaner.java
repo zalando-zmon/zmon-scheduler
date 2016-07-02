@@ -10,13 +10,13 @@ import java.util.Collection;
 /**
  * Created by jmussler on 02.06.16.
  */
-public class CheckChangeCleaner implements CheckChangeListener {
+public class CheckChangedCleaner implements CheckChangeListener {
 
-    private final AlertChangeCleaner alertCleaner;
+    private final AlertChangedCleaner alertCleaner;
 
     private final AlertRepository alertRepository;
 
-    public CheckChangeCleaner(AlertRepository alertRepo, AlertChangeCleaner alertCleaner) {
+    public CheckChangedCleaner(AlertRepository alertRepo, AlertChangedCleaner alertCleaner) {
         this.alertRepository = alertRepo;
         this.alertCleaner = alertCleaner;
     }

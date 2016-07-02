@@ -1,7 +1,7 @@
 package de.zalando.zmon.scheduler.ng.config;
 
-import de.zalando.zmon.scheduler.ng.cleanup.AlertChangeCleaner;
-import de.zalando.zmon.scheduler.ng.cleanup.CheckChangeCleaner;
+import de.zalando.zmon.scheduler.ng.cleanup.AlertChangedCleaner;
+import de.zalando.zmon.scheduler.ng.cleanup.CheckChangedCleaner;
 import de.zalando.zmon.scheduler.ng.cleanup.EntityChangedCleaner;
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
 import de.zalando.zmon.scheduler.ng.checks.CheckRepository;
@@ -20,23 +20,23 @@ public class CleanupConfiguration {
     private final static Logger LOG = LoggerFactory.getLogger(CleanupConfiguration.class);
 
     @Bean
-    public CheckChangeCleaner checkChangeCleaner(AlertRepository alertRepo, CheckRepository checkRepo, AlertChangeCleaner alertCleaner) {
-        LOG.info("Registering checkChangeCleaner...");
-        CheckChangeCleaner l = new CheckChangeCleaner(alertRepo, alertCleaner);
+    public CheckChangedCleaner checkChangedCleaner(AlertRepository alertRepo, CheckRepository checkRepo, AlertChangedCleaner alertCleaner) {
+        LOG.info("Registering checkChangedCleaner...");
+        CheckChangedCleaner l = new CheckChangedCleaner(alertRepo, alertCleaner);
         checkRepo.registerListener(l);
         return l;
     }
 
     @Bean
-    public AlertChangeCleaner alertChangeCleaner(AlertRepository alertRepo, CheckRepository checkRepo, EntityRepository entityRepo, SchedulerConfig config) {
-        LOG.info("Registering alertChangeCleaner...");
-        AlertChangeCleaner l = new AlertChangeCleaner(alertRepo, checkRepo, entityRepo, config);
+    public AlertChangedCleaner alertChangedCleaner(AlertRepository alertRepo, CheckRepository checkRepo, EntityRepository entityRepo, SchedulerConfig config) {
+        LOG.info("Registering alertChangedCleaner...");
+        AlertChangedCleaner l = new AlertChangedCleaner(alertRepo, checkRepo, entityRepo, config);
         alertRepo.registerChangeListener(l);
         return l;
     }
 
     @Bean
-    public EntityChangedCleaner entityChangedCleaner(EntityRepository entityRepo, AlertRepository alertRepo, CheckRepository checkRepo, AlertChangeCleaner alertCleaner) {
+    public EntityChangedCleaner entityChangedCleaner(EntityRepository entityRepo, AlertRepository alertRepo, CheckRepository checkRepo, AlertChangedCleaner alertCleaner) {
         LOG.info("Registering entityChangedCleaner...");
         EntityChangedCleaner l = new EntityChangedCleaner(alertRepo, checkRepo, alertCleaner);
         entityRepo.registerListener(l);

@@ -24,9 +24,9 @@ public class EntityChangedCleaner implements EntityChangeListener {
     private final AlertRepository alertRepo;
     private final CheckRepository checkRepo;
     private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
-    private final AlertChangeCleaner alertCleaner;
+    private final AlertChangedCleaner alertCleaner;
 
-    public EntityChangedCleaner(AlertRepository alertRepo, CheckRepository checkRepo, AlertChangeCleaner alertCleaner) {
+    public EntityChangedCleaner(AlertRepository alertRepo, CheckRepository checkRepo, AlertChangedCleaner alertCleaner) {
         this.alertRepo = alertRepo;
         this.checkRepo = checkRepo;
         this.alertCleaner = alertCleaner;
