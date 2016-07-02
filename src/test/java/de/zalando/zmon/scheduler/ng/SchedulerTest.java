@@ -62,8 +62,11 @@ public class SchedulerTest {
     @Test
     public void scheduleTrialRun() {
         final EntityRepository entityRepo = mock(EntityRepository.class);
-        Entity entity = new Entity("myent", "test");
-        when(entityRepo.get()).thenReturn(asList(entity));
+        Entity entity = new Entity("included-entity");
+        entity.addProperty("type", "host");
+        Entity entityExcluded = new Entity("excluded-entity");
+        entityExcluded.addProperty("type", "host");
+        when(entityRepo.get()).thenReturn(asList(entity, entityExcluded));
 
         QueueSelector queueSelector = mock(QueueSelector.class);
         SchedulerConfig config = new SchedulerConfig();
@@ -74,11 +77,17 @@ public class SchedulerTest {
         request.id = "test";
         request.interval = 60L;
         Map<String, String> includeFilter = new HashMap<>();
-        includeFilter.put("id", "myent");
+        includeFilter.put("type", "host");
         request.entities = asList(includeFilter);
+
+        Map<String,String> excludeFilter = new HashMap<>();
+        excludeFilter.put("id", "excluded-entity");
+        request.entitiesExclude = asList(excludeFilter);
+
         scheduler.scheduleTrialRun(request);
 
         verify(queueSelector).execute(eq(entity), any(), eq("zmon:queue:default"));
+        verify(queueSelector, never()).execute(eq(entityExcluded), any(), eq("zmon:queue:default"));
     }
 
 }
