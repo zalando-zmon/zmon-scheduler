@@ -61,7 +61,10 @@ public class EntityRepositoryTest {
         Entity host2 = new Entity("host-2");
         host2.addProperty("type", "host");
 
-        List<Entity> entities = asList(instance, host1);
+        Entity host3 = new Entity("host-3");
+        host3.addProperty("type", "host");
+
+        List<Entity> entities = asList(instance, host1, host3);
         List<Entity> entities2 = asList(instance, host1_changed, host2);
 
         EntityAdapter adapter = Mockito.mock(EntityAdapter.class);
@@ -74,12 +77,13 @@ public class EntityRepositoryTest {
 
         EntityRepository repository = new EntityRepository(registry, config);
         repository.registerListener(listener);
-        assertEquals(1, repository.getCurrentMap().size());
+        assertEquals(2, repository.getCurrentMap().size());
 
         repository.fill();
         assertEquals(2, repository.getCurrentMap().size());
 
         verify(listener).notifyEntityAdd(eq(repository), eq(host2));
+        verify(listener).notifyEntityRemove(eq(repository), eq(host3));
         verify(listener).notifyEntityChange(eq(repository), eq(host1), eq(host1_changed));
     }
 }
