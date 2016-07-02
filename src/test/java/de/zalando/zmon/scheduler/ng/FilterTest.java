@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
@@ -87,5 +88,28 @@ public class FilterTest {
 
         boolean matchBothAlert = AlertOverlapGenerator.matchAlertFilter(bothAlert, simpleEntity);
         assertEquals(true, matchBothAlert);
+    }
+
+    @Test
+    public void testAddProperties() {
+        Map<String, Object> newProperties = new HashMap<>();
+        newProperties.put("type", "host");
+        newProperties.put("vendor", "zalando");
+        newProperties.put("generation", 1);
+
+
+        Entity entity = new Entity("host-1");
+        entity.addProperties(newProperties);
+
+        Map<String, String> filter = new HashMap<>();
+        filter.put("type", "host");
+        List<Map<String, String>> filters = asList(filter);
+
+        Map<String, String> filter2 = new HashMap<>();
+        filter.put("generation", "1");
+        List<Map<String, String>> filters2 = asList(filter2);
+
+        assertEquals(true, AlertOverlapGenerator.matchAnyFilter(filters, entity));
+        assertEquals(true, AlertOverlapGenerator.matchAnyFilter(filters2, entity));
     }
 }
