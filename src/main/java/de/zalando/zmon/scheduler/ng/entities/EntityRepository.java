@@ -139,7 +139,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     }
 
     @Override
-    protected synchronized void fill() {
+    public synchronized void fill() {
         Map<String, Entity> m = new HashMap<>();
         Map<String, Entity> mUnfiltered = new HashMap<>();
 

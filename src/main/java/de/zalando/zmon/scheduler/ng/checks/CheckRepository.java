@@ -57,7 +57,7 @@ public class CheckRepository extends CachedRepository<Integer, CheckSourceRegist
     }
 
     @Override
-    protected synchronized void fill() {
+    public synchronized void fill() {
         Map<Integer, CheckDefinition> m = new HashMap<>();
 
         for (String name : registry.getSourceNames()) {
