@@ -1,10 +1,12 @@
-package de.zalando.zmon.scheduler.ng.entities;
+package de.zalando.zmon.scheduler.ng.entities.adapters;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+import de.zalando.zmon.scheduler.ng.entities.Entity;
+import de.zalando.zmon.scheduler.ng.entities.EntityAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

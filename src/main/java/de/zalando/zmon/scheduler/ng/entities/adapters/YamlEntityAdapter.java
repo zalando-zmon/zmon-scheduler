@@ -1,9 +1,11 @@
-package de.zalando.zmon.scheduler.ng.entities;
+package de.zalando.zmon.scheduler.ng.entities.adapters;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import de.zalando.zmon.scheduler.ng.entities.Entity;
+import de.zalando.zmon.scheduler.ng.entities.EntityAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

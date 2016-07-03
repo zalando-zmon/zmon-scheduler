@@ -1,5 +1,6 @@
 package de.zalando.zmon.scheduler.ng.entities;
 
+import de.zalando.zmon.scheduler.ng.entities.adapters.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
