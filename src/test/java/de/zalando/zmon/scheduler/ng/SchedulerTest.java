@@ -12,6 +12,7 @@ import de.zalando.zmon.scheduler.ng.queue.QueueSelector;
 import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
 import de.zalando.zmon.scheduler.ng.trailruns.TrialRunRequest;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,18 +32,31 @@ public class SchedulerTest {
         check.setId(1);
         check.setInterval(1L);
         Map<String, String> includeFilter = new HashMap<>();
-        includeFilter.put("id", "myent");
+        includeFilter.put("type", "host");
         check.setEntities(asList(includeFilter));
         when(checkRepo.get(1)).thenReturn(check);
 
+        Map<String, String> excludeFilter = new HashMap<>();
+        excludeFilter.put("id", "entity-3");
+
         final EntityRepository entityRepo = mock(EntityRepository.class);
-        Entity entity = new Entity("myent", "test");
-        when(entityRepo.get()).thenReturn(asList(entity));
+        Entity entity1= new Entity("entity-1");
+        entity1.addProperty("type", "host");
+
+        Entity entity2 = new Entity("entity-2");
+        entity2.addProperty("type", "instance");
+
+        Entity entity3 = new Entity("entity-3");
+        entity3.addProperty("type", "host");
+
+        when(entityRepo.get()).thenReturn(asList(entity1, entity2, entity3));
 
         final AlertRepository alertRepo = mock(AlertRepository.class);
         AlertDefinition alert = new AlertDefinition();
         alert.setId(2);
         alert.setEntities(asList());
+        alert.setEntitiesExclude(asList(excludeFilter));
+
         when(alertRepo.getByCheckId(check.getId())).thenReturn(asList(alert));
         when(alertRepo.get(alert.getId())).thenReturn(alert);
 
@@ -56,14 +70,27 @@ public class SchedulerTest {
         scheduler.scheduleCheck(check.getId());
 
         // verify that our entity was writen to the "queue"
-        verify(queueSelector, timeout(2000)).execute(eq(entity), any(), any(), gt(beforeSchedule));
+        verify(queueSelector, timeout(2000)).execute(eq(entity1), any(), any(), gt(beforeSchedule));
+
+        // non matching entity not executed
+        verify(queueSelector, Mockito.after(2000).never()).execute(eq(entity2), any(), any(), gt(beforeSchedule));
+
+        // excluded entity not executed
+        verify(queueSelector, Mockito.after(2000).never()).execute(eq(entity3), any(), any(), gt(beforeSchedule));
     }
 
     @Test
     public void scheduleTrialRun() {
         final EntityRepository entityRepo = mock(EntityRepository.class);
-        Entity entity = new Entity("myent", "test");
-        when(entityRepo.get()).thenReturn(asList(entity));
+        Entity entity1 = new Entity("included-entity");
+        entity1.addProperty("type", "host");
+
+        Entity entity2 = new Entity("included-entity");
+        entity2.addProperty("type", "instance");
+
+        Entity entityExcluded = new Entity("excluded-entity");
+        entityExcluded.addProperty("type", "host");
+        when(entityRepo.get()).thenReturn(asList(entity1, entity2, entityExcluded));
 
         QueueSelector queueSelector = mock(QueueSelector.class);
         SchedulerConfig config = new SchedulerConfig();
@@ -74,11 +101,18 @@ public class SchedulerTest {
         request.id = "test";
         request.interval = 60L;
         Map<String, String> includeFilter = new HashMap<>();
-        includeFilter.put("id", "myent");
+        includeFilter.put("type", "host");
         request.entities = asList(includeFilter);
+
+        Map<String,String> excludeFilter = new HashMap<>();
+        excludeFilter.put("id", "excluded-entity");
+        request.entitiesExclude = asList(excludeFilter);
+
         scheduler.scheduleTrialRun(request);
 
-        verify(queueSelector).execute(eq(entity), any(), eq("zmon:queue:default"));
+        verify(queueSelector).execute(eq(entity1), any(), eq("zmon:queue:default"));
+        verify(queueSelector, never()).execute(eq(entity2), any(), eq("zmon:queue:default"));
+        verify(queueSelector, never()).execute(eq(entityExcluded), any(), eq("zmon:queue:default"));
     }
 
 }

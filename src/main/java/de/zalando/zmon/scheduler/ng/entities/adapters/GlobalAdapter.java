@@ -1,5 +1,7 @@
-package de.zalando.zmon.scheduler.ng.entities;
+package de.zalando.zmon.scheduler.ng.entities.adapters;
 
+import de.zalando.zmon.scheduler.ng.entities.Entity;
+import de.zalando.zmon.scheduler.ng.entities.EntityAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

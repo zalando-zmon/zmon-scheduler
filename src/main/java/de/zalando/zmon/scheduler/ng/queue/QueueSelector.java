@@ -1,13 +1,16 @@
 package de.zalando.zmon.scheduler.ng.queue;
 
-import com.codahale.metrics.MetricRegistry;
-import de.zalando.zmon.scheduler.ng.*;
-import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
-import de.zalando.zmon.scheduler.ng.entities.Entity;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import com.codahale.metrics.MetricRegistry;
+
+import de.zalando.zmon.scheduler.ng.Alert;
+import de.zalando.zmon.scheduler.ng.Check;
+import de.zalando.zmon.scheduler.ng.CommandSerializer;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.entities.Entity;
 
 /**
  * Created by jmussler on 30.06.16.
@@ -16,22 +19,25 @@ public class QueueSelector {
 
     private final QueueWriter writer;
     private final SchedulerConfig config;
-    private final MetricRegistry metrics;
     private final List<Selector> selectors = new ArrayList<>();
-    private final JavaCommandSerializer serializer;
+    private final CommandSerializer serializer;
     private final PropertyQueueSelector propertySelector;
-
-    public QueueSelector(QueueWriter writer, SchedulerConfig config, MetricRegistry metrics) {
+    
+    public QueueSelector(QueueWriter writer, SchedulerConfig config){
         this.writer = writer;
         this.config = config;
-        this.metrics = metrics;
         this.propertySelector = new PropertyQueueSelector(config);
-
+        
         selectors.add(new RepoSelector(config));
         selectors.add(new HardCodedSelector(config));
         selectors.add(propertySelector);
+        
+        serializer = new CommandSerializer(config.getTaskSerializer());
+    }
 
-        serializer = new JavaCommandSerializer(config.getTaskSerializer());
+    @Deprecated
+    public QueueSelector(QueueWriter writer, SchedulerConfig config, MetricRegistry metrics) {
+        this(writer, config);
     }
 
     public void execute(Entity entity, byte[] command) {

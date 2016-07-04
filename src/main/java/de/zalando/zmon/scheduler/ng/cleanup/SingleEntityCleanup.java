@@ -1,25 +1,26 @@
 package de.zalando.zmon.scheduler.ng.cleanup;
 
-import de.zalando.zmon.scheduler.ng.AlertOverlapGenerator;
-import de.zalando.zmon.scheduler.ng.alerts.AlertDefinition;
-import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
-import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
-import de.zalando.zmon.scheduler.ng.checks.CheckDefinition;
-import de.zalando.zmon.scheduler.ng.checks.CheckRepository;
-import de.zalando.zmon.scheduler.ng.entities.Entity;
-import de.zalando.zmon.scheduler.ng.entities.EntityChangeListener;
-import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.zalando.zmon.scheduler.ng.AlertOverlapGenerator;
+import de.zalando.zmon.scheduler.ng.alerts.AlertDefinition;
+import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
+import de.zalando.zmon.scheduler.ng.checks.CheckDefinition;
+import de.zalando.zmon.scheduler.ng.checks.CheckRepository;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
+import de.zalando.zmon.scheduler.ng.entities.Entity;
+import de.zalando.zmon.scheduler.ng.entities.EntityChangeListener;
+import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * Created by jmussler on 30.06.16.
@@ -28,19 +29,15 @@ public class SingleEntityCleanup implements EntityChangeListener{
 
     private final static Logger LOG = LoggerFactory.getLogger(SingleEntityCleanup.class);
 
-    private final SchedulerConfig config;
     private final AlertRepository alertRepo;
     private final CheckRepository checkRepo;
-    private final EntityRepository entityRepo;
 
     private final JedisPool jedisPool;
     private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
 
     public SingleEntityCleanup(SchedulerConfig config, AlertRepository alertRepo, CheckRepository checkRepo, EntityRepository entityRepo) {
-        this.config = config;
         this.alertRepo = alertRepo;
         this.checkRepo = checkRepo;
-        this.entityRepo = entityRepo;
 
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setTestOnBorrow(true);

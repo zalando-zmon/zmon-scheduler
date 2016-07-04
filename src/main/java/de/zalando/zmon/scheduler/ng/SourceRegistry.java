@@ -7,7 +7,7 @@ import java.util.Map;
 /**
  * Created by jmussler on 4/7/15.
  */
-public class SourceRegistry<T extends Source> {
+public class SourceRegistry<T extends Source<?>> {
 
     private final Map<String, T> registry = new HashMap<>();
 

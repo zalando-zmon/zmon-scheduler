@@ -45,7 +45,7 @@ public class EntityPropertyChangeTest {
     static CheckRepository checkRepo = mock(CheckRepository.class);
     static EntityRepository entityRepo = mock(EntityRepository.class);
 
-    static AlertChangeCleaner alertCleaner = mock(AlertChangeCleaner.class);
+    static AlertChangedCleaner alertCleaner = mock(AlertChangedCleaner.class);
     static EntityChangedCleaner cleaner = new EntityChangedCleaner(alertRepo, checkRepo, alertCleaner);
 
     static Entity simpleEntity = when(mock(Entity.class).getFilterProperties()).thenReturn(simpleEntityProperties).getMock();

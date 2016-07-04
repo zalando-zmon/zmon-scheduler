@@ -29,7 +29,7 @@ public abstract class CachedRepository<I, S, T> implements Runnable {
 
     protected abstract T getNullObject();
 
-    abstract protected void fill();
+    abstract public void fill();
 
     public long getLastUpdated() {
         return lastUpdated;

@@ -1,30 +1,31 @@
-package de.zalando.zmon.scheduler.ng.entities;
+package de.zalando.zmon.scheduler.ng.entities.adapters;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import de.zalando.zmon.scheduler.ng.entities.Entity;
+import de.zalando.zmon.scheduler.ng.entities.EntityAdapter;
+import de.zalando.zmon.scheduler.ng.entities.Environments;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by jmussler on 4/20/15.
  */
-public class DDSClusterAdapter extends EntityAdapter {
+public class DDSDatabaseAdapter extends EntityAdapter {
 
     private String url;
     private final Timer timer;
 
-    private static final Logger LOG = LoggerFactory.getLogger(DDSClusterAdapter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DDSDatabaseAdapter.class);
 
-    public DDSClusterAdapter(String url, MetricRegistry metrics) {
-        super("DDSClusterAdapter");
+    public DDSDatabaseAdapter(String url, MetricRegistry metrics) {
+        super("DDSDatabaseAdapter");
         this.url = url;
-        timer = metrics.timer("entity-adapter.dds.clusters");
+        timer = metrics.timer("entity-adapter.dds.databases");
     }
 
     private static class BaseEntity extends HashMap<String, Object> {
@@ -39,12 +40,22 @@ public class DDSClusterAdapter extends EntityAdapter {
 
         Timer.Context tC = timer.time();
         BaseEntityList list = rt.getForObject(url, BaseEntityList.class);
-        LOG.info("DDS Adapter used: {}ms", tC.stop() / 1000000);
+        LOG.info("DDS Database Adapter used: {}ms", tC.stop() / 1000000);
 
         List<Entity> entities = new ArrayList<>();
 
+        Set<String> seenIds = new HashSet<>();
+
         for (BaseEntity base : list) {
-            Entity e = new Entity(base.get("cluster") + "@" + base.get("instance_name"), "DDSClusterAdapter");
+            List<String> parts = Arrays.asList((String) base.get("name"), (String) base.get("environment"), (String) base.get("role"), (String) base.get("slave_type"));
+            String entityId = parts.stream().filter(x -> x != null).collect(Collectors.joining("-"));
+
+            if (seenIds.contains(entityId)) {
+                continue;
+            }
+            seenIds.add(entityId);
+
+            Entity e = new Entity(entityId, "DDSDatabaseAdapter");
             base.put("environment", Environments.getNormalized((String) base.get("environment")));
             base.remove("id");
             if (!base.containsKey("pci")) {

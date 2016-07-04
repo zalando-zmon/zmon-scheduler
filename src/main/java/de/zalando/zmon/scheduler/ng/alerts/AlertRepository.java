@@ -21,7 +21,7 @@ public class AlertRepository extends CachedRepository<Integer, AlertSourceRegist
     }
 
     @Override
-    protected void fill() {
+    public synchronized void fill() {
         Map<Integer, AlertDefinition> m = new HashMap<>();
         Map<Integer, List<AlertDefinition>> newByCheckId = new HashMap<>();
 
@@ -66,7 +66,7 @@ public class AlertRepository extends CachedRepository<Integer, AlertSourceRegist
         byCheckId = newByCheckId;
         currentMap = m;
 
-        // we notifiy after update with the new state
+        // we notify after update with the new state
         // main purpose is now delayed cleanup of alert filter changes
         for (AlertChangeListener l : changeListeners) {
             for (AlertDefinition ad : changedAlerts) {

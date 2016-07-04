@@ -1,10 +1,17 @@
 package de.zalando.zmon.scheduler.ng.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
+
 /**
  * Created by jmussler on 30.06.16.
  */
 
 import com.codahale.metrics.MetricRegistry;
+
 import de.zalando.zmon.scheduler.ng.TokenWrapper;
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
 import de.zalando.zmon.scheduler.ng.checks.CheckChangedListener;
@@ -19,11 +26,6 @@ import de.zalando.zmon.scheduler.ng.queue.QueueSelector;
 import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
 import de.zalando.zmon.scheduler.ng.trailruns.TrialRunForwarder;
 import de.zalando.zmon.scheduler.ng.trailruns.TrialRunHttpSubscriber;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class SchedulerFactory {
@@ -75,11 +77,11 @@ public class SchedulerFactory {
         }
 
         if (config.getTrialRunHttpUrl() != null) {
-            TrialRunHttpSubscriber trialRunPoller = new TrialRunHttpSubscriber(newScheduler, config, tokenWrapper, restTemplate);
+            new TrialRunHttpSubscriber(newScheduler, config, tokenWrapper, restTemplate);
         }
 
         if (config.getInstantEvalHttpUrl() != null) {
-            InstantEvalHttpSubscriber instantEvalPoller = new InstantEvalHttpSubscriber(newScheduler, config, tokenWrapper, restTemplate);
+            new InstantEvalHttpSubscriber(newScheduler, config, tokenWrapper, restTemplate);
         }
 
         return newScheduler;
