@@ -1,5 +1,6 @@
 package de.zalando.zmon.scheduler.ng.entities.adapters;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,7 +28,7 @@ import de.zalando.zmon.scheduler.ng.TokenWrapper;
  */
 public class EntityServiceAdapter extends EntityAdapter {
 
-    private String url;
+    private URI url;
     private TokenWrapper tokens;
 
     private final Timer timer;
@@ -38,7 +39,7 @@ public class EntityServiceAdapter extends EntityAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(EntityServiceAdapter.class);
 
     @Autowired
-    public EntityServiceAdapter(String url, MetricRegistry metrics, TokenWrapper tokens, ClientHttpRequestFactory clientFactory) {
+    public EntityServiceAdapter(URI url, MetricRegistry metrics, TokenWrapper tokens, ClientHttpRequestFactory clientFactory) {
         super("EntityServiceAdapter");
         this.clientFactory = clientFactory;
         LOG.info("configuring entity service url={}", url);

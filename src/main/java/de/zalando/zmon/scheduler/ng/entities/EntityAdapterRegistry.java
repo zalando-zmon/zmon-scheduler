@@ -16,6 +16,7 @@ import de.zalando.zmon.scheduler.ng.TokenWrapper;
 import de.zalando.zmon.scheduler.ng.config.ZalandoConfig;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLEncoder;
 
 /**
@@ -41,7 +42,6 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
 
         if (config.getEntityServiceUrl() != null && !config.getEntityServiceUrl().equals("")) {
             String entityServiceUrl = config.getEntityServiceUrl() + "/api/v1/entities";
-
             try {
                 if (config.getEntityBaseFilterStr() != null && !"".equals(config.getEntityBaseFilterStr()) && config.isBaseFilterForward()) {
                     entityServiceUrl = entityServiceUrl + "?query=" + URLEncoder.encode(config.getEntityBaseFilterStr(), "UTF-8");
@@ -58,7 +58,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
                 LOG.error("Encoding of base filter query param failed");
             }
 
-            EntityServiceAdapter e = new EntityServiceAdapter(entityServiceUrl, metrics, tokens, clientFactory);
+            EntityServiceAdapter e = new EntityServiceAdapter(URI.create(entityServiceUrl), metrics, tokens, clientFactory);
             register(e);
         }
 
@@ -94,7 +94,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
         }
 
         if (zConfig.entityservice != null && zConfig.entityservice.url != null) {
-            EntityServiceAdapter e = new EntityServiceAdapter(zConfig.entityservice.url + "/api/v1/entities/", metrics, tokens, clientFactory);
+            EntityServiceAdapter e = new EntityServiceAdapter(URI.create(zConfig.entityservice.url + "/api/v1/entities/"), metrics, tokens, clientFactory);
             register(e);
         }
 
