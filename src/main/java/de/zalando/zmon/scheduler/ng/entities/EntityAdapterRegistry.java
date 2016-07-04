@@ -15,6 +15,9 @@ import de.zalando.zmon.scheduler.ng.SourceRegistry;
 import de.zalando.zmon.scheduler.ng.TokenWrapper;
 import de.zalando.zmon.scheduler.ng.config.ZalandoConfig;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 /**
  * Created by jmussler on 4/1/15.
  */
@@ -39,17 +42,20 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
         if (config.getEntityServiceUrl() != null && !config.getEntityServiceUrl().equals("")) {
             String entityServiceUrl = config.getEntityServiceUrl() + "/api/v1/entities";
 
-            if (config.getEntityBaseFilterStr() != null && !"".equals(config.getEntityBaseFilterStr()) && config.isBaseFilterForward()) {
-                entityServiceUrl = entityServiceUrl + "?query=" + config.getEntityBaseFilterStr();
+            try {
+                if (config.getEntityBaseFilterStr() != null && !"".equals(config.getEntityBaseFilterStr()) && config.isBaseFilterForward()) {
+                    entityServiceUrl = entityServiceUrl + "?query=" + URLEncoder.encode(config.getEntityBaseFilterStr(), "UTF-8");
+                } else if (config.getEntityBaseFilter() != null && config.isBaseFilterForward()) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    try {
+                        entityServiceUrl = entityServiceUrl + "?query=" + URLEncoder.encode(mapper.writeValueAsString(config.getEntityBaseFilter()), "UTF-8");
+                    } catch (JsonProcessingException ex) {
+                        LOG.error("Could not serialize base filter: {}", ex.getMessage());
+                    }
+                }
             }
-            else if(config.getEntityBaseFilter() != null && config.isBaseFilterForward()) {
-                ObjectMapper mapper = new ObjectMapper();
-                try {
-                    entityServiceUrl = entityServiceUrl + "?query=" + mapper.writeValueAsString(config.getEntityBaseFilter());
-                }
-                catch(JsonProcessingException ex) {
-                    LOG.error("Could not serialize base filter: {}", ex.getMessage());
-                }
+            catch(UnsupportedEncodingException ex) {
+                LOG.error("Encoding of base filter query param failed");
             }
 
             EntityServiceAdapter e = new EntityServiceAdapter(entityServiceUrl, metrics, tokens, clientFactory);
