@@ -1,15 +1,18 @@
 package de.zalando.zmon.scheduler.ng.entities;
 
 import de.zalando.zmon.scheduler.ng.entities.adapters.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 
 import com.codahale.metrics.MetricRegistry;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.SourceRegistry;
 import de.zalando.zmon.scheduler.ng.TokenWrapper;
-import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.config.ZalandoConfig;
 
 /**
@@ -17,6 +20,8 @@ import de.zalando.zmon.scheduler.ng.config.ZalandoConfig;
  */
 @Component
 public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
+
+    private final static Logger LOG = LoggerFactory.getLogger(EntityAdapterRegistry.class);
 
     private final static EntityAdapter EMPTY_ADAPTER = new EmptyAdapter();
 
@@ -32,7 +37,21 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
         }
 
         if (config.getEntityServiceUrl() != null && !config.getEntityServiceUrl().equals("")) {
-            final String entityServiceUrl = config.getEntityServiceUrl() + "/api/v1/entities/";
+            String entityServiceUrl = config.getEntityServiceUrl() + "/api/v1/entities";
+
+            if (config.getEntityBaseFilterStr() != null && !"".equals(config.getEntityBaseFilterStr()) && config.isBaseFilterForward()) {
+                entityServiceUrl = entityServiceUrl + "?query=" + config.getEntityBaseFilterStr();
+            }
+            else if(config.getEntityBaseFilter() != null && config.isBaseFilterForward()) {
+                ObjectMapper mapper = new ObjectMapper();
+                try {
+                    entityServiceUrl = entityServiceUrl + "?query=" + mapper.writeValueAsString(config.getEntityBaseFilter());
+                }
+                catch(JsonProcessingException ex) {
+                    LOG.error("Could not serialize base filter: {}", ex.getMessage());
+                }
+            }
+
             EntityServiceAdapter e = new EntityServiceAdapter(entityServiceUrl, metrics, tokens, clientFactory);
             register(e);
         }

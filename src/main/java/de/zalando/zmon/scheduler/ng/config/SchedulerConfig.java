@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ public class SchedulerConfig {
     List<Integer> checkFilter = new ArrayList<>();
     String entitySkipOnField = null;
 
+    boolean baseFilterForward = true;
     List<Map<String, String>> entityBaseFilter = null;
     String entityBaseFilterStr = null;
 
@@ -392,5 +394,13 @@ public class SchedulerConfig {
 
     public void setServerPort(String serverPort) {
         this.serverPort = serverPort;
+    }
+
+    public boolean isBaseFilterForward() {
+        return baseFilterForward;
+    }
+
+    public void setBaseFilterForward(boolean baseFilterForward) {
+        this.baseFilterForward = baseFilterForward;
     }
 }
