@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,7 +71,7 @@ public class SchedulerConfig {
     String dummyCities = null; // "dummy_data/cities.json"
 
     // Mapping based on check url prefix
-    Map<String, String> queueMmappingByUrl = new HashMap<>();
+    Map<String, String> queueMappingByUrl = new HashMap<>();
 
     // Map certrain check IDs to queue
     Map<String, List<Integer>> queueMapping = new HashMap<>();
@@ -340,12 +339,12 @@ public class SchedulerConfig {
         this.dummyCities = dummyCities;
     }
 
-    public Map<String, String> getQueueMmappingByUrl() {
-        return queueMmappingByUrl;
+    public Map<String, String> getQueueMappingByUrl() {
+        return queueMappingByUrl;
     }
 
-    public void setQueueMmappingByUrl(Map<String, String> queueMmappingByUrl) {
-        this.queueMmappingByUrl = queueMmappingByUrl;
+    public void setQueueMappingByUrl(Map<String, String> queueMappingByUrl) {
+        this.queueMappingByUrl = queueMappingByUrl;
     }
 
     public Map<String, List<Integer>> getQueueMapping() {
