@@ -5,6 +5,7 @@ import de.zalando.zmon.scheduler.ng.cleanup.CheckChangedCleaner;
 import de.zalando.zmon.scheduler.ng.cleanup.EntityChangedCleaner;
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
 import de.zalando.zmon.scheduler.ng.checks.CheckRepository;
+import de.zalando.zmon.scheduler.ng.cleanup.MetricsCleanup;
 import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,5 +42,12 @@ public class CleanupConfiguration {
         EntityChangedCleaner l = new EntityChangedCleaner(alertRepo, checkRepo, alertCleaner);
         entityRepo.registerListener(l);
         return l;
+    }
+
+    @Bean
+    public MetricsCleanup metricsCleanup(SchedulerConfig config) {
+        LOG.info("Registering metricsCleaner...");
+        MetricsCleanup cleaner = new MetricsCleanup(config);
+        return cleaner;
     }
 }
