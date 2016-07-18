@@ -78,34 +78,9 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
             register(new YamlEntityAdapter("dummy-cities", config.getDummyCities(), "city", m -> (m.get("country") + "-" + m.get("city"))));
         }
 
-        if (zConfig.cmdb != null && zConfig.cmdb.url != null) {
-            CmdbAdapter c = new CmdbAdapter(zConfig.cmdb.url, zConfig.cmdb.user, zConfig.cmdb.password, metrics);
-            register(c);
-        }
-
-        if (zConfig.deployctl != null && zConfig.deployctl.url != null) {
-            DeployCtlInstanceAdapter d = new DeployCtlInstanceAdapter(zConfig.deployctl.url, zConfig.deployctl.user, zConfig.deployctl.password, metrics);
-            register(d);
-        }
-
-        if (zConfig.projects != null && zConfig.projects.url != null) {
-            DeployCtlProjectAdapter d = new DeployCtlProjectAdapter(zConfig.projects.url, zConfig.projects.user, zConfig.projects.password, metrics);
-            register(d);
-        }
-
         if (zConfig.entityservice != null && zConfig.entityservice.url != null) {
             EntityServiceAdapter e = new EntityServiceAdapter(URI.create(zConfig.entityservice.url + "/api/v1/entities/"), metrics, tokens, clientFactory);
             register(e);
-        }
-
-        if (zConfig.ddscluster != null && zConfig.ddscluster.url != null) {
-            DDSClusterAdapter dds = new DDSClusterAdapter(zConfig.ddscluster.url, metrics);
-            register(dds);
-        }
-
-        if (zConfig.ddsdatabase != null && zConfig.ddsdatabase.url != null) {
-            DDSDatabaseAdapter dds = new DDSDatabaseAdapter(zConfig.ddsdatabase.url, metrics);
-            register(dds);
         }
     }
 }
