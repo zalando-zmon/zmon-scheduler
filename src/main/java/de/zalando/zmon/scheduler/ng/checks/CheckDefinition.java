@@ -55,8 +55,19 @@ public class CheckDefinition {
     @XmlElement
     private String sourceUrl;
 
+    // setting this to minimum to currently always trigger check refresh until API services this field
+    private long lastModified = 0;
+
     @XmlElement
     private String lastModifiedBy;
+
+    public long getLastModified() {
+        return lastModified;
+    }
+
+    public void setLastModified(long lastModified) {
+        this.lastModified = lastModified;
+    }
 
     public Integer getId() {
         return id;
