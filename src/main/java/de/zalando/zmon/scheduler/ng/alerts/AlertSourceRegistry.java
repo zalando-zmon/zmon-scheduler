@@ -20,7 +20,7 @@ public class AlertSourceRegistry extends SourceRegistry<AlertSource> {
     public AlertSourceRegistry(final SchedulerConfig config, final MetricRegistry metrics, final TokenWrapper tokens, RestTemplate restTemplate) {
 
         final String url = config.getControllerUrl() + "/api/v1/checks/all-active-alert-definitions";
-        final DefaultAlertSource source = new DefaultAlertSource("alert-source", url, metrics, tokens, restTemplate);
+        final DefaultAlertSource source = new DefaultAlertSource("alert-source", url, metrics, restTemplate);
 
         register(source);
     }

@@ -58,7 +58,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
                 LOG.error("Encoding of base filter query param failed");
             }
 
-            EntityServiceAdapter e = new EntityServiceAdapter(URI.create(entityServiceUrl), metrics, tokens, clientFactory);
+            EntityServiceAdapter e = new EntityServiceAdapter(URI.create(entityServiceUrl), metrics, clientFactory);
             register(e);
         }
 
@@ -79,7 +79,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
         }
 
         if (zConfig.entityservice != null && zConfig.entityservice.url != null) {
-            EntityServiceAdapter e = new EntityServiceAdapter(URI.create(zConfig.entityservice.url + "/api/v1/entities/"), metrics, tokens, clientFactory);
+            EntityServiceAdapter e = new EntityServiceAdapter(URI.create(zConfig.entityservice.url + "/api/v1/entities/"), metrics, clientFactory);
             register(e);
         }
     }

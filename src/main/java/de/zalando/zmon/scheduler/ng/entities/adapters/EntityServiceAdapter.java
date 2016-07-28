@@ -29,7 +29,6 @@ import de.zalando.zmon.scheduler.ng.TokenWrapper;
 public class EntityServiceAdapter extends EntityAdapter {
 
     private URI url;
-    private TokenWrapper tokens;
 
     private final Timer timer;
     private boolean isFirstLoad = true;
@@ -39,12 +38,11 @@ public class EntityServiceAdapter extends EntityAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(EntityServiceAdapter.class);
 
     @Autowired
-    public EntityServiceAdapter(URI url, MetricRegistry metrics, TokenWrapper tokens, ClientHttpRequestFactory clientFactory) {
+    public EntityServiceAdapter(URI url, MetricRegistry metrics, ClientHttpRequestFactory clientFactory) {
         super("EntityServiceAdapter");
         this.clientFactory = clientFactory;
         LOG.info("configuring entity service url={}", url);
         this.url = url;
-        this.tokens = tokens;
         this.timer = metrics.timer("entity-adapter.entity-service");
     }
 
@@ -54,24 +52,13 @@ public class EntityServiceAdapter extends EntityAdapter {
     private static class BaseEntityList extends ArrayList<BaseEntity> {
     }
 
-    private HttpHeaders getWithAuth() {
-        HttpHeaders headers = new HttpHeaders();
-
-        if (tokens != null) {
-            headers.add("Authorization", "Bearer " + tokens.get());
-        }
-
-        return headers;
-    }
-
     @Override
     public Collection<Entity> getCollection() {
         RestTemplate rt = new RestTemplate(clientFactory);
         HttpEntity<String> request;
 
-        final String accessToken = tokens.get();
-        LOG.info("Querying entities with token " + accessToken.substring(0, Math.min(accessToken.length(), 3)) + "..");
-        request = new HttpEntity<>(getWithAuth());
+        LOG.info("Querying entities with token...");
+        request = new HttpEntity<>(new HttpHeaders());
 
         try {
             Timer.Context tC = timer.time();
