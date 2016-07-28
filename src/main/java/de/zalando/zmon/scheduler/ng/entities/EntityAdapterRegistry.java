@@ -4,7 +4,6 @@ import de.zalando.zmon.scheduler.ng.entities.adapters.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 
 import com.codahale.metrics.MetricRegistry;
@@ -12,8 +11,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.SourceRegistry;
-import de.zalando.zmon.scheduler.ng.TokenWrapper;
 import de.zalando.zmon.scheduler.ng.config.ZalandoConfig;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -33,7 +32,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
     }
 
     @Autowired(required = false)
-    public EntityAdapterRegistry(SchedulerConfig config, MetricRegistry metrics, TokenWrapper tokens, ClientHttpRequestFactory clientFactory) {
+    public EntityAdapterRegistry(SchedulerConfig config, MetricRegistry metrics, RestTemplate restTemplate) {
         register(EMPTY_ADAPTER);
 
         if (config.isEnableGlobalEntity()) {
@@ -58,7 +57,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
                 LOG.error("Encoding of base filter query param failed");
             }
 
-            EntityServiceAdapter e = new EntityServiceAdapter(URI.create(entityServiceUrl), metrics, clientFactory);
+            EntityServiceAdapter e = new EntityServiceAdapter(URI.create(entityServiceUrl), metrics, restTemplate);
             register(e);
         }
 
@@ -68,7 +67,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
     }
 
     @Autowired(required = false)
-    public EntityAdapterRegistry(SchedulerConfig config, ZalandoConfig zConfig, MetricRegistry metrics, TokenWrapper tokens, ClientHttpRequestFactory clientFactory) {
+    public EntityAdapterRegistry(SchedulerConfig config, ZalandoConfig zConfig, MetricRegistry metrics, RestTemplate restTemplate) {
 
         if (config.isEnableGlobalEntity()) {
             register(new GlobalAdapter());
@@ -79,7 +78,7 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
         }
 
         if (zConfig.entityservice != null && zConfig.entityservice.url != null) {
-            EntityServiceAdapter e = new EntityServiceAdapter(URI.create(zConfig.entityservice.url + "/api/v1/entities/"), metrics, clientFactory);
+            EntityServiceAdapter e = new EntityServiceAdapter(URI.create(zConfig.entityservice.url + "/api/v1/entities/"), metrics, restTemplate);
             register(e);
         }
     }

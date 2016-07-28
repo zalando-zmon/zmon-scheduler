@@ -33,14 +33,14 @@ public class EntityServiceAdapter extends EntityAdapter {
     private final Timer timer;
     private boolean isFirstLoad = true;
 
-    private ClientHttpRequestFactory clientFactory;
+    private RestTemplate restTemplate;
 
     private static final Logger LOG = LoggerFactory.getLogger(EntityServiceAdapter.class);
 
     @Autowired
-    public EntityServiceAdapter(URI url, MetricRegistry metrics, ClientHttpRequestFactory clientFactory) {
+    public EntityServiceAdapter(URI url, MetricRegistry metrics, RestTemplate restTemplate) {
         super("EntityServiceAdapter");
-        this.clientFactory = clientFactory;
+        this.restTemplate = restTemplate;
         LOG.info("configuring entity service url={}", url);
         this.url = url;
         this.timer = metrics.timer("entity-adapter.entity-service");
@@ -54,7 +54,6 @@ public class EntityServiceAdapter extends EntityAdapter {
 
     @Override
     public Collection<Entity> getCollection() {
-        RestTemplate rt = new RestTemplate(clientFactory);
         HttpEntity<String> request;
 
         LOG.info("Querying entities with token...");
@@ -62,7 +61,7 @@ public class EntityServiceAdapter extends EntityAdapter {
 
         try {
             Timer.Context tC = timer.time();
-            ResponseEntity<BaseEntityList> response = rt.exchange(url, HttpMethod.GET, request, BaseEntityList.class);
+            ResponseEntity<BaseEntityList> response = restTemplate.exchange(url, HttpMethod.GET, request, BaseEntityList.class);
             LOG.info("Entity Service Adapter used: {}ms", tC.stop() / 1000000);
 
             BaseEntityList list = response.getBody();

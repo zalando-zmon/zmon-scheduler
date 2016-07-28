@@ -77,11 +77,11 @@ public class SchedulerFactory {
         }
 
         if (config.getTrialRunHttpUrl() != null) {
-            new TrialRunHttpSubscriber(newScheduler, config, tokenWrapper, restTemplate);
+            new TrialRunHttpSubscriber(newScheduler, config, restTemplate);
         }
 
         if (config.getInstantEvalHttpUrl() != null) {
-            new InstantEvalHttpSubscriber(newScheduler, config, tokenWrapper, restTemplate);
+            new InstantEvalHttpSubscriber(newScheduler, config, restTemplate);
         }
 
         return newScheduler;

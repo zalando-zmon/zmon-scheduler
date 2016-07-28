@@ -1,7 +1,6 @@
 package de.zalando.zmon.scheduler.ng.instantevaluations;
 
 import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
-import de.zalando.zmon.scheduler.ng.TokenWrapper;
 import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,12 +26,10 @@ public class InstantEvalHttpSubscriber implements Runnable {
     private final String url;
     private final Scheduler scheduler;
     private final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
-    private final TokenWrapper tokenWrapper;
     private final RestTemplate restTemplate;
 
-    public InstantEvalHttpSubscriber(Scheduler scheduler, SchedulerConfig config, TokenWrapper tokenWrapper, RestTemplate restTemplate) {
+    public InstantEvalHttpSubscriber(Scheduler scheduler, SchedulerConfig config, RestTemplate restTemplate) {
         url = config.getInstantEvalHttpUrl();
-        this.tokenWrapper = tokenWrapper;
         this.restTemplate = restTemplate;
 
         LOG.info("Subscribing for instant evaluations: {}", url);
@@ -49,7 +46,6 @@ public class InstantEvalHttpSubscriber implements Runnable {
             HttpEntity<String> request;
 
             HttpHeaders headers = new HttpHeaders();
-            headers.add("Authorization", "Bearer " + tokenWrapper.get());
             request = new HttpEntity<>(headers);
 
             ResponseEntity<List<Integer>> response = restTemplate.exchange(url, HttpMethod.GET, request, new ParameterizedTypeReference<List<Integer>>() {
@@ -60,7 +56,7 @@ public class InstantEvalHttpSubscriber implements Runnable {
                 scheduler.executeImmediate(checkId);
             }
         } catch (Throwable ex) {
-            LOG.error("", ex);
+            LOG.error("msg={}", ex.getMessage());
         }
     }
 }
