@@ -26,13 +26,11 @@ public class DowntimeHttpSubscriber implements Runnable {
     private final DowntimeService service;
     private final String url;
     private final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
-    private final TokenWrapper tokenWrapper;
     private final RestTemplate restTemplate;
 
-    public DowntimeHttpSubscriber(DowntimeService service, SchedulerConfig config, TokenWrapper tokenWrapper, RestTemplate restTemplate) {
+    public DowntimeHttpSubscriber(DowntimeService service, SchedulerConfig config, RestTemplate restTemplate) {
         url = config.getDowntimeHttpUrl();
         this.service = service;
-        this.tokenWrapper = tokenWrapper;
         this.restTemplate = restTemplate;
 
 
@@ -46,7 +44,6 @@ public class DowntimeHttpSubscriber implements Runnable {
     public void run() {
         try {
             HttpHeaders headers = new HttpHeaders();
-            headers.add("Authorization", "Bearer " + tokenWrapper.get());
             HttpEntity<String> request = new HttpEntity<>(headers);
 
             ResponseEntity<List<DowntimeForwardTask>> response = restTemplate.exchange(url, HttpMethod.GET, request, new ParameterizedTypeReference<List<DowntimeForwardTask>>() {
@@ -71,7 +68,7 @@ public class DowntimeHttpSubscriber implements Runnable {
             }
 
         } catch (Throwable ex) {
-            LOG.error("", ex);
+            LOG.error("msg={}", ex.getMessage());
         }
     }
 }

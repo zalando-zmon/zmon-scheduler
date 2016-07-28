@@ -1,7 +1,6 @@
 package de.zalando.zmon.scheduler.ng.downtimes;
 
 import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
-import de.zalando.zmon.scheduler.ng.TokenWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -17,10 +16,10 @@ public class DowntimeConfiguration {
     public static Logger LOG = LoggerFactory.getLogger(DowntimeConfiguration.class);
 
     @Bean
-    DowntimeHttpSubscriber downtimeHttpSubscriber(DowntimeService downtimeService, SchedulerConfig config, TokenWrapper tokenWrapper, RestTemplate restTemplate) {
+    DowntimeHttpSubscriber downtimeHttpSubscriber(DowntimeService downtimeService, SchedulerConfig config, RestTemplate restTemplate) {
         if (config.getDowntimeHttpUrl() != null) {
             LOG.info("Registering DowntimeHttpSubscriber");
-            return new DowntimeHttpSubscriber(downtimeService, config, tokenWrapper, restTemplate);
+            return new DowntimeHttpSubscriber(downtimeService, config, restTemplate);
         }
         return null;
     }
