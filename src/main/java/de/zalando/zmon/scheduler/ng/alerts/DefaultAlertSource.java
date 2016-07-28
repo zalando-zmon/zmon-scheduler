@@ -2,7 +2,6 @@ package de.zalando.zmon.scheduler.ng.alerts;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import de.zalando.zmon.scheduler.ng.TokenWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +11,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.TimeZone;
 
 /**
  * Created by jmussler on 4/7/15.
@@ -26,7 +21,6 @@ public class DefaultAlertSource extends AlertSource {
     private final Timer timer;
 
     private final String url;
-    private final TokenWrapper tokens;
     private final RestTemplate restTemplate;
     private boolean isFirstLoad = true;
 
@@ -36,35 +30,22 @@ public class DefaultAlertSource extends AlertSource {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultAlertSource.class);
 
     @Autowired
-    public DefaultAlertSource(final String name, final String url, final MetricRegistry metrics, final TokenWrapper tokens, final RestTemplate restTemplate) {
+    public DefaultAlertSource(final String name, final String url, final MetricRegistry metrics, final RestTemplate restTemplate) {
         super(name);
         this.restTemplate = restTemplate;
         LOG.info("configuring alert source url={}", url);
         this.url = url;
-        this.tokens = tokens;
         this.timer = metrics.timer("alert-adapter." + name);
-    }
-
-    private HttpHeaders getAuthenticationHeader() {
-
-        final HttpHeaders headers = new HttpHeaders();
-
-        if (tokens != null) {
-            headers.add("Authorization", "Bearer " + tokens.get());
-        }
-
-        return headers;
     }
 
     @Override
     public Collection<AlertDefinition> getCollection() {
         AlertDefinitions defs = new AlertDefinitions();
         try {
-            final String accessToken = tokens.get();
-            LOG.info("Querying alert definitions with token " + accessToken.substring(0, Math.min(accessToken.length(), 3)) + "..");
-            final HttpEntity<String> request = new HttpEntity<>(getAuthenticationHeader());
+            LOG.info("Querying alert definitions with token... ");
+            final HttpEntity<String> request = new HttpEntity<>(new HttpHeaders());
 
-            HttpHeaders headers = restTemplate.headForHeaders(url, request);
+            HttpHeaders headers = restTemplate.headForHeaders(url);
             if (headers.containsKey("Last-Modified")) {
                 if (!doRefresh(headers.get("Last-Modified").get(0), lastResultMaxLastModified, lastResults)) {
                     LOG.info("Skipping alert update ...{}", headers.get("Last-Modified"));

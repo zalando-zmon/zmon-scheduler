@@ -20,7 +20,7 @@ public class CheckSourceRegistry extends SourceRegistry<CheckSource> {
     @Autowired
     public CheckSourceRegistry(SchedulerConfig config, final TokenWrapper tokens, RestTemplate restTemplate) {
         final String url = config.getControllerUrl() + "/api/v1/checks/all-active-check-definitions";
-        final DefaultCheckSource source = new DefaultCheckSource("check-source", url, tokens, restTemplate);
+        final DefaultCheckSource source = new DefaultCheckSource("check-source", url, restTemplate);
         register(source);
     }
 
