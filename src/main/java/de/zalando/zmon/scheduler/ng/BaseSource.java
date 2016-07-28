@@ -21,8 +21,8 @@ public abstract class BaseSource<T> implements Source<T> {
         return name;
     }
 
-    protected static boolean doRefresh(String headerValue, long lastRefresh, Collection lastData) {
-        if(lastData == null) return true;
+    protected static boolean doRefresh(String headerValue, long currentMaxLastModified, Collection<?> lastData) {
+        if (lastData == null) return true;
 
         TimeZone tz = TimeZone.getTimeZone("UTC");
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
@@ -30,8 +30,7 @@ public abstract class BaseSource<T> implements Source<T> {
 
         try {
             long lastModified = df.parse(headerValue).getTime();
-            return lastRefresh != lastModified;
-
+            return currentMaxLastModified != lastModified;
         } catch (ParseException e) {
             return true;
         }

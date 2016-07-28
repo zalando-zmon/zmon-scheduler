@@ -56,7 +56,7 @@ public class DefaultCheckSource extends CheckSource {
 
             HttpHeaders headers = restTemplate.headForHeaders(url, request);
             if (headers.containsKey("Last-Modified")) {
-                if (!doRefresh(headers.get("Last-Modified").get(0), lastResultMaxLastModified,lastResults)) {
+                if (!doRefresh(headers.get("Last-Modified").get(0), lastResultMaxLastModified, lastResults)) {
                     LOG.info("Skipping check update ...{}", headers.get("Last-Modified"));
                     return lastResults;
                 }
