@@ -53,7 +53,7 @@ public class AlertDefinition {
     @XmlElement
     private Integer priority;
 
-    private Date lastModified;
+    private long lastModified;
 
     private String lastModifiedBy;
 
@@ -165,11 +165,11 @@ public class AlertDefinition {
         this.priority = priority;
     }
 
-    public Date getLastModified() {
+    public long getLastModified() {
         return lastModified;
     }
 
-    public void setLastModified(final Date lastModified) {
+    public void setLastModified(long lastModified) {
         this.lastModified = lastModified;
     }
 
