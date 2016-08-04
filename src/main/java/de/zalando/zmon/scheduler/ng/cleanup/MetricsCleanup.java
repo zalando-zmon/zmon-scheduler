@@ -26,13 +26,14 @@ public class MetricsCleanup {
 
         @Override
         public void run() {
-            try(Jedis jedis = new Jedis(config.getRedisHost(), config.getRedisPort())) {
-                long currentTime = System.currentTimeMillis();
+            try (Jedis jedis = new Jedis(config.getRedisHost(), config.getRedisPort())) {
+                float currentTimeSeconds = System.currentTimeMillis() / 1000;
                 int count = 0;
                 Set<String> members = jedis.smembers("zmon:metrics");
-                for(String m : members) {
-                    long lastUpdate = Long.parseLong(jedis.get("zmon:metrics:" + m + ":ts"));
-                    if (lastUpdate < (currentTime - 1000L*60L*60L)) {
+                for (String m : members) {
+                    // NOTE: the timestamp is in seconds since epoch (Python worker writes a float value)
+                    float lastUpdateSeconds = Float.parseFloat(jedis.get("zmon:metrics:" + m + ":ts"));
+                    if (lastUpdateSeconds < (currentTimeSeconds - 60 * 60)) {
                         // cleanup entries that have no activity for 60 min for now
                         jedis.del("zmon:metrics:" + m + ":ts");
                         jedis.del("zmon:metrics:" + m + ":check.count");
@@ -41,8 +42,7 @@ public class MetricsCleanup {
                     }
                 }
                 log.info("removed {} entities", count);
-            }
-            catch (Throwable t) {
+            } catch (Throwable t) {
                 log.error("Metrics cleanup failed: {}", t.getMessage());
             }
         }

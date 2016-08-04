@@ -1,7 +1,6 @@
 package de.zalando.zmon.scheduler.ng.downtimes;
 
 import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
-import de.zalando.zmon.scheduler.ng.TokenWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
