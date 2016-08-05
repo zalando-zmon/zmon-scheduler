@@ -20,7 +20,6 @@ import java.util.Map;
 @Configuration
 @ConfigurationProperties(prefix = "scheduler")
 public class SchedulerConfig {
-    ZalandoControllerConfig controller = null;
     SchedulePersistType lastRunPersist = SchedulePersistType.DISABLED;
     boolean checkDetailMetrics = false;
     int threadCount = 8;
@@ -89,14 +88,6 @@ public class SchedulerConfig {
     String serverPort  = null;
 
     public SchedulerConfig() {
-    }
-
-    public ZalandoControllerConfig getController() {
-        return controller;
-    }
-
-    public void setController(ZalandoControllerConfig controller) {
-        this.controller = controller;
     }
 
     public SchedulePersistType getLastRunPersist() {

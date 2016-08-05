@@ -11,7 +11,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.SourceRegistry;
-import de.zalando.zmon.scheduler.ng.config.ZalandoConfig;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.UnsupportedEncodingException;
@@ -66,20 +65,4 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
         }
     }
 
-    @Autowired(required = false)
-    public EntityAdapterRegistry(SchedulerConfig config, ZalandoConfig zConfig, MetricRegistry metrics, RestTemplate restTemplate) {
-
-        if (config.isEnableGlobalEntity()) {
-            register(new GlobalAdapter());
-        }
-
-        if (config.getDummyCities() != null && !config.getDummyCities().equals("")) {
-            register(new YamlEntityAdapter("dummy-cities", config.getDummyCities(), "city", m -> (m.get("country") + "-" + m.get("city"))));
-        }
-
-        if (zConfig.entityservice != null && zConfig.entityservice.url != null) {
-            EntityServiceAdapter e = new EntityServiceAdapter(URI.create(zConfig.entityservice.url + "/api/v1/entities/"), metrics, restTemplate);
-            register(e);
-        }
-    }
 }
