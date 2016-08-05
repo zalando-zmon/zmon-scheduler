@@ -1,11 +1,7 @@
 package de.zalando.zmon.scheduler.ng.entities.adapters;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
 import de.zalando.zmon.scheduler.ng.entities.EntityAdapter;
 import org.slf4j.Logger;
@@ -15,13 +11,13 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
-
-import de.zalando.zmon.scheduler.ng.TokenWrapper;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by jmussler on 4/2/15.
