@@ -89,6 +89,9 @@ public class Scheduler {
         ScheduledCheck check = scheduledChecks.getOrDefault(id, null);
         if (null != check) {
             check.cancelExecution();
+            // remove the check from our map,
+            // a new "ScheduledCheck" instance will be created on next schedule(id) call
+            scheduledChecks.remove(id);
         }
     }
 
