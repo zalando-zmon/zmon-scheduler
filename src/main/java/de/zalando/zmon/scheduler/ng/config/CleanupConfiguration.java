@@ -1,11 +1,8 @@
 package de.zalando.zmon.scheduler.ng.config;
 
-import de.zalando.zmon.scheduler.ng.cleanup.AlertChangedCleaner;
-import de.zalando.zmon.scheduler.ng.cleanup.CheckChangedCleaner;
-import de.zalando.zmon.scheduler.ng.cleanup.EntityChangedCleaner;
+import de.zalando.zmon.scheduler.ng.cleanup.*;
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
 import de.zalando.zmon.scheduler.ng.checks.CheckRepository;
-import de.zalando.zmon.scheduler.ng.cleanup.MetricsCleanup;
 import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +45,13 @@ public class CleanupConfiguration {
     public MetricsCleanup metricsCleanup(SchedulerConfig config) {
         LOG.info("Registering metricsCleaner...");
         MetricsCleanup cleaner = new MetricsCleanup(config);
+        return cleaner;
+    }
+
+    @Bean
+    public DowntimeCleanup downtimeCleanup(SchedulerConfig config){
+        LOG.info("Registering downtimeCleanup...");
+        DowntimeCleanup cleaner = new DowntimeCleanup(config);
         return cleaner;
     }
 }

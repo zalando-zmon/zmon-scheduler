@@ -56,11 +56,11 @@ public class DowntimeHttpSubscriber implements Runnable {
                         service.storeDowntime(task.getRequest());
                         break;
                     case DELETE:
-                        LOG.info("Received downtime request: type={} ids={}", task.getType(), task.getIds());
+                        LOG.info("Received downtime delete request: type={} ids={}", task.getType(), task.getIds());
                         service.deleteDowntimes(task.getIds());
                         break;
                     case DELETE_GROUP:
-                        LOG.info("Received downtime request: type={} (unexpected)", task.getType());
+                        LOG.info("Received downtime group delete request: type={} (unexpected)", task.getType());
                         service.deleteDowntimeGroup(task.getGroupId());
                         break;
                 }
