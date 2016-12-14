@@ -9,12 +9,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -129,6 +127,11 @@ For now do a very stupid delete, we just assume that the id is present and delet
         executor.execute(t);
     }
 
+    public void deleteDowntimes(final Collection<String> downtimeIds) {
+        DeleteDowntimesTask t = new DeleteDowntimesTask(downtimeIds);
+        executor.execute(t);
+    }
+
     public static class DowntimeEntry {
         public String alertId;
         public String entity;
@@ -139,9 +142,17 @@ For now do a very stupid delete, we just assume that the id is present and delet
         }
     }
 
-    public void deleteDowntimes(final Collection<String> downtimeIds) {
-        DeleteDowntimesTask t = new DeleteDowntimesTask(downtimeIds);
-        executor.execute(t);
+    protected void doDeleteDowntimeGroup(String groupId) {
+        Set<String> ids = null;
+        try (Jedis jedis = new Jedis(config.getRedisHost(), config.getRedisPort())) {
+            ids = jedis.smembers("zmon:downtime-groups:" + groupId);
+            jedis.del("zmon:downtime-groups:" + groupId);
+        }
+
+        if (null != ids) {
+            log.info("deleting downtime group: id={} count={}", groupId, ids.size());
+            deleteDowntimesByIds(ids);
+        }
     }
 
     protected void deleteDowntimesByIds(final Collection<String> downtimeIds) {
@@ -214,16 +225,7 @@ For now do a very stupid delete, we just assume that the id is present and delet
         }
 
         public void delete() {
-            Set<String> ids = null;
-            try (Jedis jedis = new Jedis(config.getRedisHost(), config.getRedisPort())) {
-                ids = jedis.smembers("zmon:downtime-groups:" + groupId);
-                jedis.del("zmon:downtime-groups:" + groupId);
-            }
-
-            if (null != ids) {
-                log.info("deleting downtime group: id={} count={}", groupId, ids.size());
-                deleteDowntimesByIds(ids);
-            }
+            doDeleteDowntimeGroup(groupId);
         }
 
         @Override
