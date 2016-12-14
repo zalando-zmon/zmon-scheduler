@@ -40,14 +40,14 @@ public class DowntimeCleanup implements Runnable {
             int cleanupCounter = 0;
             for(String alertId : alertIdsInDowntime) {
                 Set<String> entityIds = jedis.smembers("zmon:downtimes:" + alertId);
-                if (null == entityIds) {
+                if (null == entityIds || entityIds.size() == 0) {
                     cleanupCounter++;
                     jedis.srem("zmon:downtimes", alertId);
                 }
 
                 for(String entityId : entityIds) {
                     Map<String, String> downtimes = jedis.hgetAll("zmon:downtimes:" + alertId + ":" + entityId);
-                    if(null == downtimes) {
+                    if(null == downtimes || downtimes.size() == 0) {
                         cleanupCounter++;
                         jedis.srem("zmon:downtimes:" + alertId, entityId);
                     }
