@@ -181,8 +181,10 @@ For now do a very stupid delete, we just assume that the id is present and delet
 
                 String type = jedis.type(key);
                 if ("none".equals(type)) {
-                    jedis.srem("zmon:downtimes:" + entry.getKey().alertId, entry.getKey().entity);
-                    if (jedis.smembers("zmon:downtimes:" + entry.getKey()).size() == 0) {
+                    final String alertKey = "zmon:downtimes:" + entry.getKey().alertId;
+                    jedis.srem(alertKey, entry.getKey().entity);
+                    Set<String> members =jedis.smembers(alertKey);
+                    if (null == members || members.size() == 0) {
                         jedis.srem("zmon:downtimes", entry.getKey().alertId);
                     }
                 }
