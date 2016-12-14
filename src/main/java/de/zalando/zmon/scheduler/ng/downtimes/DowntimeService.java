@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +35,8 @@ public class DowntimeService {
     private final SchedulerConfig config;
     private final EntityRepository entityRepository;
     private final boolean enableEntityFilter;
+
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Autowired
     public DowntimeService(SchedulerConfig config, EntityRepository entityRepository) {
@@ -119,10 +123,13 @@ For now do a very stupid delete, we just assume that the id is present and delet
 */
 
     public void deleteDowntimeGroup(String groupId) {
-        try (Jedis jedis = new Jedis(config.getRedisHost(), config.getRedisPort())) {
-            Set<String> ids = jedis.smembers("zmon:downtime-groups:" + groupId);
-            deleteDowntimes(ids);
-        }
+        DeleteGroupTask t = new DeleteGroupTask(groupId);
+        executor.execute(t);
+    }
+
+    public void deleteDowntimes(final Collection<String> downtimeIds) {
+        DeleteDowntimesTask t = new DeleteDowntimesTask(downtimeIds);
+        executor.execute(t);
     }
 
     public static class DowntimeEntry {
@@ -135,7 +142,20 @@ For now do a very stupid delete, we just assume that the id is present and delet
         }
     }
 
-    public void deleteDowntimes(final Collection<String> downtimeIds) {
+    protected void doDeleteDowntimeGroup(String groupId) {
+        Set<String> ids = null;
+        try (Jedis jedis = new Jedis(config.getRedisHost(), config.getRedisPort())) {
+            ids = jedis.smembers("zmon:downtime-groups:" + groupId);
+            jedis.del("zmon:downtime-groups:" + groupId);
+        }
+
+        if (null != ids) {
+            log.info("deleting downtime group: id={} count={}", groupId, ids.size());
+            deleteDowntimesByIds(ids);
+        }
+    }
+
+    protected void deleteDowntimesByIds(final Collection<String> downtimeIds) {
         Map<DowntimeEntry, Collection<String>> toDeleteItems = new HashMap<>();
         try (Jedis jedis = new Jedis(config.getRedisHost(), config.getRedisPort())) {
             Set<String> alertsInDowntime = jedis.smembers("zmon:downtimes");
@@ -146,16 +166,19 @@ For now do a very stupid delete, we just assume that the id is present and delet
                 }
             }
         }
+
+        log.info("deleting individual downtime entries: count={}", toDeleteItems.size());
         doDelete(toDeleteItems);
     }
 
-    public void doDelete(Map<DowntimeEntry, Collection<String>> toDeleteEntries) {
+    protected void doDelete(Map<DowntimeEntry, Collection<String>> toDeleteEntries) {
         try (Jedis jedis = new Jedis(config.getRedisHost(), config.getRedisPort())) {
             for (Map.Entry<DowntimeEntry, Collection<String>> entry : toDeleteEntries.entrySet()) {
                 final String key = "zmon:downtimes:" + entry.getKey().alertId + ":" + entry.getKey().entity;
                 for (String id : entry.getValue()) {
                     jedis.hdel(key, id);
                 }
+
                 String type = jedis.type(key);
                 if ("none".equals(type)) {
                     jedis.srem("zmon:downtimes:" + entry.getKey().alertId, entry.getKey().entity);
@@ -163,6 +186,58 @@ For now do a very stupid delete, we just assume that the id is present and delet
                         jedis.srem("zmon:downtimes", entry.getKey().alertId);
                     }
                 }
+            }
+        }
+    }
+
+    private class DeleteDowntimesTask implements Runnable {
+
+        private final Collection<String> ids;
+
+        public DeleteDowntimesTask(Collection<String> ids) {
+            this.ids = ids;
+        }
+
+        public void delete() {
+            deleteDowntimesByIds(ids);
+        }
+
+        @Override
+        public void run() {
+            try {
+                long start = System.currentTimeMillis();
+                delete();
+                long end = System.currentTimeMillis();
+                log.info("Deleted downtimes {} in {}ms", ids, end - start);
+            }
+            catch(Throwable t) {
+                log.error("Failed delete downtimes task", t);
+            }
+        }
+    }
+
+    private class DeleteGroupTask implements Runnable {
+
+        private final String groupId;
+
+        public DeleteGroupTask(String groupId) {
+            this.groupId = groupId;
+        }
+
+        public void delete() {
+            doDeleteDowntimeGroup(groupId);
+        }
+
+        @Override
+        public void run() {
+            try {
+                long start = System.currentTimeMillis();
+                delete();
+                long end = System.currentTimeMillis();
+                log.info("Deleted downtime group {} in {}ms", groupId, end - start);
+            }
+            catch(Throwable t) {
+                log.error("Failed group delete task", t);
             }
         }
     }

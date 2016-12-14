@@ -2,6 +2,8 @@ package de.zalando.zmon.scheduler.ng.downtimes;
 
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
 import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +14,8 @@ import java.util.*;
  */
 @RestController
 public class DowntimesAPI {
+
+    private final Logger log = LoggerFactory.getLogger(DowntimesAPI.class);
 
     @Autowired
     Scheduler scheduler;
@@ -50,15 +54,17 @@ public class DowntimesAPI {
 
     @RequestMapping(value = "/api/v1/downtimes/{id}", method = RequestMethod.DELETE)
     void deleteDowntime(@PathVariable(value = "id") String id) {
+        log.info("Deleting downtime: id={}", id);
         Set<String> ids = new TreeSet<>();
         ids.add(id);
-        downtimeService.deleteDowntimes(ids);
         downtimeForwarder.forwardRequest(DowntimeForwardTask.DeleteDowntimeTask(ids));
+        downtimeService.deleteDowntimes(ids);
     }
 
     @RequestMapping(value = "/api/v1/downtime-groups/{groupId}", method = RequestMethod.DELETE)
     void deleteDowntimeGroup(@PathVariable(value = "groupId") String groupId) {
-        downtimeService.deleteDowntimeGroup(groupId);
+        log.info("Deleting downtime-group: groupId={}", groupId);
         downtimeForwarder.forwardRequest(DowntimeForwardTask.DeleteGroupTask(groupId));
+        downtimeService.deleteDowntimeGroup(groupId);
     }
 }
