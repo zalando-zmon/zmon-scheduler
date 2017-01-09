@@ -100,6 +100,45 @@ public class Application {
         return scheduler.queryKnownEntities(filter, excludeFilter, baseFilter);
     }
 
+    @RequestMapping(value = "/api/v2/entities", method=RequestMethod.HEAD)
+    Integer queryKnownEntitiesMultiFilterCount(@RequestParam(value = "include_filters") String sIncludeFilters,
+                                                     @RequestParam(value = "exclude_filters", defaultValue = "") String sExcludeFilters,
+                                                     @RequestParam(value = "local", defaultValue = "false") boolean baseFilter) throws IOException {
+
+        List<List<Map<String, String>>> includeFilters = mapper.readValue(sIncludeFilters, new TypeReference<List<List<Map<String, String>>>>() {
+        });
+
+        List<List<Map<String, String>>> excludeFilters = mapper.readValue(sExcludeFilters, new TypeReference<List<List<Map<String, String>>>>() {
+        });
+
+        return scheduler.queryForKnownEntities(includeFilters, excludeFilters, baseFilter).size();
+    }
+
+    @RequestMapping(value = "/api/v2/entities")
+    Collection<Entity> queryKnownEntitiesMultiFilter(@RequestParam(value = "include_filters") String sIncludeFilters,
+                                          @RequestParam(value = "exclude_filters", defaultValue = "") String sExcludeFilters,
+                                          @RequestParam(value = "local", defaultValue = "false") boolean baseFilter) throws IOException {
+
+        List<List<Map<String, String>>> includeFilters = mapper.readValue(sIncludeFilters, new TypeReference<List<List<Map<String, String>>>>() {
+        });
+
+        List<List<Map<String, String>>> excludeFilters = mapper.readValue(sExcludeFilters, new TypeReference<List<List<Map<String, String>>>>() {
+        });
+
+        return scheduler.queryForKnownEntities(includeFilters, excludeFilters, baseFilter);
+    }
+
+    public static class EntitySearchRequest {
+        public List<List<Map<String, String>>> includeFilters;
+        public List<List<Map<String, String>>> excludeFilters;
+        public boolean local = false;
+    }
+
+    @RequestMapping(value = "/api/v2/entities", method=RequestMethod.POST)
+    Collection<Entity> queryKnownEntitiesMultiFilter(@RequestBody EntitySearchRequest searchRequest) throws IOException {
+        return scheduler.queryForKnownEntities(searchRequest.includeFilters, searchRequest.excludeFilters, searchRequest.local);
+    }
+
 
     @Autowired
     AlertRepository alertRepo;

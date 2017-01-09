@@ -105,8 +105,7 @@ public class Scheduler {
         long result = check.getLastRun();
         if (checkRepo.get(id).getInterval() < 30) {
             check.schedule(shortIntervalService, delay);
-        }
-        else {
+        } else {
             check.schedule(service, delay);
         }
         return result;
@@ -124,9 +123,8 @@ public class Scheduler {
                 && lastScheduleAtStartup.containsKey(id)) {
             lastScheduled = lastScheduleAtStartup.getOrDefault(id, 0L);
             startDelay += Math.max(rate - (System.currentTimeMillis() - lastScheduled) / 1000, 0);
-        }
-        else {
-            startDelay = (long)((double)rate * Math.random()); // try to distribute everything along one interval
+        } else {
+            startDelay = (long) ((double) rate * Math.random()); // try to distribute everything along one interval
         }
 
         schedule(id, startDelay);
@@ -138,8 +136,7 @@ public class Scheduler {
         try {
             long lastRun = schedule(checkId, 0);
             LOG.info("Schedule for immediate execution: checkId={}  last-run {}s ago", checkId, ((System.currentTimeMillis() - lastRun) / 1000));
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             LOG.error("Unexpected exception in executeImmediate for check_id: checkId={}", checkId, t);
         }
     }
@@ -149,9 +146,49 @@ public class Scheduler {
 
         if (applyBaseFilter) {
             entities = getEntitiesForTrialRun(entityRepo.get(), filter, excludeFilter);
-        }
-        else {
+        } else {
             entities = getEntitiesForTrialRun(entityRepo.getUnfiltered(), filter, excludeFilter);
+        }
+
+        return entities;
+    }
+
+    /**
+     * Filters entities by all include filters in order, useful to simulate check+alert filter behavior
+     *
+     *  Exclude filter comes last, entities are removed if they match any exclude filter provided
+     *
+     * @param includeFilterList
+     * @param excludeFilterList
+     * @param withBaseFilter
+     * @return
+     */
+    public List<Entity> queryForKnownEntities(List<List<Map<String, String>>> includeFilterList, List<List<Map<String, String>>> excludeFilterList, boolean withBaseFilter) {
+        List<Entity> entities = new ArrayList<>();
+        Collection<Entity> allEntities = withBaseFilter ? entityRepo.get() : entityRepo.getUnfiltered();
+
+        for (Entity e : allEntities) {
+            boolean matchIncludeFilter = true;
+            for (List<Map<String, String>> singleIncludeFilter : includeFilterList) {
+                matchIncludeFilter &= AlertOverlapGenerator.matchAnyFilter(singleIncludeFilter, e.getFilterProperties());
+                if (!matchIncludeFilter) {
+                    break;
+                }
+            }
+
+            boolean matchAnyExcludeFilter = false;
+            if (matchIncludeFilter) {
+                for (List<Map<String, String>> singleExcludeFilter : excludeFilterList) {
+                    matchAnyExcludeFilter |= AlertOverlapGenerator.matchAnyFilter(singleExcludeFilter, e.getFilterProperties());
+                    if (matchAnyExcludeFilter) {
+                        break;
+                    }
+                }
+            }
+
+            if (matchIncludeFilter && !matchAnyExcludeFilter) {
+                entities.add(e);
+            }
         }
 
         return entities;
@@ -160,12 +197,11 @@ public class Scheduler {
     private List<Entity> getEntitiesForTrialRun(Collection<Entity> entityBase, List<Map<String, String>> includeFilter, List<Map<String, String>> excludeFilters) {
         List<Entity> entityList = new ArrayList<>();
         for (Entity entity : entityBase) {
-            if(AlertOverlapGenerator.matchAnyFilter(includeFilter, entity.getFilterProperties())) {
+            if (AlertOverlapGenerator.matchAnyFilter(includeFilter, entity.getFilterProperties())) {
                 if (null == excludeFilters || excludeFilters.size() == 0) {
                     entityList.add(entity);
-                }
-                else {
-                    if(!AlertOverlapGenerator.matchAnyFilter(excludeFilters, entity.getFilterProperties())) {
+                } else {
+                    if (!AlertOverlapGenerator.matchAnyFilter(excludeFilters, entity.getFilterProperties())) {
                         entityList.add(entity);
                     }
                 }
@@ -179,7 +215,7 @@ public class Scheduler {
         List<Entity> entitiesLocal = getEntitiesForTrialRun(entityRepo.get(), request.entities, request.entitiesExclude);
         Scheduler.LOG.info("Trial run matched entities: global=" + entitiesGlobal.size() + " local=" + entitiesLocal.size());
 
-        try(Jedis jedis = new Jedis(schedulerConfig.getRedisHost(), schedulerConfig.getRedisPort())) {
+        try (Jedis jedis = new Jedis(schedulerConfig.getRedisHost(), schedulerConfig.getRedisPort())) {
             String redisEntityKey = "zmon:trial_run:" + request.id;
             for (Entity entity : entitiesGlobal) {
                 jedis.sadd(redisEntityKey, entity.getId());
@@ -189,8 +225,7 @@ public class Scheduler {
                 byte[] command = taskSerializer.writeTrialRun(entity, request);
                 queueSelector.execute(entity, command, schedulerConfig.getTrialRunQueue());
             }
-        }
-        finally {
+        } finally {
             service.schedule(new TrialRunCleanupTask(request.id, schedulerConfig), 300, TimeUnit.SECONDS);
         }
     }
