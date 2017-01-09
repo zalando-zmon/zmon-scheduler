@@ -100,15 +100,29 @@ public class Application {
         return scheduler.queryKnownEntities(filter, excludeFilter, baseFilter);
     }
 
-    @RequestMapping(value = "/api/v2/entities")
-    Collection<Entity> queryKnownEntitiesMultiFilter(@RequestParam(value = "include_filters") String sFilter,
-                                          @RequestParam(value = "exclude_filters", defaultValue = "") String sExcludeFilter,
-                                          @RequestParam(value = "local", defaultValue = "false") boolean baseFilter) throws IOException {
+    @RequestMapping(value = "/api/v2/entities", method=RequestMethod.HEAD)
+    Integer queryKnownEntitiesMultiFilterCount(@RequestParam(value = "include_filters") String sIncludeFilters,
+                                                     @RequestParam(value = "exclude_filters", defaultValue = "") String sExcludeFilters,
+                                                     @RequestParam(value = "local", defaultValue = "false") boolean baseFilter) throws IOException {
 
-        List<List<Map<String, String>>> includeFilters = mapper.readValue(sFilter, new TypeReference<List<List<Map<String, String>>>>() {
+        List<List<Map<String, String>>> includeFilters = mapper.readValue(sIncludeFilters, new TypeReference<List<List<Map<String, String>>>>() {
         });
 
-        List<List<Map<String, String>>> excludeFilters = mapper.readValue(sExcludeFilter, new TypeReference<List<List<Map<String, String>>>>() {
+        List<List<Map<String, String>>> excludeFilters = mapper.readValue(sExcludeFilters, new TypeReference<List<List<Map<String, String>>>>() {
+        });
+
+        return scheduler.queryForKnownEntities(includeFilters, excludeFilters, baseFilter).size();
+    }
+
+    @RequestMapping(value = "/api/v2/entities")
+    Collection<Entity> queryKnownEntitiesMultiFilter(@RequestParam(value = "include_filters") String sIncludeFilters,
+                                          @RequestParam(value = "exclude_filters", defaultValue = "") String sExcludeFilters,
+                                          @RequestParam(value = "local", defaultValue = "false") boolean baseFilter) throws IOException {
+
+        List<List<Map<String, String>>> includeFilters = mapper.readValue(sIncludeFilters, new TypeReference<List<List<Map<String, String>>>>() {
+        });
+
+        List<List<Map<String, String>>> excludeFilters = mapper.readValue(sExcludeFilters, new TypeReference<List<List<Map<String, String>>>>() {
         });
 
         return scheduler.queryForKnownEntities(includeFilters, excludeFilters, baseFilter);
