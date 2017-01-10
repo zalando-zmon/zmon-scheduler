@@ -100,8 +100,9 @@ public class Application {
         return scheduler.queryKnownEntities(filter, excludeFilter, baseFilter);
     }
 
+    @ResponseBody
     @RequestMapping(value = "/api/v2/entities", method=RequestMethod.HEAD)
-    Integer queryKnownEntitiesMultiFilterCount(@RequestParam(value = "include_filters") String sIncludeFilters,
+    int queryKnownEntitiesMultiFilterCount(@RequestParam(value = "include_filters") String sIncludeFilters,
                                                      @RequestParam(value = "exclude_filters", defaultValue = "") String sExcludeFilters,
                                                      @RequestParam(value = "local", defaultValue = "false") boolean baseFilter) throws IOException {
 
@@ -114,8 +115,9 @@ public class Application {
         return scheduler.queryForKnownEntities(includeFilters, excludeFilters, baseFilter).size();
     }
 
+    @ResponseBody
     @RequestMapping(value = "/api/v2/entities")
-    Collection<Entity> queryKnownEntitiesMultiFilter(@RequestParam(value = "include_filters") String sIncludeFilters,
+    Collection<Map<String, Object>> queryKnownEntitiesMultiFilter(@RequestParam(value = "include_filters") String sIncludeFilters,
                                           @RequestParam(value = "exclude_filters", defaultValue = "") String sExcludeFilters,
                                           @RequestParam(value = "local", defaultValue = "false") boolean baseFilter) throws IOException {
 
@@ -135,7 +137,7 @@ public class Application {
     }
 
     @RequestMapping(value = "/api/v2/entities", method=RequestMethod.POST)
-    Collection<Entity> queryKnownEntitiesMultiFilter(@RequestBody EntitySearchRequest searchRequest) throws IOException {
+    Collection<Map<String, Object>> queryKnownEntitiesMultiFilter(@RequestBody EntitySearchRequest searchRequest) throws IOException {
         return scheduler.queryForKnownEntities(searchRequest.includeFilters, searchRequest.excludeFilters, searchRequest.local);
     }
 
