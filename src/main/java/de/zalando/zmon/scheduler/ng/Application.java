@@ -25,6 +25,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.web.bind.annotation.*;
 
 import javax.net.ssl.SSLSession;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -102,9 +103,10 @@ public class Application {
 
     @ResponseBody
     @RequestMapping(value = "/api/v2/entities", method=RequestMethod.HEAD)
-    int queryKnownEntitiesMultiFilterCount(@RequestParam(value = "include_filters") String sIncludeFilters,
-                                                     @RequestParam(value = "exclude_filters", defaultValue = "") String sExcludeFilters,
-                                                     @RequestParam(value = "local", defaultValue = "false") boolean baseFilter) throws IOException {
+    void queryKnownEntitiesMultiFilterCount(HttpServletResponse response,
+                                           @RequestParam(value = "include_filters") String sIncludeFilters,
+                                           @RequestParam(value = "exclude_filters", defaultValue = "") String sExcludeFilters,
+                                           @RequestParam(value = "local", defaultValue = "false") boolean baseFilter) throws IOException {
 
         List<List<Map<String, String>>> includeFilters = mapper.readValue(sIncludeFilters, new TypeReference<List<List<Map<String, String>>>>() {
         });
@@ -112,7 +114,7 @@ public class Application {
         List<List<Map<String, String>>> excludeFilters = mapper.readValue(sExcludeFilters, new TypeReference<List<List<Map<String, String>>>>() {
         });
 
-        return scheduler.queryForKnownEntities(includeFilters, excludeFilters, baseFilter).size();
+        response.addHeader("entity-count", "" + scheduler.queryForKnownEntities(includeFilters, excludeFilters, baseFilter).size());
     }
 
     @ResponseBody
