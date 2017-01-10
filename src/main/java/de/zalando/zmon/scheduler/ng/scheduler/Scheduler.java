@@ -163,8 +163,8 @@ public class Scheduler {
      * @param withBaseFilter
      * @return
      */
-    public List<Entity> queryForKnownEntities(List<List<Map<String, String>>> includeFilterList, List<List<Map<String, String>>> excludeFilterList, boolean withBaseFilter) {
-        List<Entity> entities = new ArrayList<>();
+    public List<Map<String, Object>> queryForKnownEntities(List<List<Map<String, String>>> includeFilterList, List<List<Map<String, String>>> excludeFilterList, boolean withBaseFilter) {
+        List<Map<String, Object>> entities = new ArrayList<>();
         Collection<Entity> allEntities = withBaseFilter ? entityRepo.get() : entityRepo.getUnfiltered();
 
         for (Entity e : allEntities) {
@@ -187,10 +187,11 @@ public class Scheduler {
             }
 
             if (matchIncludeFilter && !matchAnyExcludeFilter) {
-                entities.add(e);
+                entities.add(e.getProperties());
             }
         }
 
+        LOG.info("Searching for: include={} exclude={} local={} count={}", includeFilterList, excludeFilterList, withBaseFilter, entities.size());
         return entities;
     }
 
