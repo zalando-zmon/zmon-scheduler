@@ -170,7 +170,7 @@ public class Scheduler {
         for (Entity e : allEntities) {
             boolean matchIncludeFilter = true;
             for (List<Map<String, String>> singleIncludeFilter : includeFilterList) {
-                matchIncludeFilter &= AlertOverlapGenerator.matchAnyFilter(singleIncludeFilter, e.getFilterProperties());
+                matchIncludeFilter &= singleIncludeFilter.size() == 0 || AlertOverlapGenerator.matchAnyFilter(singleIncludeFilter, e.getFilterProperties());
                 if (!matchIncludeFilter) {
                     break;
                 }
