@@ -48,7 +48,7 @@ public class DefaultAlertSource extends AlertSource {
             HttpHeaders headers = restTemplate.headForHeaders(url);
             if (headers.containsKey("Last-Modified")) {
                 if (!doRefresh(headers.get("Last-Modified").get(0), lastResultMaxLastModified, lastResults)) {
-                    LOG.info("Skipping alert update ...{}", headers.get("Last-Modified"));
+                    LOG.info("Skipping alert update ... cache={} head={}", lastResultMaxLastModified, headers.get("Last-Modified"));
                     return lastResults;
                 }
             }
