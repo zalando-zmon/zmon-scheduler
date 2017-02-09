@@ -3,6 +3,7 @@ package de.zalando.zmon.scheduler.ng.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import de.zalando.zmon.scheduler.ng.TokenWrapper;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -42,7 +43,7 @@ public class RestTemplateConfiguration {
 
     @Bean
     public ClientHttpRequestFactory getFactory() {
-        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().build());
         factory.setReadTimeout(30000);
         factory.setConnectTimeout(3000);
         return factory;
