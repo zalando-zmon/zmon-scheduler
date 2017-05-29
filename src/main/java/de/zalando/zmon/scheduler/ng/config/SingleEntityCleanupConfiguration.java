@@ -4,6 +4,7 @@ import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
 import de.zalando.zmon.scheduler.ng.checks.CheckRepository;
 import de.zalando.zmon.scheduler.ng.cleanup.SingleEntityCleanup;
 import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
+import de.zalando.zmon.scheduler.ng.eventlog.HttpEventLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -17,8 +18,8 @@ public class SingleEntityCleanupConfiguration {
     private final static Logger LOG = LoggerFactory.getLogger(SingleEntityCleanupConfiguration.class);
 
     @Bean
-    SingleEntityCleanup getSingleEntityCleanup(SchedulerConfig config, AlertRepository alertRepo, CheckRepository checkRepo, EntityRepository entityRepository) {
-        SingleEntityCleanup cleanup = new SingleEntityCleanup(config, alertRepo, checkRepo, entityRepository);
+    SingleEntityCleanup getSingleEntityCleanup(SchedulerConfig config, AlertRepository alertRepo, CheckRepository checkRepo, EntityRepository entityRepository, HttpEventLogger eventLog) {
+        SingleEntityCleanup cleanup = new SingleEntityCleanup(config, alertRepo, checkRepo, entityRepository, eventLog);
         LOG.info("Registering SingleEntityCleanUp job");
         entityRepository.registerListener(cleanup);
         return cleanup;

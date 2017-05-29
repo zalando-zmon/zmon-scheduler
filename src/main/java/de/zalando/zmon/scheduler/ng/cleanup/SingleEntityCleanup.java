@@ -6,6 +6,8 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import de.zalando.zmon.scheduler.ng.eventlog.HttpEventLogger;
+import de.zalando.zmon.scheduler.ng.eventlog.ZMonEventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,9 +37,12 @@ public class SingleEntityCleanup implements EntityChangeListener{
     private final JedisPool jedisPool;
     private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
 
-    public SingleEntityCleanup(SchedulerConfig config, AlertRepository alertRepo, CheckRepository checkRepo, EntityRepository entityRepo) {
+    private final HttpEventLogger eventLog;
+
+    public SingleEntityCleanup(SchedulerConfig config, AlertRepository alertRepo, CheckRepository checkRepo, EntityRepository entityRepo, HttpEventLogger eventLog) {
         this.alertRepo = alertRepo;
         this.checkRepo = checkRepo;
+        this.eventLog = eventLog;
 
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setTestOnBorrow(true);
@@ -75,6 +80,8 @@ public class SingleEntityCleanup implements EntityChangeListener{
                     jedis.srem("zmon:alerts:" + alertId, entityId);
                     jedis.del("zmon:alerts:" + alertId + ":" + entityId);
                     jedis.hdel("zmon:alerts:" + alertId + ":entities", entityId);
+
+                    eventLog.log(ZMonEventType.ALERT_ENTITY_ENDED, checkId, alertId, "{\"message\":\"entity has been removed\"}", entityId);
                 }
             }
             catch(Throwable t) {
