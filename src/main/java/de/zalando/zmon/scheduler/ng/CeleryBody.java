@@ -40,6 +40,7 @@ public class CeleryBody {
         public String responsible_team;
         public int priority = 1;
         public String team;
+        public List<String> tags = new ArrayList<>();
     }
 
     public static class TrialRunCeleryCommand {

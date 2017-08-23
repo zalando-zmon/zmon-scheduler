@@ -100,6 +100,7 @@ public class CommandSerializer {
             alertArg.notifications = alertDef.getNotifications();
             alertArg.period = alertDef.getPeriod();
             alertArg.priority = alertDef.getPriority();
+            alertArg.tags = alertDef.getTags();
 
             if(alertArg.period == null) {
                 alertArg.period = "";
