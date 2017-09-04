@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
 
 import javax.net.ssl.SSLSession;
@@ -30,6 +31,10 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+
+import com.uber.jaeger.Configuration;
+import com.uber.jaeger.samplers.ProbabilisticSampler;
 
 @RestController
 @EnableConfigurationProperties
@@ -160,6 +165,16 @@ public class Application {
         node.put("check-repo", checkRepo.getLastUpdated());
         node.put("entity-repo", entityRepo.getLastUpdated());
         return node;
+    }
+
+    @Bean
+    public io.opentracing.Tracer jaegerTracer() {
+
+        Configuration config = Configuration.fromEnv();
+
+        io.opentracing.Tracer tracer = config.getTracer();
+
+        return tracer;
     }
 
     public static void main(String[] args) throws Exception {
