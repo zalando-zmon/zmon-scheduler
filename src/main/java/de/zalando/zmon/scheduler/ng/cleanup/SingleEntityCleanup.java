@@ -71,6 +71,8 @@ public class SingleEntityCleanup implements EntityChangeListener{
         private void doCleanup(int checkId, Collection<Integer> alertIds, String entityId) {
             try(Jedis jedis = jedisPool.getResource()) {
                 jedis.del("zmon:checks:" + checkId + ":" + entityId);
+                jedis.srem("zmon:checks:" + checkId, entityId);
+
                 for(Integer alertId : alertIds) {
                     jedis.srem("zmon:alerts:" + alertId, entityId);
                     jedis.del("zmon:alerts:" + alertId + ":" + entityId);
