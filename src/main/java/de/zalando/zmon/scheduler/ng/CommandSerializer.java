@@ -1,14 +1,16 @@
 package de.zalando.zmon.scheduler.ng;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
 import de.zalando.zmon.scheduler.ng.alerts.AlertDefinition;
 import de.zalando.zmon.scheduler.ng.checks.CheckDefinition;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
 import de.zalando.zmon.scheduler.ng.trailruns.TrialRunRequest;
+
+import io.opentracing.Tracer;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by jmussler on 30.06.16.
@@ -16,9 +18,11 @@ import de.zalando.zmon.scheduler.ng.trailruns.TrialRunRequest;
 public class CommandSerializer {
 
     private final CeleryWriter writer;
+    private final Tracer tracer;
 
-    public CommandSerializer(TaskSerializerType type) {
-        writer = CeleryWriter.create(type);
+    public CommandSerializer(TaskSerializerType type, Tracer tracer) {
+        this.writer = CeleryWriter.create(type);
+        this.tracer = tracer;
     }
 
     public String expiresTime(long interval) {
@@ -64,7 +68,7 @@ public class CommandSerializer {
 
         body.task = "trial_run";
 
-        return writer.asCeleryTask(body);
+        return writer.asCeleryTask(body, tracer);
     }
 
     public byte[] write(Entity entity, Check check, Collection<Alert> alerts, long scheduledTime) {
@@ -114,6 +118,6 @@ public class CommandSerializer {
             alertList.add(alertArg);
         }
 
-        return writer.asCeleryTask(body);
+        return writer.asCeleryTask(body, tracer);
     }
 }

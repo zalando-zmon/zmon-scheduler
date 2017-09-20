@@ -1,19 +1,5 @@
 package de.zalando.zmon.scheduler.ng.scheduler;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
-
-import com.codahale.metrics.MetricRegistry;
-
 import de.zalando.zmon.scheduler.ng.AlertOverlapGenerator;
 import de.zalando.zmon.scheduler.ng.CommandSerializer;
 import de.zalando.zmon.scheduler.ng.SchedulePersistType;
@@ -26,7 +12,21 @@ import de.zalando.zmon.scheduler.ng.entities.Entity;
 import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
 import de.zalando.zmon.scheduler.ng.queue.QueueSelector;
 import de.zalando.zmon.scheduler.ng.trailruns.TrialRunRequest;
+
+import com.codahale.metrics.MetricRegistry;
+import io.opentracing.Tracer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import redis.clients.jedis.Jedis;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by jmussler on 30.06.16.
@@ -50,7 +50,13 @@ public class Scheduler {
     private final CommandSerializer taskSerializer;
     private final Map<Integer, Long> lastScheduleAtStartup = SchedulePersister.loadSchedule();
 
-    public Scheduler(AlertRepository alertRepo, CheckRepository checkRepo, EntityRepository entityRepository, QueueSelector queueSelector, SchedulerConfig schedulerConfig, MetricRegistry metrics) {
+    public Scheduler(AlertRepository alertRepo,
+                     CheckRepository checkRepo,
+                     EntityRepository entityRepository,
+                     QueueSelector queueSelector,
+                     SchedulerConfig schedulerConfig,
+                     MetricRegistry metrics,
+                     Tracer tracer) {
         this.alertRepo = alertRepo;
         this.checkRepo = checkRepo;
         this.entityRepo = entityRepository;
@@ -58,7 +64,7 @@ public class Scheduler {
         this.schedulerConfig = schedulerConfig;
         this.schedulerMetrics = new SchedulerMetrics(metrics);
 
-        taskSerializer = new CommandSerializer(schedulerConfig.getTaskSerializer());
+        taskSerializer = new CommandSerializer(schedulerConfig.getTaskSerializer(), tracer);
 
         service = new ScheduledThreadPoolExecutor(schedulerConfig.getThreadCount(), new CustomizableThreadFactory("sc-pool-"));
         service.setRemoveOnCancelPolicy(true);

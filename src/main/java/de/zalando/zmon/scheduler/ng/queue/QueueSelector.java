@@ -1,16 +1,16 @@
 package de.zalando.zmon.scheduler.ng.queue;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import com.codahale.metrics.MetricRegistry;
-
 import de.zalando.zmon.scheduler.ng.Alert;
 import de.zalando.zmon.scheduler.ng.Check;
 import de.zalando.zmon.scheduler.ng.CommandSerializer;
 import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
+
+import io.opentracing.Tracer;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by jmussler on 30.06.16.
@@ -22,8 +22,8 @@ public class QueueSelector {
     private final List<Selector> selectors = new ArrayList<>();
     private final CommandSerializer serializer;
     private final PropertyQueueSelector propertySelector;
-    
-    public QueueSelector(QueueWriter writer, SchedulerConfig config){
+
+    public QueueSelector(QueueWriter writer, SchedulerConfig config, Tracer tracer) {
         this.writer = writer;
         this.config = config;
         this.propertySelector = new PropertyQueueSelector(config);
@@ -31,13 +31,8 @@ public class QueueSelector {
         selectors.add(new RepoSelector(config));
         selectors.add(new HardCodedSelector(config));
         selectors.add(propertySelector);
-        
-        serializer = new CommandSerializer(config.getTaskSerializer());
-    }
 
-    @Deprecated
-    public QueueSelector(QueueWriter writer, SchedulerConfig config, MetricRegistry metrics) {
-        this(writer, config);
+        serializer = new CommandSerializer(config.getTaskSerializer(), tracer);
     }
 
     public void execute(Entity entity, byte[] command) {
