@@ -2,10 +2,17 @@ package de.zalando.zmon.scheduler.ng.checks;
 
 import de.zalando.zmon.scheduler.ng.CachedRepository;
 import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
+
+import io.opentracing.Tracer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by jmussler on 4/7/15.
@@ -79,8 +86,8 @@ public class CheckRepository extends CachedRepository<Integer, CheckSourceRegist
     }
 
     @Autowired
-    public CheckRepository(CheckSourceRegistry registry, SchedulerConfig config) {
-        super(registry);
+    public CheckRepository(CheckSourceRegistry registry, SchedulerConfig config, Tracer tracer) {
+        super(registry, tracer);
         this.checkMinInterval = config.getCheckMinInterval();
         currentMap = new HashMap<>();
         fill();

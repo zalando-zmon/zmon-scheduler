@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class CeleryWriter {
+    private static final String TRACE_OPERATION_NAME = "queue_processing";
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -38,15 +39,15 @@ public abstract class CeleryWriter {
             ObjectNode properties = node.putObject("properties");
             properties.put("body_encoding", "nested");
 
-
             try {
                 Map<String, String> map = getSpanData(tracer);
                 properties.set("trace", mapper.valueToTree(map));
-            } catch (JsonProcessingException e) {
+            } catch (Throwable e) {
                 LOG.error("Preparing a trace failed: {}", e.toString());
             }
 
             try {
+                node.putPOJO("body", task);
                 return mapper.writeValueAsString(node).getBytes();
             } catch (JsonProcessingException e) {
                 LOG.error("Serialize failed for task {}: {}", task, e.getMessage());
@@ -55,12 +56,14 @@ public abstract class CeleryWriter {
         }
 
         private Map<String, String> getSpanData(Tracer tracer) throws JsonProcessingException {
-            Tracer.SpanBuilder spanBuilder = tracer.buildSpan("queue_processing")
-                    .asChildOf(tracer.activeSpan());
-            Span span = spanBuilder.startManual();
+            Span span = tracer.buildSpan(TRACE_OPERATION_NAME)
+                    .asChildOf(tracer.activeSpan())
+                    .startManual();
+
             Map<String, String> map = new HashMap<>();
             TextMapInjectAdapter textMap = new TextMapInjectAdapter(map);
             tracer.inject(span.context(), Format.Builtin.TEXT_MAP, textMap);
+            span.finish();
 
             return map;
         }

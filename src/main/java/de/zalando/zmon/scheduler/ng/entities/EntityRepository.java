@@ -1,10 +1,12 @@
 package de.zalando.zmon.scheduler.ng.entities;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.zalando.zmon.scheduler.ng.AlertOverlapGenerator;
 import de.zalando.zmon.scheduler.ng.CachedRepository;
 import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.opentracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +15,13 @@ import org.xerial.snappy.Snappy;
 import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -37,8 +45,9 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public EntityRepository(EntityAdapterRegistry registry) {
-        super(registry);
+    @Autowired
+    public EntityRepository(EntityAdapterRegistry registry, Tracer tracer) {
+        super(registry, tracer);
 
         skipField = null;
 
@@ -53,8 +62,8 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     }
 
     @Autowired
-    public EntityRepository(EntityAdapterRegistry registry, SchedulerConfig config) {
-        super(registry);
+    public EntityRepository(EntityAdapterRegistry registry, SchedulerConfig config, Tracer tracer) {
+        super(registry, tracer);
 
         this.skipField = config.getEntitySkipOnField();
 
