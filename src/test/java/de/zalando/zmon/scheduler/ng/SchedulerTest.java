@@ -1,6 +1,5 @@
 package de.zalando.zmon.scheduler.ng;
 
-import com.codahale.metrics.MetricRegistry;
 import de.zalando.zmon.scheduler.ng.alerts.AlertDefinition;
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
 import de.zalando.zmon.scheduler.ng.checks.CheckDefinition;
@@ -11,6 +10,9 @@ import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
 import de.zalando.zmon.scheduler.ng.queue.QueueSelector;
 import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
 import de.zalando.zmon.scheduler.ng.trailruns.TrialRunRequest;
+
+import com.codahale.metrics.MetricRegistry;
+import io.opentracing.NoopTracerFactory;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -21,7 +23,11 @@ import static java.util.Arrays.asList;
 import static org.mockito.AdditionalMatchers.gt;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class SchedulerTest {
 
@@ -63,7 +69,7 @@ public class SchedulerTest {
         QueueSelector queueSelector = mock(QueueSelector.class);
         SchedulerConfig config = new SchedulerConfig();
         MetricRegistry metricRegistry = new MetricRegistry();
-        Scheduler scheduler = new Scheduler(alertRepo, checkRepo, entityRepo, queueSelector, config, metricRegistry);
+        Scheduler scheduler = new Scheduler(alertRepo, checkRepo, entityRepo, queueSelector, config, metricRegistry, NoopTracerFactory.create());
 
         // now schedule our check
         long beforeSchedule = System.currentTimeMillis();
@@ -95,7 +101,7 @@ public class SchedulerTest {
         QueueSelector queueSelector = mock(QueueSelector.class);
         SchedulerConfig config = new SchedulerConfig();
         MetricRegistry metricRegistry = new MetricRegistry();
-        Scheduler scheduler = new Scheduler(null, null, entityRepo, queueSelector, config, metricRegistry);
+        Scheduler scheduler = new Scheduler(null, null, entityRepo, queueSelector, config, metricRegistry, NoopTracerFactory.create());
 
         TrialRunRequest request = new TrialRunRequest();
         request.id = "test";

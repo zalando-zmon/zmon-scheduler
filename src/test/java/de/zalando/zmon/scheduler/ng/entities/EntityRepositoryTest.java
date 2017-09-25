@@ -1,15 +1,20 @@
 package de.zalando.zmon.scheduler.ng.entities;
 
 import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
+
+import io.opentracing.NoopTracerFactory;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.io.IOException;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by jmussler on 02.07.16.
@@ -37,7 +42,7 @@ public class EntityRepositoryTest {
         when(registry.getSourceNames()).thenReturn(asList("entities"));
         when(registry.get("entities")).thenReturn(adapter);
 
-        EntityRepository repository = new EntityRepository(registry, config);
+        EntityRepository repository = new EntityRepository(registry, config, NoopTracerFactory.create());
 
         assertEquals(1, repository.getCurrentMap().size());
     }
@@ -63,7 +68,7 @@ public class EntityRepositoryTest {
         when(registry.getSourceNames()).thenReturn(asList("entities"));
         when(registry.get("entities")).thenReturn(adapter);
 
-        EntityRepository repository = new EntityRepository(registry, config);
+        EntityRepository repository = new EntityRepository(registry, config, NoopTracerFactory.create());
         assertEquals(1, repository.getCurrentMap().size());
 
         try {
@@ -111,7 +116,7 @@ public class EntityRepositoryTest {
 
         EntityChangeListener listener = Mockito.mock(EntityChangeListener.class);
 
-        EntityRepository repository = new EntityRepository(registry, config);
+        EntityRepository repository = new EntityRepository(registry, config, NoopTracerFactory.create());
         repository.registerListener(listener);
         assertEquals(2, repository.getCurrentMap().size());
 
