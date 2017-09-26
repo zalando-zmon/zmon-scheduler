@@ -39,7 +39,6 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    @Autowired
     public EntityRepository(EntityAdapterRegistry registry, Tracer tracer) {
         super(registry, tracer);
 
