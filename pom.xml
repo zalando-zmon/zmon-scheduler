@@ -83,7 +83,7 @@
         <dependency>
             <groupId>io.opentracing.contrib</groupId>
             <artifactId>opentracing-spring-cloud-starter</artifactId>
-            <version>0.0.4</version>
+            <version>0.0.7</version>
         </dependency>
     </dependencies>
 
@@ -136,6 +136,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <mainClass>de.zalando.zmon.scheduler.ng.Application</mainClass>
+                    <layout>ZIP</layout>
                 </configuration>
             </plugin>
 
