@@ -82,8 +82,8 @@
         <!--Does automatic configuration of OpenTracing tracer. NoopTracer is by default-->
         <dependency>
             <groupId>io.opentracing.contrib</groupId>
-            <artifactId>opentracing-spring-web-autoconfigure</artifactId>
-            <version>0.0.10</version>
+            <artifactId>opentracing-spring-cloud-starter</artifactId>
+            <version>0.0.4</version>
         </dependency>
     </dependencies>
 
