@@ -22,6 +22,9 @@ public class CheckDefinition {
     @XmlElement(required = true)
     private String name;
 
+    @XmlElement(required = false)
+    private Boolean deleted;
+
     @XmlElement
     private String description;
 
@@ -179,6 +182,14 @@ public class CheckDefinition {
 
     public void setLastModifiedBy(final String lastModifiedBy) {
         this.lastModifiedBy = lastModifiedBy;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 
     @Override
