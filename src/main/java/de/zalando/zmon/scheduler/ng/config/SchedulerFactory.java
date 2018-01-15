@@ -1,17 +1,5 @@
 package de.zalando.zmon.scheduler.ng.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
-
-/**
- * Created by jmussler on 30.06.16.
- */
-
-import com.codahale.metrics.MetricRegistry;
-
 import de.zalando.zmon.scheduler.ng.TokenWrapper;
 import de.zalando.zmon.scheduler.ng.alerts.AlertRepository;
 import de.zalando.zmon.scheduler.ng.checks.CheckChangedListener;
@@ -27,8 +15,24 @@ import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
 import de.zalando.zmon.scheduler.ng.trailruns.TrialRunForwarder;
 import de.zalando.zmon.scheduler.ng.trailruns.TrialRunHttpSubscriber;
 
+import com.codahale.metrics.MetricRegistry;
+import io.opentracing.Tracer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
+
+/**
+ * Created by jmussler on 30.06.16.
+ */
+
 @Configuration
 public class SchedulerFactory {
+
+    @Autowired
+    private Tracer tracer;
 
     private final static Logger LOG = LoggerFactory.getLogger(SchedulerFactory.class);
 
@@ -54,7 +58,13 @@ public class SchedulerFactory {
                                   MetricRegistry metrics) {
 
         LOG.info("Creating scheduler instance");
-        Scheduler newScheduler = new Scheduler(alertRepo, checkRepo, entityRepo, queueSelector, config, metrics);
+        Scheduler newScheduler = new Scheduler(alertRepo,
+                checkRepo,
+                entityRepo,
+                queueSelector,
+                config,
+                metrics,
+                tracer);
 
         LOG.info("Check ID filter: {}", config.getCheckFilter());
 

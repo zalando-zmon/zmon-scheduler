@@ -1,10 +1,18 @@
 package de.zalando.zmon.scheduler.ng.alerts;
 
 import de.zalando.zmon.scheduler.ng.CachedRepository;
+
+import io.opentracing.Tracer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by jmussler on 4/7/15.
@@ -90,8 +98,8 @@ public class AlertRepository extends CachedRepository<Integer, AlertSourceRegist
     }
 
     @Autowired
-    public AlertRepository(AlertSourceRegistry registry) {
-        super(registry);
+    public AlertRepository(AlertSourceRegistry registry, Tracer tracer) {
+        super(registry, tracer);
         currentMap = new HashMap<>();
         byCheckId = new HashMap<>();
         fill();

@@ -1,12 +1,5 @@
 package de.zalando.zmon.scheduler.ng.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-import com.codahale.metrics.MetricRegistry;
-
 import de.zalando.zmon.scheduler.ng.TaskWriterType;
 import de.zalando.zmon.scheduler.ng.queue.ArrayQueueWriter;
 import de.zalando.zmon.scheduler.ng.queue.JedisQueueWriter;
@@ -14,11 +7,22 @@ import de.zalando.zmon.scheduler.ng.queue.LogQueueWriter;
 import de.zalando.zmon.scheduler.ng.queue.QueueSelector;
 import de.zalando.zmon.scheduler.ng.queue.QueueWriter;
 
+import com.codahale.metrics.MetricRegistry;
+import io.opentracing.Tracer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
 /**
  * Created by jmussler on 30.06.16.
  */
 @Configuration
 public class QueueSelectorConfiguration {
+
+    @Autowired
+    private Tracer tracer;
 
     private static final Logger LOG = LoggerFactory.getLogger(QueueSelectorConfiguration.class);
 
@@ -44,6 +48,6 @@ public class QueueSelectorConfiguration {
 
     @Bean
     public QueueSelector getSelector(QueueWriter writer, SchedulerConfig config) {
-        return new QueueSelector(writer, config);
+        return new QueueSelector(writer, config, tracer);
     }
 }
