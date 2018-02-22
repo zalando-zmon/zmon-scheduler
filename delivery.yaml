@@ -27,5 +27,5 @@ pipeline:
             AGENT_IMAGE=registry-write.opensource.zalan.do/zmon/zmon-scheduler-unstable:${VERSION}
           fi
 
-          docker build --tag "$IMAGE" .
-          docker push "$IMAGE"
+          docker build --tag "$AGENT_IMAGE" .
+          docker push "$AGENT_IMAGE"
