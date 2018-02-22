@@ -21,11 +21,11 @@ pipeline:
           if [[ ${IS_PR_BUILD} != "true" ]]
           then
             VERSION=$(git describe --tags --always --dirty)
+            AGENT_IMAGE=registry-write.opensource.zalan.do/zmon/zmon-scheduler:${VERSION}
           else
             VERSION=${CDP_BUILD_VERSION}
+            AGENT_IMAGE=registry-write.opensource.zalan.do/zmon/zmon-scheduler-unstable:${VERSION}
           fi
-
-          IMAGE=registry-write.opensource.zalan.do/zmon/zmon-scheduler:${VERSION}
 
           docker build --tag "$IMAGE" .
           docker push "$IMAGE"
