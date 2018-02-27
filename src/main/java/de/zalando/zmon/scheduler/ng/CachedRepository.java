@@ -1,6 +1,6 @@
 package de.zalando.zmon.scheduler.ng;
 
-import io.opentracing.Span;
+import io.opentracing.Scope;
 import io.opentracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,28 +42,13 @@ public abstract class CachedRepository<I, S, T> implements Runnable {
     }
 
     public void run() {
-        Span previousActiveSpan = null;
-        Span span = null;
-        try {
-            String operationName = String.format("repository_update_%s", registry.getClass().getSimpleName());
-            previousActiveSpan = tracer.activeSpan();
-            span = previousActiveSpan == null
-                    ? tracer.buildSpan(operationName).startActive(true).span()
-                    : previousActiveSpan;
-        } catch (Throwable e) {
-            LOG.error("Error during creating a span: {}", e.toString(), e);
-        }
-
-        try {
+        String operationName = String.format("repository_update_%s", registry.getClass().getSimpleName());
+        try (Scope scope = tracer.buildSpan(operationName).startActive(true)) {
             LOG.info("scheduling update of: {}", registry.getClass());
             fill();
             lastUpdated = System.currentTimeMillis();
         } catch (Throwable e) {
             LOG.error("Error during refresh of {}", registry.getClass(), e);
-        } finally {
-            if (previousActiveSpan == null && span != null) {
-                span.finish();
-            }
         }
     }
 
