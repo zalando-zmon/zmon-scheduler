@@ -1,5 +1,7 @@
 package de.zalando.zmon.scheduler.ng;
 
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,14 +19,18 @@ public abstract class CachedRepository<I, S, T> implements Runnable {
 
     protected Map<I, T> currentMap;
     protected final S registry;
+    protected final Tracer tracer;
     protected static final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
 
     private long lastUpdated = 0;
 
-    public CachedRepository(S r) {
+    public CachedRepository(S r, Tracer tracer) {
         assert (null != r);
-        registry = r;
-        executor.scheduleAtFixedRate(this, 180, 60, TimeUnit.SECONDS);
+        this.registry = r;
+        this.tracer = tracer;
+
+        LOG.info("starting scheduler for {}", registry.getClass().getName());
+        executor.scheduleAtFixedRate(this, 20, 60, TimeUnit.SECONDS);
     }
 
     protected abstract T getNullObject();
@@ -36,12 +42,28 @@ public abstract class CachedRepository<I, S, T> implements Runnable {
     }
 
     public void run() {
+        Span previousActiveSpan = null;
+        Span span = null;
+        try {
+            String operationName = String.format("repository_update_%s", registry.getClass().getSimpleName());
+            previousActiveSpan = tracer.activeSpan();
+            span = previousActiveSpan == null
+                    ? tracer.buildSpan(operationName).startActive(true).span()
+                    : previousActiveSpan;
+        } catch (Throwable e) {
+            LOG.error("Error during creating a span: {}", e.toString(), e);
+        }
+
         try {
             LOG.info("scheduling update of: {}", registry.getClass());
             fill();
             lastUpdated = System.currentTimeMillis();
         } catch (Throwable e) {
             LOG.error("Error during refresh of {}", registry.getClass(), e);
+        } finally {
+            if (previousActiveSpan == null && span != null) {
+                span.finish();
+            }
         }
     }
 

@@ -1,14 +1,16 @@
 package de.zalando.zmon.scheduler.ng;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
 import de.zalando.zmon.scheduler.ng.alerts.AlertDefinition;
 import de.zalando.zmon.scheduler.ng.checks.CheckDefinition;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
 import de.zalando.zmon.scheduler.ng.trailruns.TrialRunRequest;
+
+import io.opentracing.Tracer;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by jmussler on 30.06.16.
@@ -17,8 +19,8 @@ public class CommandSerializer {
 
     private final CeleryWriter writer;
 
-    public CommandSerializer(TaskSerializerType type) {
-        writer = CeleryWriter.create(type);
+    public CommandSerializer(TaskSerializerType type, Tracer tracer) {
+        this.writer = CeleryWriter.create(type, tracer);
     }
 
     public String expiresTime(long interval) {

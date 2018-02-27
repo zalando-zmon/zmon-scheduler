@@ -1,10 +1,11 @@
 package de.zalando.zmon.scheduler.ng.entities;
 
 import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
+
+import io.opentracing.noop.NoopTracerFactory;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.io.IOException;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -37,7 +38,7 @@ public class EntityRepositoryTest {
         when(registry.getSourceNames()).thenReturn(asList("entities"));
         when(registry.get("entities")).thenReturn(adapter);
 
-        EntityRepository repository = new EntityRepository(registry, config);
+        EntityRepository repository = new EntityRepository(registry, config, NoopTracerFactory.create());
 
         assertEquals(1, repository.getCurrentMap().size());
     }
@@ -63,14 +64,13 @@ public class EntityRepositoryTest {
         when(registry.getSourceNames()).thenReturn(asList("entities"));
         when(registry.get("entities")).thenReturn(adapter);
 
-        EntityRepository repository = new EntityRepository(registry, config);
+        EntityRepository repository = new EntityRepository(registry, config, NoopTracerFactory.create());
         assertEquals(1, repository.getCurrentMap().size());
 
         try {
             repository.fill();
             fail("Exception not thrown");
-        }
-        catch(Exception t) {
+        } catch (Exception t) {
             assertTrue("Exception of unexpected type", t instanceof RuntimeException);
         }
 
@@ -111,7 +111,7 @@ public class EntityRepositoryTest {
 
         EntityChangeListener listener = Mockito.mock(EntityChangeListener.class);
 
-        EntityRepository repository = new EntityRepository(registry, config);
+        EntityRepository repository = new EntityRepository(registry, config, NoopTracerFactory.create());
         repository.registerListener(listener);
         assertEquals(2, repository.getCurrentMap().size());
 

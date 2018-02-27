@@ -1,6 +1,8 @@
 package de.zalando.zmon.scheduler.ng.alerts;
 
 import de.zalando.zmon.scheduler.ng.CachedRepository;
+
+import io.opentracing.Tracer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -90,8 +92,8 @@ public class AlertRepository extends CachedRepository<Integer, AlertSourceRegist
     }
 
     @Autowired
-    public AlertRepository(AlertSourceRegistry registry) {
-        super(registry);
+    public AlertRepository(AlertSourceRegistry registry, Tracer tracer) {
+        super(registry, tracer);
         currentMap = new HashMap<>();
         byCheckId = new HashMap<>();
         fill();
