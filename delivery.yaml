@@ -5,10 +5,8 @@ pipeline:
     commands:
       - desc: "Install dependencies"
         cmd: |
-          apt-get install -y \
-          openjdk-8-* \
-          maven \
-          git
+          apt-get -y update
+          apt-get -y install openjdk-8-* maven git
           curl -fLOsS https://delivery.cloud.zalando.com/utils/ensure-docker && sh ensure-docker && rm ensure-docker
 
       - desc: "Build maven package"
