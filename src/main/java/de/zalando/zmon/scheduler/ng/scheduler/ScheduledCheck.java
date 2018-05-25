@@ -104,7 +104,7 @@ public class ScheduledCheck implements Runnable {
         boolean setLastRun = false;
         CheckDefinition checkDef = check.getCheckDefinition();
         if (null == checkDef) {
-            LOG.warn("Probably inactive/deleted check still scheduled: " + check.getId());
+            LOG.debug("Probably inactive/deleted check still scheduled: " + check.getId());
             return lastRunEntities;
         }
 
