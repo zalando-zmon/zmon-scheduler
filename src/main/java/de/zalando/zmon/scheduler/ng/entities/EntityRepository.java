@@ -6,6 +6,7 @@ import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
 import io.opentracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,9 @@ import java.util.stream.Collectors;
  */
 @Component
 public class EntityRepository extends CachedRepository<String, EntityAdapterRegistry, Entity> {
+
+    @Autowired
+    Scheduler scheduler;
 
     private static final Logger LOG = LoggerFactory.getLogger(EntityRepository.class);
 
@@ -191,6 +195,8 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
                 l.notifyEntityRemove(this, oldUnfiltered.get(k));
             }
         }
+
+        scheduler.scheduleEntityCleanUp(removedIds);
 
         for (String k : changedFilterProperties) {
             for (EntityChangeListener l : currentListeners) {

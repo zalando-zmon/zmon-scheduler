@@ -7,10 +7,7 @@ import de.zalando.zmon.scheduler.ng.trailruns.TrialRunRequest;
 
 import io.opentracing.Tracer;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by jmussler on 30.06.16.
@@ -26,6 +23,19 @@ public class CommandSerializer {
     public String expiresTime(long interval) {
         Date exp = new Date(System.currentTimeMillis()+(interval * 1000L));
         return LocalDateFormatter.get().format(exp);
+    }
+
+    public byte[] writeCleanUp(Set<String> removedIds){
+        CeleryBody body = new CeleryBody();
+
+        body.task= "cleanup";
+        body.expires="";
+
+        //TODO: This is not unique yet
+        body.id="entity-CU:"+System.currentTimeMillis();
+
+        body.kwargs.put("cleanup_entities", removedIds);
+        return writer.asCeleryTask(body);
     }
 
     public byte[] writeTrialRun(Entity entity, TrialRunRequest request) {
