@@ -6,7 +6,6 @@ import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
 import io.opentracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +23,6 @@ import java.util.stream.Collectors;
  */
 @Component
 public class EntityRepository extends CachedRepository<String, EntityAdapterRegistry, Entity> {
-
-    private Scheduler scheduler;
 
     private static final Logger LOG = LoggerFactory.getLogger(EntityRepository.class);
 
@@ -58,7 +55,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     }
 
     @Autowired
-    public EntityRepository(EntityAdapterRegistry registry, SchedulerConfig config, Tracer tracer, Scheduler scheduler) {
+    public EntityRepository(EntityAdapterRegistry registry, SchedulerConfig config, Tracer tracer) {
         super(registry, tracer);
 
         this.skipField = config.getEntitySkipOnField();
@@ -66,8 +63,6 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
         this.redisHost = config.getRedisHost();
         this.redisPort = config.getRedisPort();
         this.redisPropertiesKey = config.getEntityPropertiesKey();
-
-        this.scheduler = scheduler;
 
         if (config.getEntityBaseFilter() == null && config.getEntityBaseFilterStr() != null) {
             ObjectMapper m = new ObjectMapper();
@@ -198,7 +193,9 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
         }
 
         //Handover cleanup to worker
-        scheduler.scheduleEntityCleanUp(removedIds);
+        for (EntityChangeListener l : currentListeners) {
+            l.notifyBatchEntityRemove(this, removedIds);
+        }
 
         for (String k : changedFilterProperties) {
             for (EntityChangeListener l : currentListeners) {

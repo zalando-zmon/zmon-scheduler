@@ -41,11 +41,7 @@ public class EntityRepositoryTest {
         when(registry.getSourceNames()).thenReturn(asList("entities"));
         when(registry.get("entities")).thenReturn(adapter);
 
-        QueueSelector queueSelector = mock(QueueSelector.class);
-        MetricRegistry metricRegistry = new MetricRegistry();
-        Scheduler scheduler = new Scheduler(null, null, null, queueSelector, config, metricRegistry, NoopTracerFactory.create());
-
-        EntityRepository repository = new EntityRepository(registry, config, NoopTracerFactory.create(), scheduler);
+        EntityRepository repository = new EntityRepository(registry, config, NoopTracerFactory.create());
 
         assertEquals(1, repository.getCurrentMap().size());
     }
@@ -71,11 +67,7 @@ public class EntityRepositoryTest {
         when(registry.getSourceNames()).thenReturn(asList("entities"));
         when(registry.get("entities")).thenReturn(adapter);
 
-        QueueSelector queueSelector = mock(QueueSelector.class);
-        MetricRegistry metricRegistry = new MetricRegistry();
-        Scheduler scheduler = new Scheduler(null, null, null, queueSelector, config, metricRegistry, NoopTracerFactory.create());
-
-        EntityRepository repository = new EntityRepository(registry, config, NoopTracerFactory.create(), scheduler);
+        EntityRepository repository = new EntityRepository(registry, config, NoopTracerFactory.create());
         assertEquals(1, repository.getCurrentMap().size());
 
         try {
@@ -122,11 +114,7 @@ public class EntityRepositoryTest {
 
         EntityChangeListener listener = Mockito.mock(EntityChangeListener.class);
 
-        QueueSelector queueSelector = mock(QueueSelector.class);
-        MetricRegistry metricRegistry = new MetricRegistry();
-        Scheduler scheduler = new Scheduler(null, null, null, queueSelector, config, metricRegistry, NoopTracerFactory.create());
-
-        EntityRepository repository = new EntityRepository(registry, config, NoopTracerFactory.create(), scheduler);
+        EntityRepository repository = new EntityRepository(registry, config, NoopTracerFactory.create());
         repository.registerListener(listener);
         assertEquals(2, repository.getCurrentMap().size());
 

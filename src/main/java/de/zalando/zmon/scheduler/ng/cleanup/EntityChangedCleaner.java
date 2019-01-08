@@ -11,6 +11,7 @@ import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -72,6 +73,9 @@ public class EntityChangedCleaner implements EntityChangeListener {
     public void notifyEntityRemove(EntityRepository repo, Entity e) {
 
     }
+
+    @Override
+    public void notifyBatchEntityRemove (EntityRepository repo, Set<String> removedEntities) {}
 
     protected void notifyEntityChangeNoWait(EntityRepository repo, Entity entityOld, Entity entityNew) {
         executor.schedule(new EntityChangeCleanupTask(entityOld, entityNew), 0, TimeUnit.SECONDS);

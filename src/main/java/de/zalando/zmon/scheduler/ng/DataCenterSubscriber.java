@@ -79,4 +79,7 @@ public class DataCenterSubscriber<T> implements EntityChangeListener {
     public void notifyEntityChange(EntityRepository repo, Entity oldEntity, Entity newEntity) {
 
     }
+
+    @Override
+    public void notifyBatchEntityRemove (EntityRepository repo, Set<String> removedEntities) {}
 }
