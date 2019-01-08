@@ -41,6 +41,9 @@ public class CommandSerializer {
         command.check_id = "TR:" + uuid;
         body.args.add(command);
 
+        body.timelimit.add(3600L);
+        body.timelimit.add(7200L);
+
         return writer.asCeleryTask(body);
     }
 
