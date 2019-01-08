@@ -38,7 +38,7 @@ public class CommandSerializer {
 
         //For open-tracing
         CeleryBody.EntityCleanUpArg command = new CeleryBody.EntityCleanUpArg();
-        command.check_id = "TR:" + uuid;
+        command.check_id = "CU:" + uuid;
         body.args.add(command);
 
         body.timelimit.add(3600L);
