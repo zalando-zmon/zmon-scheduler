@@ -25,8 +25,7 @@ import java.util.stream.Collectors;
 @Component
 public class EntityRepository extends CachedRepository<String, EntityAdapterRegistry, Entity> {
 
-    @Autowired
-    Scheduler scheduler;
+    private Scheduler scheduler;
 
     private static final Logger LOG = LoggerFactory.getLogger(EntityRepository.class);
 
@@ -59,7 +58,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     }
 
     @Autowired
-    public EntityRepository(EntityAdapterRegistry registry, SchedulerConfig config, Tracer tracer) {
+    public EntityRepository(EntityAdapterRegistry registry, SchedulerConfig config, Tracer tracer, Scheduler scheduler) {
         super(registry, tracer);
 
         this.skipField = config.getEntitySkipOnField();
@@ -67,6 +66,8 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
         this.redisHost = config.getRedisHost();
         this.redisPort = config.getRedisPort();
         this.redisPropertiesKey = config.getEntityPropertiesKey();
+
+        this.scheduler = scheduler;
 
         if (config.getEntityBaseFilter() == null && config.getEntityBaseFilterStr() != null) {
             ObjectMapper m = new ObjectMapper();
@@ -196,6 +197,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
             }
         }
 
+        //Handover cleanup to worker
         scheduler.scheduleEntityCleanUp(removedIds);
 
         for (String k : changedFilterProperties) {

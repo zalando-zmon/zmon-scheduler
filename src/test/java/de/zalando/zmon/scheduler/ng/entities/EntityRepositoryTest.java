@@ -1,7 +1,10 @@
 package de.zalando.zmon.scheduler.ng.entities;
 
+import com.codahale.metrics.MetricRegistry;
 import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 
+import de.zalando.zmon.scheduler.ng.queue.QueueSelector;
+import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
 import io.opentracing.noop.NoopTracerFactory;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -38,7 +41,11 @@ public class EntityRepositoryTest {
         when(registry.getSourceNames()).thenReturn(asList("entities"));
         when(registry.get("entities")).thenReturn(adapter);
 
-        EntityRepository repository = new EntityRepository(registry, config, NoopTracerFactory.create());
+        QueueSelector queueSelector = mock(QueueSelector.class);
+        MetricRegistry metricRegistry = new MetricRegistry();
+        Scheduler scheduler = new Scheduler(null, null, null, queueSelector, config, metricRegistry, NoopTracerFactory.create());
+
+        EntityRepository repository = new EntityRepository(registry, config, NoopTracerFactory.create(), scheduler);
 
         assertEquals(1, repository.getCurrentMap().size());
     }
@@ -64,7 +71,11 @@ public class EntityRepositoryTest {
         when(registry.getSourceNames()).thenReturn(asList("entities"));
         when(registry.get("entities")).thenReturn(adapter);
 
-        EntityRepository repository = new EntityRepository(registry, config, NoopTracerFactory.create());
+        QueueSelector queueSelector = mock(QueueSelector.class);
+        MetricRegistry metricRegistry = new MetricRegistry();
+        Scheduler scheduler = new Scheduler(null, null, null, queueSelector, config, metricRegistry, NoopTracerFactory.create());
+
+        EntityRepository repository = new EntityRepository(registry, config, NoopTracerFactory.create(), scheduler);
         assertEquals(1, repository.getCurrentMap().size());
 
         try {
@@ -111,7 +122,11 @@ public class EntityRepositoryTest {
 
         EntityChangeListener listener = Mockito.mock(EntityChangeListener.class);
 
-        EntityRepository repository = new EntityRepository(registry, config, NoopTracerFactory.create());
+        QueueSelector queueSelector = mock(QueueSelector.class);
+        MetricRegistry metricRegistry = new MetricRegistry();
+        Scheduler scheduler = new Scheduler(null, null, null, queueSelector, config, metricRegistry, NoopTracerFactory.create());
+
+        EntityRepository repository = new EntityRepository(registry, config, NoopTracerFactory.create(), scheduler);
         repository.registerListener(listener);
         assertEquals(2, repository.getCurrentMap().size());
 

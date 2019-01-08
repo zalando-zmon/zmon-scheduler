@@ -21,20 +21,26 @@ public class CommandSerializer {
     }
 
     public String expiresTime(long interval) {
-        Date exp = new Date(System.currentTimeMillis()+(interval * 1000L));
+        Date exp = new Date(System.currentTimeMillis() + (interval * 1000L));
         return LocalDateFormatter.get().format(exp);
     }
 
-    public byte[] writeCleanUp(Set<String> removedIds){
+    public byte[] writeCleanUp(Set<String> removedIds) {
         CeleryBody body = new CeleryBody();
 
-        body.task= "cleanup";
-        body.expires="";
+        body.task = "cleanup";
+        body.expires = "";
 
-        //TODO: This is not unique yet
-        body.id="entity-CU:"+System.currentTimeMillis();
+        String uuid = UUID.randomUUID().toString();
+        body.id = "entity-CU:" + uuid;
 
         body.kwargs.put("cleanup_entities", removedIds);
+
+        //For open-tracing
+        CeleryBody.EntityCleanUpArg command = new CeleryBody.EntityCleanUpArg();
+        command.check_id = "TR:" + uuid;
+        body.args.add(command);
+
         return writer.asCeleryTask(body);
     }
 
@@ -42,13 +48,13 @@ public class CommandSerializer {
         CeleryBody body = new CeleryBody();
 
         body.expires = expiresTime(request.interval); // "2015-12-31T00:00:00.000+00:00"
-        body.id="check-TR:"+request.id+"-"+entity.getId()+"-"+System.currentTimeMillis();
+        body.id = "check-TR:" + request.id + "-" + entity.getId() + "-" + System.currentTimeMillis();
 
         body.timelimit.add(request.interval);
         body.timelimit.add(request.interval * 2L);
 
         CeleryBody.TrialRunCeleryCommand command = new CeleryBody.TrialRunCeleryCommand();
-        command.check_id = "TR:"+request.id;
+        command.check_id = "TR:" + request.id;
         command.check_name = request.name;
         command.interval = request.interval;
         command.command = request.checkCommand;
@@ -66,7 +72,7 @@ public class CommandSerializer {
         alertArg.condition = request.alertCondition;
         alertArg.name = request.name;
         alertArg.period = request.period;
-        if(alertArg.period == null) {
+        if (alertArg.period == null) {
             alertArg.period = "";
         }
         alertArg.team = "TRIAL RUN";
@@ -95,13 +101,13 @@ public class CommandSerializer {
         command.interval = checkDef.getInterval();
         command.command = checkDef.getCommand();
         command.entity = entity.getProperties();
-        command.schedule_time = ((double)scheduledTime) / 1000.0;
+        command.schedule_time = ((double) scheduledTime) / 1000.0;
         body.args.add(command);
 
         List<CeleryBody.CeleryAlertArg> alertList = new ArrayList<>();
         body.args.add(alertList);
 
-        for(Alert alert : alerts) {
+        for (Alert alert : alerts) {
             CeleryBody.CeleryAlertArg alertArg = new CeleryBody.CeleryAlertArg();
             AlertDefinition alertDef = alert.getAlertDefinition();
 
@@ -114,7 +120,7 @@ public class CommandSerializer {
             alertArg.priority = alertDef.getPriority();
             alertArg.tags = alertDef.getTags();
 
-            if(alertArg.period == null) {
+            if (alertArg.period == null) {
                 alertArg.period = "";
             }
 
