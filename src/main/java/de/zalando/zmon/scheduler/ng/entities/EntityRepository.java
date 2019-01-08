@@ -193,8 +193,10 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
         }
 
         //Handover cleanup to worker
-        for (EntityChangeListener l : currentListeners) {
-            l.notifyBatchEntityRemove(this, removedIds);
+        if (!removedIds.isEmpty()){
+            for (EntityChangeListener l : currentListeners) {
+                l.notifyBatchEntityRemove(this, removedIds);
+            }
         }
 
         for (String k : changedFilterProperties) {
