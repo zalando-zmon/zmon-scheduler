@@ -1,10 +1,6 @@
 package de.zalando.zmon.scheduler.ng.entities;
 
-import com.codahale.metrics.MetricRegistry;
 import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
-
-import de.zalando.zmon.scheduler.ng.queue.QueueSelector;
-import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
 import io.opentracing.noop.NoopTracerFactory;
 import org.junit.Test;
 import org.mockito.Mockito;

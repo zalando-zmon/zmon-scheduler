@@ -28,7 +28,7 @@ import redis.clients.jedis.JedisPoolConfig;
 /**
  * Created by jmussler on 30.06.16.
  */
-public class SingleEntityCleanup implements EntityChangeListener{
+public class SingleEntityCleanup implements EntityChangeListener {
 
     @Autowired
     private Scheduler scheduler;

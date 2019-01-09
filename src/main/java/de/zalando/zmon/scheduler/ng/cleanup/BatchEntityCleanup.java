@@ -13,6 +13,9 @@ public class BatchEntityCleanup implements EntityChangeListener {
     private Scheduler scheduler;
     private final static Logger LOG = LoggerFactory.getLogger(BatchEntityCleanup.class);
 
+    public BatchEntityCleanup(Scheduler scheduler) {
+        this.scheduler = scheduler;
+    }
 
     @Override
     public void notifyEntityChange(EntityRepository repo, Entity entityOld, Entity entityNew) {
@@ -21,10 +24,6 @@ public class BatchEntityCleanup implements EntityChangeListener {
 
     @Override
     public void notifyEntityRemove(EntityRepository repo, Entity e) {
-    }
-
-    public BatchEntityCleanup(Scheduler scheduler) {
-        this.scheduler = scheduler;
     }
 
     @Override

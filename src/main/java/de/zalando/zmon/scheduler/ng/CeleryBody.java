@@ -66,7 +66,7 @@ public class CeleryBody {
         public String team;
     }
 
-    public static class EntityCleanUpArg{
+    public static class EntityCleanUpArg {
         public String check_id;
     }
 }
