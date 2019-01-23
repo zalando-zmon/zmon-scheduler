@@ -5,6 +5,8 @@ import io.opentracing.noop.NoopTracerFactory;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -119,6 +121,42 @@ public class EntityRepositoryTest {
 
         verify(listener).notifyEntityAdd(eq(repository), eq(host2));
         verify(listener).notifyEntityRemove(eq(repository), eq(host3));
+        verify(listener, never()).notifyBatchEntityRemove(eq(repository), eq(new HashSet<>(Arrays.asList(host2.getId()))));
         verify(listener).notifyEntityChange(eq(repository), eq(host1), eq(host1_changed));
+    }
+
+    @Test
+    public void TestNotifyGlobalScheduler() {
+        SchedulerConfig config = new SchedulerConfig();
+        config.setEntityBaseFilterStr("[{\"type\":\"host\"}]");
+        //Marks it as a Global scheduler
+        config.setEnableGlobalEntity(true);
+
+        EntityAdapterRegistry registry = Mockito.mock(EntityAdapterRegistry.class);
+
+        Entity instance = new Entity("instance-1");
+        instance.addProperty("type", "instance");
+
+        Entity host2 = new Entity("host-2");
+        host2.addProperty("type", "host");
+
+        List<Entity> entities = asList(instance, host2);
+        List<Entity> entities2 = asList(instance);
+
+        EntityAdapter adapter = Mockito.mock(EntityAdapter.class);
+        when(adapter.getCollection()).thenReturn(entities).thenReturn(entities2);
+
+        when(registry.getSourceNames()).thenReturn(asList("entities"));
+        when(registry.get("entities")).thenReturn(adapter);
+
+        EntityChangeListener listener = Mockito.mock(EntityChangeListener.class);
+
+        EntityRepository repository = new EntityRepository(registry, config, NoopTracerFactory.create());
+        repository.registerListener(listener);
+
+        repository.fill();
+
+        verify(listener).notifyEntityRemove(eq(repository), eq(host2));
+        verify(listener, never()).notifyBatchEntityRemove(eq(repository), eq(new HashSet<>(Arrays.asList(host2.getId()))));
     }
 }
