@@ -30,6 +30,9 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     private final String skipField;
     private final List<EntityChangeListener> changeListeners = new ArrayList<>();
 
+    //Need to differentiate between Global and Local schedulers
+    private final boolean isGlobal;
+
     // Need this to write globally aware change listener
     private Map<String, Entity> unfilteredEntities;
 
@@ -42,6 +45,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     public EntityRepository(EntityAdapterRegistry registry, Tracer tracer) {
         super(registry, tracer);
 
+        isGlobal = false;
         skipField = null;
 
         baseFilter = new ArrayList<>();
@@ -58,6 +62,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     public EntityRepository(EntityAdapterRegistry registry, SchedulerConfig config, Tracer tracer) {
         super(registry, tracer);
 
+        this.isGlobal = config.isEnableGlobalEntity();
         this.skipField = config.getEntitySkipOnField();
 
         this.redisHost = config.getRedisHost();
@@ -192,14 +197,10 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
             }
         }
 
-        //Handover cleanup to worker
-        // Only execute the batch cleanup on a remote scheduler. Global scheduler will have a maximum of 1 entity
-        LOG.info("Entity count: {}",currentIds.size());
-        if (currentIds.size() > 1) {
-            if (!removedIds.isEmpty()){
-                for (EntityChangeListener l : currentListeners) {
-                    l.notifyBatchEntityRemove(this, removedIds);
-                }
+        //Handover cleanup to worker -- Skip for Global scheduler
+        if (!(isGlobal || removedIds.isEmpty())) {
+            for (EntityChangeListener l : currentListeners) {
+                l.notifyBatchEntityRemove(this, removedIds);
             }
         }
 
