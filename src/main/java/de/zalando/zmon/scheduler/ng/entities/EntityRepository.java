@@ -193,9 +193,12 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
         }
 
         //Handover cleanup to worker
-        if (!removedIds.isEmpty()){
-            for (EntityChangeListener l : currentListeners) {
-                l.notifyBatchEntityRemove(this, removedIds);
+        // Only execute the batch cleanup on a remote scheduler. Global scheduler will have a maximum of 1 entity
+        if (currentIds.size() > 1) {
+            if (!removedIds.isEmpty()){
+                for (EntityChangeListener l : currentListeners) {
+                    l.notifyBatchEntityRemove(this, removedIds);
+                }
             }
         }
 
