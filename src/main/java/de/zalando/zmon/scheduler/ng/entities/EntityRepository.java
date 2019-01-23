@@ -194,6 +194,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
 
         //Handover cleanup to worker
         // Only execute the batch cleanup on a remote scheduler. Global scheduler will have a maximum of 1 entity
+        LOG.info("Entity count: {}",currentIds.size());
         if (currentIds.size() > 1) {
             if (!removedIds.isEmpty()){
                 for (EntityChangeListener l : currentListeners) {

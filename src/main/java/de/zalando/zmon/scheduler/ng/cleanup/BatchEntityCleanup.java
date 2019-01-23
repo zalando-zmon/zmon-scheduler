@@ -29,6 +29,7 @@ public class BatchEntityCleanup implements EntityChangeListener {
     @Override
     public void notifyBatchEntityRemove(EntityRepository repo, Set<String> removedEntities) {
         scheduler.scheduleEntityCleanUp(removedEntities);
+        LOG.info("Batch cleanup scheduled for {} entities", removedEntities.size());
     }
 
     @Override
