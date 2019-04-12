@@ -19,7 +19,7 @@ import static org.mockito.Mockito.*;
 public class EntityRepositoryTest {
 
     @Test
-    public void BaseFilterTest() {
+    public void baseFilterTest() {
         SchedulerConfig config = new SchedulerConfig();
         config.setEntityBaseFilterStr("[{\"type\":\"host\"}]");
 
@@ -45,7 +45,7 @@ public class EntityRepositoryTest {
     }
 
     @Test
-    public void TestNoChangeOnException() {
+    public void testNoChangeOnException() {
         SchedulerConfig config = new SchedulerConfig();
         config.setEntityBaseFilterStr("[{\"type\":\"host\"}]");
 
@@ -79,7 +79,7 @@ public class EntityRepositoryTest {
     }
 
     @Test
-    public void TestNotify() {
+    public void testNotify() {
         SchedulerConfig config = new SchedulerConfig();
         config.setEntityBaseFilterStr("[{\"type\":\"host\"}]");
 
