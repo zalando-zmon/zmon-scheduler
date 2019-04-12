@@ -126,7 +126,7 @@ public class EntityRepositoryTest {
     }
 
     @Test
-    public void TestNotifyGlobalScheduler() {
+    public void testNotifyGlobalScheduler() {
         SchedulerConfig config = new SchedulerConfig();
         config.setEntityBaseFilterStr("[{\"type\":\"host\"}]");
         //Marks it as a Global scheduler
