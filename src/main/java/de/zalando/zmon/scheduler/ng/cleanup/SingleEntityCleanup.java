@@ -2,10 +2,12 @@ package de.zalando.zmon.scheduler.ng.cleanup;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import de.zalando.zmon.scheduler.ng.scheduler.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +20,7 @@ import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
 import de.zalando.zmon.scheduler.ng.entities.EntityChangeListener;
 import de.zalando.zmon.scheduler.ng.entities.EntityRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -25,7 +28,10 @@ import redis.clients.jedis.JedisPoolConfig;
 /**
  * Created by jmussler on 30.06.16.
  */
-public class SingleEntityCleanup implements EntityChangeListener{
+public class SingleEntityCleanup implements EntityChangeListener {
+
+    @Autowired
+    private Scheduler scheduler;
 
     private final static Logger LOG = LoggerFactory.getLogger(SingleEntityCleanup.class);
 
@@ -55,6 +61,9 @@ public class SingleEntityCleanup implements EntityChangeListener{
         executor.schedule(new EntityCleanupTask(e), 90, TimeUnit.SECONDS);
         executor.schedule(new EntityCleanupTask(e), 300, TimeUnit.SECONDS);
     }
+
+    @Override
+    public void notifyBatchEntityRemove (EntityRepository repo, Set<String> removedEntities) {}
 
     @Override
     public void notifyEntityAdd(EntityRepository repo, Entity e) {
