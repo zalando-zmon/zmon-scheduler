@@ -20,7 +20,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import redis.clients.jedis.Jedis;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -231,10 +235,5 @@ public class Scheduler {
         } finally {
             service.schedule(new TrialRunCleanupTask(request.id, schedulerConfig), 300, TimeUnit.SECONDS);
         }
-    }
-
-    public void scheduleEntityCleanUp(Set<String> removedIds){
-        byte [] command = taskSerializer.writeCleanUp(removedIds);
-        queueSelector.execute(null, command);
     }
 }

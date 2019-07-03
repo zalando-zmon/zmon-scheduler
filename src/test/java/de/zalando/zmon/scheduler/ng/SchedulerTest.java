@@ -16,7 +16,8 @@ import io.opentracing.noop.NoopTracerFactory;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static org.mockito.AdditionalMatchers.gt;
@@ -120,26 +121,4 @@ public class SchedulerTest {
         verify(queueSelector, never()).execute(eq(entityExcluded), any(), eq("zmon:queue:default"));
     }
 
-    @Test
-    public void scheduleEntityCleanUp() {
-        final EntityRepository entityRepo = mock(EntityRepository.class);
-
-        //Entities to cleanup
-        Entity entity1 = new Entity("included-entity");
-        entity1.addProperty("type", "host");
-        Entity entity2 = new Entity("included-entity");
-        entity2.addProperty("type", "instance");
-
-        QueueSelector queueSelector = mock(QueueSelector.class);
-        SchedulerConfig config = new SchedulerConfig();
-        MetricRegistry metricRegistry = new MetricRegistry();
-        Scheduler scheduler = new Scheduler(null, null, entityRepo, queueSelector, config, metricRegistry, NoopTracerFactory.create());
-
-        Set<String> removedIds = new HashSet<>(Arrays.asList(entity1.getId(), entity2.getId()));
-
-        //Now schedule the cleanup
-        scheduler.scheduleEntityCleanUp(removedIds);
-
-        verify(queueSelector).execute( eq(null), any());
-    }
 }

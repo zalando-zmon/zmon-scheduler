@@ -65,10 +65,6 @@ public class CeleryBody {
         public int priority = 1;
         public String team;
     }
-
-    public static class EntityCleanUpArg {
-        public String check_id;
-    }
 }
 
 /*
