@@ -43,6 +43,12 @@ public class EntityAdapterRegistry extends SourceRegistry<EntityAdapter> {
             try {
                 if (config.getEntityBaseFilterStr() != null && !"".equals(config.getEntityBaseFilterStr()) && config.isBaseFilterForward()) {
                     entityServiceUrl = entityServiceUrl + "?query=" + URLEncoder.encode(config.getEntityBaseFilterStr(), "UTF-8");
+                } else if (config.getEntitySkipOnField() != null && !"".equals(config.getEntitySkipOnField())) {
+                    try {
+                        entityServiceUrl = entityServiceUrl + "?exclude=" + URLEncoder.encode(config.getEntitySkipOnField(), "UTF-8");
+                    } catch(UnsupportedEncodingException ex) {
+                        LOG.error("Encoding of skip filter query param failed");
+                    }
                 } else if (config.getEntityBaseFilter() != null && config.isBaseFilterForward()) {
                     ObjectMapper mapper = new ObjectMapper();
                     try {
