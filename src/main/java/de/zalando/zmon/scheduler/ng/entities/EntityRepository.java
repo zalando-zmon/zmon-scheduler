@@ -27,7 +27,6 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     private static final Logger LOG = LoggerFactory.getLogger(EntityRepository.class);
 
     private List<Map<String, String>> baseFilter = null;
-    private final String skipField;
     private final List<EntityChangeListener> changeListeners = new ArrayList<>();
 
     // Need this to write globally aware change listener
@@ -42,7 +41,6 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     public EntityRepository(EntityAdapterRegistry registry, Tracer tracer) {
         super(registry, tracer);
 
-        skipField = null;
 
         baseFilter = new ArrayList<>();
         currentMap = new HashMap<>();
@@ -57,8 +55,6 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     @Autowired
     public EntityRepository(EntityAdapterRegistry registry, SchedulerConfig config, Tracer tracer) {
         super(registry, tracer);
-
-        this.skipField = config.getEntitySkipOnField();
 
         this.redisHost = config.getRedisHost();
         this.redisPort = config.getRedisPort();
@@ -148,9 +144,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
         for (String name : registry.getSourceNames()) {
             for (Entity e : registry.get(name).getCollection()) {
 
-                if (null != skipField && e.getFilterProperties().containsKey(skipField)) {
-                    // SKIP ( use this for DC vs AWS Distinction as legacy entities do not have skipField set )
-                } else if (null != baseFilter && baseFilter.size() > 0) {
+                if (null != baseFilter && baseFilter.size() > 0) {
                     if (AlertOverlapGenerator.matchAnyFilter(baseFilter, e.getFilterProperties())) {
                         m.put(e.getId(), e);
                     }
