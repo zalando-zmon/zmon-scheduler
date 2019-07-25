@@ -1,5 +1,6 @@
 package de.zalando.zmon.scheduler.ng.config;
 
+import de.zalando.zmon.scheduler.ng.DefinitionRuntime;
 import de.zalando.zmon.scheduler.ng.SchedulePersistType;
 import de.zalando.zmon.scheduler.ng.TaskSerializerType;
 import de.zalando.zmon.scheduler.ng.TaskWriterType;
@@ -72,11 +73,13 @@ public class SchedulerConfig {
     // Mapping based on check url prefix
     Map<String, String> queueMappingByUrl = new HashMap<>();
 
-    // Map certrain check IDs to queue
+    // Map certain check IDs to queue
     Map<String, List<Integer>> queueMapping = new HashMap<>();
 
-    // Map certrain properties to queues e.g. "dc":"gth" => "dclocal:gth"
+    // Map certain entity properties to queues e.g. "dc":"gth" => "dclocal:gth"
     Map<String, List<Map<String,String>>> queuePropertyMapping = new HashMap<>();
+
+    Map<String, List<Map<String, String>>> genericQueueMapping = new HashMap<>();
 
     TaskSerializerType taskSerializer = TaskSerializerType.PLAIN;
 
@@ -392,5 +395,13 @@ public class SchedulerConfig {
 
     public void setBaseFilterForward(boolean baseFilterForward) {
         this.baseFilterForward = baseFilterForward;
+    }
+
+    public Map<String, List<Map<String, String>>> getGenericQueueMapping() {
+        return genericQueueMapping;
+    }
+
+    public void setGenericQueueMapping(Map<String, List<Map<String, String>>> genericQueueMapping) {
+        this.genericQueueMapping = genericQueueMapping;
     }
 }
