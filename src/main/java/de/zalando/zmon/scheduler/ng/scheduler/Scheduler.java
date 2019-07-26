@@ -229,8 +229,7 @@ public class Scheduler {
             }
 
             for (Entity entity : entitiesLocal) {
-                byte[] command = taskSerializer.writeTrialRun(entity, request);
-                queueSelector.execute(entity, command, schedulerConfig.getTrialRunQueue());
+                queueSelector.executeTrialRun(entity, request);
             }
         } finally {
             service.schedule(new TrialRunCleanupTask(request.id, schedulerConfig), 300, TimeUnit.SECONDS);

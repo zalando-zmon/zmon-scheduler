@@ -6,7 +6,6 @@ import de.zalando.zmon.scheduler.ng.DefinitionRuntime;
 import de.zalando.zmon.scheduler.ng.checks.CheckDefinition;
 import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
-import de.zalando.zmon.scheduler.ng.queue.Selector;
 
 import java.util.*;
 
@@ -34,7 +33,7 @@ public class GenericSelector implements Selector {
         checkDefinition
                 .map(CheckDefinition::getSourceUrl)
                 .ifPresent(url -> context.put("check_url", url));
-        // TODO: cover more cases here
+        // TODO: cover more cases here and eventually replace all the other selectors
 
         return context;
     }
@@ -43,7 +42,7 @@ public class GenericSelector implements Selector {
     public String getQueue(Entity entity, Check check, Collection<Alert> alerts) {
         Map<String, String> context = buildContext(check);
 
-        for (Map.Entry<String, List<Map<String, String>>> entry : this.config.getGenericQueueMapping().entrySet()) {
+        for (Map.Entry<String, List<Map<String, String>>> entry : config.getGenericQueueMapping().entrySet()) {
             String queue = entry.getKey();
             List<Map<String, String>> queueConditions = entry.getValue();
             for (Map<String, String> condition : queueConditions) {

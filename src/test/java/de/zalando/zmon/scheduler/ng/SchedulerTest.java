@@ -116,9 +116,9 @@ public class SchedulerTest {
 
         scheduler.scheduleTrialRun(request);
 
-        verify(queueSelector).execute(eq(entity1), any(), eq("zmon:queue:default"));
-        verify(queueSelector, never()).execute(eq(entity2), any(), eq("zmon:queue:default"));
-        verify(queueSelector, never()).execute(eq(entityExcluded), any(), eq("zmon:queue:default"));
+        verify(queueSelector).executeTrialRun(eq(entity1), eq(request));
+        verify(queueSelector, never()).executeTrialRun(eq(entity2), eq(request));
+        verify(queueSelector, never()).executeTrialRun(eq(entityExcluded), eq(request));
     }
 
 }
