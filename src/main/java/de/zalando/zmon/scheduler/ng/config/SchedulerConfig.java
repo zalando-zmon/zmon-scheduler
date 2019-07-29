@@ -79,7 +79,7 @@ public class SchedulerConfig {
     // Map certain entity properties to queues e.g. "dc":"gth" => "dclocal:gth"
     Map<String, List<Map<String,String>>> queuePropertyMapping = new HashMap<>();
 
-    Map<String, List<Map<String, String>>> genericQueueMapping = new HashMap<>();
+    Map<String, List<Map<String, Object>>> genericQueueMapping = new HashMap<>();
 
     TaskSerializerType taskSerializer = TaskSerializerType.PLAIN;
 
@@ -397,11 +397,11 @@ public class SchedulerConfig {
         this.baseFilterForward = baseFilterForward;
     }
 
-    public Map<String, List<Map<String, String>>> getGenericQueueMapping() {
+    public Map<String, List<Map<String, Object>>> getGenericQueueMapping() {
         return genericQueueMapping;
     }
 
-    public void setGenericQueueMapping(Map<String, List<Map<String, String>>> genericQueueMapping) {
+    public void setGenericQueueMapping(Map<String, List<Map<String, Object>>> genericQueueMapping) {
         this.genericQueueMapping = genericQueueMapping;
     }
 }

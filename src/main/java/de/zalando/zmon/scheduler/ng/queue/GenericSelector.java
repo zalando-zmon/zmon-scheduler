@@ -47,10 +47,10 @@ public class GenericSelector implements Selector {
     public String getQueue(Entity entity, Check check, Collection<Alert> alerts, TrialRunRequest request) {
         Map<String, Object> context = buildContext(check, request);
 
-        for (Map.Entry<String, List<Map<String, String>>> entry : config.getGenericQueueMapping().entrySet()) {
+        for (Map.Entry<String, List<Map<String, Object>>> entry : config.getGenericQueueMapping().entrySet()) {
             String queue = entry.getKey();
-            List<Map<String, String>> queueConditions = entry.getValue();
-            for (Map<String, String> condition : queueConditions) {
+            List<Map<String, Object>> queueConditions = entry.getValue();
+            for (Map<String, Object> condition : queueConditions) {
                 if (context.entrySet().containsAll(condition.entrySet())) {
                     return queue;
                 }
