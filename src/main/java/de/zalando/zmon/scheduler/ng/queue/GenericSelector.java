@@ -6,6 +6,7 @@ import de.zalando.zmon.scheduler.ng.DefinitionRuntime;
 import de.zalando.zmon.scheduler.ng.checks.CheckDefinition;
 import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
+import de.zalando.zmon.scheduler.ng.trailruns.TrialRunRequest;
 
 import java.util.*;
 
@@ -16,31 +17,35 @@ public class GenericSelector implements Selector {
         this.config = config;
     }
 
-    private Map<String, String> buildContext(Check check) {
-        Map<String, String> context = new HashMap<>();
-        Optional<Check> optionalCheck = Optional.ofNullable(check);
-        Optional<CheckDefinition> checkDefinition = optionalCheck.map(Check::getCheckDefinition);
+    private Map<String, Object> buildContext(Check check, TrialRunRequest request) {
+        Map<String, Object> context = new HashMap<>();
+        // Trial Run
+        Optional<TrialRunRequest> optionalRequest = Optional.ofNullable(request);
+        context.put("trial_run", optionalRequest.isPresent());
+        optionalRequest
+                .map(req -> req.runtime)
+                .map(DefinitionRuntime::name)
+                .ifPresent(runtime -> context.put("trial_run_runtime", runtime));
 
-        context.put("trial_run", String.valueOf(!optionalCheck.isPresent()));
-        optionalCheck
-                .map(Check::getId)
-                .map(String::valueOf)
+        // Check
+        Optional<CheckDefinition> checkDefinition = Optional.ofNullable(check).map(Check::getCheckDefinition);
+        checkDefinition
+                .map(CheckDefinition::getId)
                 .ifPresent(id -> context.put("check_id", id));
+        checkDefinition
+                .map(CheckDefinition::getSourceUrl)
+                .ifPresent(url -> context.put("check_url", url));
         checkDefinition
                 .map(CheckDefinition::getRuntime)
                 .map(DefinitionRuntime::name)
                 .ifPresent(runtime -> context.put("check_runtime", runtime));
-        checkDefinition
-                .map(CheckDefinition::getSourceUrl)
-                .ifPresent(url -> context.put("check_url", url));
-        // TODO: cover more cases here and eventually replace all the other selectors
 
         return context;
     }
 
     @Override
-    public String getQueue(Entity entity, Check check, Collection<Alert> alerts) {
-        Map<String, String> context = buildContext(check);
+    public String getQueue(Entity entity, Check check, Collection<Alert> alerts, TrialRunRequest request) {
+        Map<String, Object> context = buildContext(check, request);
 
         for (Map.Entry<String, List<Map<String, String>>> entry : config.getGenericQueueMapping().entrySet()) {
             String queue = entry.getKey();

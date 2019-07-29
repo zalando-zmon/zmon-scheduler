@@ -5,6 +5,7 @@ import de.zalando.zmon.scheduler.ng.AlertOverlapGenerator;
 import de.zalando.zmon.scheduler.ng.Check;
 import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
+import de.zalando.zmon.scheduler.ng.trailruns.TrialRunRequest;
 
 import java.util.Collection;
 import java.util.List;
@@ -22,7 +23,7 @@ public class PropertyQueueSelector implements Selector {
     }
 
     @Override
-    public String getQueue(Entity entity, Check check, Collection<Alert> alerts) {
+    public String getQueue(Entity entity, Check check, Collection<Alert> alerts, TrialRunRequest request) {
         if (null == check) {
             return null;
         }

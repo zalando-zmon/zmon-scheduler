@@ -1,5 +1,6 @@
 package de.zalando.zmon.scheduler.ng.trailruns;
 
+import de.zalando.zmon.scheduler.ng.DefinitionRuntime;
 import de.zalando.zmon.scheduler.ng.alerts.Parameter;
 
 import java.util.List;
@@ -15,6 +16,7 @@ public class TrialRunRequest {
     public String id;
     public String checkCommand;
     public String alertCondition;
+    public DefinitionRuntime runtime;
     public List<Map<String, String>> entities;
     public List<Map<String, String>> entitiesExclude;
     public Map<String, Parameter> parameters;

@@ -33,11 +33,11 @@ public class QueueSelector {
         selectors.add(new GenericSelector(config));
     }
 
-    private String getQueueOrDefault(Entity entity, Check check, Collection<Alert> alerts, String defaultQueue) {
+    private String getQueueOrDefault(Entity entity, Check check, Collection<Alert> alerts, TrialRunRequest request, String defaultQueue) {
         String queue;
 
-        for(Selector s : selectors) {
-            queue = s.getQueue(entity, check, alerts);
+        for (Selector s : selectors) {
+            queue = s.getQueue(entity, check, alerts, request);
             if (queue != null) {
                 return queue;
             }
@@ -48,14 +48,14 @@ public class QueueSelector {
 
     public void executeTrialRun(Entity entity, TrialRunRequest request) {
         byte[] command = serializer.writeTrialRun(entity, request);
-        String queue = getQueueOrDefault(entity, null, null, config.getTrialRunQueue());
+        String queue = getQueueOrDefault(entity, null, null, request, config.getTrialRunQueue());
 
         writer.exec(queue, command);
     }
 
     public void execute(Entity entity, Check check, Collection<Alert> alerts, long scheduledTime) {
         byte[] command = serializer.write(entity, check, alerts, scheduledTime);
-        String queue = getQueueOrDefault(entity, check, alerts, config.getDefaultQueue());
+        String queue = getQueueOrDefault(entity, check, alerts, null, config.getDefaultQueue());
 
         writer.exec(queue, command);
     }
