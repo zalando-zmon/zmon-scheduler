@@ -15,6 +15,7 @@ import java.util.Map;
 /**
  * Created by jmussler on 30.06.16.
  */
+@Deprecated
 public class HardCodedSelector implements Selector {
 
     private final Map<Integer, String> queueMapping = new HashMap<>();

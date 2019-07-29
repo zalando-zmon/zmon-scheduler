@@ -23,9 +23,13 @@ public class QueueSelector {
     private final CommandSerializer serializer;
 
     public QueueSelector(QueueWriter writer, SchedulerConfig config, Tracer tracer) {
+        this(writer, config, new CommandSerializer(config.getTaskSerializer(), tracer));
+    }
+
+    public QueueSelector(QueueWriter writer, SchedulerConfig config, CommandSerializer serializer) {
         this.writer = writer;
         this.config = config;
-        serializer = new CommandSerializer(config.getTaskSerializer(), tracer);
+        this.serializer = serializer;
 
         selectors.add(new RepoSelector(config));
         selectors.add(new HardCodedSelector(config));

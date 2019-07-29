@@ -13,6 +13,7 @@ import java.util.Map;
 /**
  * Created by jmussler on 30.06.16.
  */
+@Deprecated
 public class RepoSelector implements Selector {
 
     private final SchedulerConfig config;
