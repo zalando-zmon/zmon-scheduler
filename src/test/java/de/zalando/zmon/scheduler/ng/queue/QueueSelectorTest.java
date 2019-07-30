@@ -53,7 +53,7 @@ public class QueueSelectorTest {
     }
 
     @Test
-    public void executeWritesToQueueMappedWithGenericSelector() {
+    public void executeWritesToQueueMappedWithUniversalSelector() {
         config.setUniversalQueueMapping(new HashMap<String, List<Map<String, Object>>>() {{
             put("zmon:python_3", Collections.singletonList(
                     new HashMap<String, Object>() {{

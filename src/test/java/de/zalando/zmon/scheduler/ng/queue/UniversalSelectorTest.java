@@ -13,7 +13,7 @@ import java.util.*;
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
-public class GenericSelectorTest {
+public class UniversalSelectorTest {
     private Entity entity = new Entity("42");
 
     @Test
