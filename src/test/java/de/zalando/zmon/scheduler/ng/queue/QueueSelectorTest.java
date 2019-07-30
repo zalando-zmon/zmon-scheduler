@@ -54,7 +54,7 @@ public class QueueSelectorTest {
 
     @Test
     public void executeWritesToQueueMappedWithGenericSelector() {
-        config.setGenericQueueMapping(new HashMap<String, List<Map<String, Object>>>() {{
+        config.setUniversalQueueMapping(new HashMap<String, List<Map<String, Object>>>() {{
             put("zmon:python_3", Collections.singletonList(
                     new HashMap<String, Object>() {{
                         put("check_runtime", "PYTHON_3");

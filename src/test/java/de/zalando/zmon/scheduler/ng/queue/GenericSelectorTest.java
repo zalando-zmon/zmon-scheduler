@@ -19,7 +19,7 @@ public class GenericSelectorTest {
     @Test
     public void getQueueReturnsQueueBasedOnCheckRuntimeMapping() {
         SchedulerConfig config = new SchedulerConfig() {{
-            setGenericQueueMapping(new HashMap<String, List<Map<String, Object>>>() {{
+            setUniversalQueueMapping(new HashMap<String, List<Map<String, Object>>>() {{
                 put("zmon:python_3", Collections.singletonList(
                         new HashMap<String, Object>() {{
                             put("check_runtime", "PYTHON_3");
@@ -33,7 +33,7 @@ public class GenericSelectorTest {
         }});
         Check checkRegular = mock(Check.class);
 
-        GenericSelector selector = new GenericSelector(config);
+        UniversalSelector selector = new UniversalSelector(config);
         String queuePython3 = selector.getQueue(entity, checkPython3, null, null);
         String queueRegular = selector.getQueue(entity, checkRegular, null, null);
 
@@ -44,7 +44,7 @@ public class GenericSelectorTest {
     @Test
     public void getQueueReturnsQueueBasedOnTrialRunRuntimeMapping() {
         SchedulerConfig config = new SchedulerConfig() {{
-            setGenericQueueMapping(new HashMap<String, List<Map<String, Object>>>() {{
+            setUniversalQueueMapping(new HashMap<String, List<Map<String, Object>>>() {{
                 put("zmon:trial_run_python_3", Collections.singletonList(
                         new HashMap<String, Object>() {{
                             put("trial_run_runtime", "PYTHON_3");
@@ -57,7 +57,7 @@ public class GenericSelectorTest {
         }};
         TrialRunRequest requestRegular = new TrialRunRequest();
 
-        GenericSelector selector = new GenericSelector(config);
+        UniversalSelector selector = new UniversalSelector(config);
         String queuePython3 = selector.getQueue(entity, null, null, requestPython3);
         String queueRegular = selector.getQueue(entity, null, null, requestRegular);
 

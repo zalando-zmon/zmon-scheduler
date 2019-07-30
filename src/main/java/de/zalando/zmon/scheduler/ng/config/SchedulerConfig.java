@@ -78,8 +78,11 @@ public class SchedulerConfig {
     // Map certain entity properties to queues e.g. "dc":"gth" => "dclocal:gth"
     Map<String, List<Map<String,String>>> queuePropertyMapping = new HashMap<>();
 
-    // Maps chosen check/trial run attributes to queues
-    private Map<String, List<Map<String, Object>>> genericQueueMapping = new HashMap<>();
+    /**
+     * Maps check/trial runs to specific queues based on their attributes.
+     * For syntax/details please refer to {@link de.zalando.zmon.scheduler.ng.queue.UniversalSelector}.
+     */
+    private Map<String, List<Map<String, Object>>> universalQueueMapping = new HashMap<>();
 
     TaskSerializerType taskSerializer = TaskSerializerType.PLAIN;
 
@@ -397,11 +400,11 @@ public class SchedulerConfig {
         this.baseFilterForward = baseFilterForward;
     }
 
-    public Map<String, List<Map<String, Object>>> getGenericQueueMapping() {
-        return genericQueueMapping;
+    public Map<String, List<Map<String, Object>>> getUniversalQueueMapping() {
+        return universalQueueMapping;
     }
 
-    public void setGenericQueueMapping(Map<String, List<Map<String, Object>>> genericQueueMapping) {
-        this.genericQueueMapping = genericQueueMapping;
+    public void setUniversalQueueMapping(Map<String, List<Map<String, Object>>> universalQueueMapping) {
+        this.universalQueueMapping = universalQueueMapping;
     }
 }

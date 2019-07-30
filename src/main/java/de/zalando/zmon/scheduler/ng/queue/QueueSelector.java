@@ -34,7 +34,7 @@ public class QueueSelector {
         selectors.add(new RepoSelector(config));
         selectors.add(new HardCodedSelector(config));
         selectors.add(new PropertyQueueSelector(config));
-        selectors.add(new GenericSelector(config));
+        selectors.add(new UniversalSelector(config));
     }
 
     private String getQueueOrDefault(Entity entity, Check check, Collection<Alert> alerts, TrialRunRequest request, String defaultQueue) {
