@@ -4,6 +4,7 @@ package de.zalando.zmon.scheduler.ng.checks;
  * Created by jmussler on 4/2/15.
  */
 
+import de.zalando.zmon.scheduler.ng.DefinitionRuntime;
 import de.zalando.zmon.scheduler.ng.DefinitionStatus;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -63,6 +64,9 @@ public class CheckDefinition {
 
     @XmlElement
     private String lastModifiedBy;
+
+    @XmlElement
+    private DefinitionRuntime runtime;
 
     public long getLastModified() {
         return lastModified;
@@ -192,6 +196,14 @@ public class CheckDefinition {
         this.deleted = deleted;
     }
 
+    public DefinitionRuntime getRuntime() {
+        return runtime;
+    }
+
+    public void setRuntime(DefinitionRuntime runtime) {
+        this.runtime = runtime;
+    }
+
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
@@ -223,6 +235,8 @@ public class CheckDefinition {
         builder.append(sourceUrl);
         builder.append(", lastModifiedBy=");
         builder.append(lastModifiedBy);
+        builder.append(", runtime=");
+        builder.append(runtime);
         builder.append("]");
         return builder.toString();
     }

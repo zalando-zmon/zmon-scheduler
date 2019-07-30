@@ -69,14 +69,20 @@ public class SchedulerConfig {
 
     String dummyCities = null; // "dummy_data/cities.json"
 
-    // Mapping based on check url prefix
+    // DEPRECATED: Mapping based on check url prefix
     Map<String, String> queueMappingByUrl = new HashMap<>();
 
-    // Map certrain check IDs to queue
+    // DEPRECATED: Map certain check IDs to queue
     Map<String, List<Integer>> queueMapping = new HashMap<>();
 
-    // Map certrain properties to queues e.g. "dc":"gth" => "dclocal:gth"
+    // Map certain entity properties to queues e.g. "dc":"gth" => "dclocal:gth"
     Map<String, List<Map<String,String>>> queuePropertyMapping = new HashMap<>();
+
+    /**
+     * Maps check/trial runs to specific queues based on their attributes.
+     * For syntax/details please refer to {@link de.zalando.zmon.scheduler.ng.queue.UniversalSelector}.
+     */
+    private Map<String, List<Map<String, Object>>> universalQueueMapping = new HashMap<>();
 
     TaskSerializerType taskSerializer = TaskSerializerType.PLAIN;
 
@@ -392,5 +398,13 @@ public class SchedulerConfig {
 
     public void setBaseFilterForward(boolean baseFilterForward) {
         this.baseFilterForward = baseFilterForward;
+    }
+
+    public Map<String, List<Map<String, Object>>> getUniversalQueueMapping() {
+        return universalQueueMapping;
+    }
+
+    public void setUniversalQueueMapping(Map<String, List<Map<String, Object>>> universalQueueMapping) {
+        this.universalQueueMapping = universalQueueMapping;
     }
 }
