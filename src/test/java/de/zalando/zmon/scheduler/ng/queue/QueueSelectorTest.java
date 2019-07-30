@@ -53,6 +53,18 @@ public class QueueSelectorTest {
     }
 
     @Test
+    public void executeWritesToDefaultQueueWhenCheckRuntimeIsNull() {
+        Check check = mock(Check.class);
+        when(check.getCheckDefinition()).thenReturn(new CheckDefinition() {{
+            setRuntime(null);
+        }});
+
+        queueSelector.execute(entity, check, null, 0);
+
+        verify(mockWriter, times(1)).exec(eq("default_queue"), any());
+    }
+
+    @Test
     public void executeWritesToQueueMappedWithUniversalSelector() {
         config.setUniversalQueueMapping(new HashMap<String, List<Map<String, Object>>>() {{
             put("zmon:python_3", Collections.singletonList(

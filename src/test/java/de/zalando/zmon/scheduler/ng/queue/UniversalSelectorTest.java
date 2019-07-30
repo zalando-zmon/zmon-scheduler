@@ -17,6 +17,20 @@ public class UniversalSelectorTest {
     private Entity entity = new Entity("42");
 
     @Test
+    public void getQueueReturnsNullAndDoesNotThrowWhenCheckRuntimeIsNull() {
+        SchedulerConfig config = new SchedulerConfig();
+        Check check = mock(Check.class);
+        when(check.getCheckDefinition()).thenReturn(new CheckDefinition() {{
+            setRuntime(null);
+        }});
+
+        UniversalSelector selector = new UniversalSelector(config);
+        String queue = selector.getQueue(entity, check, null, null);
+
+        assertNull(queue);
+    }
+
+    @Test
     public void getQueueReturnsQueueBasedOnCheckRuntimeMapping() {
         SchedulerConfig config = new SchedulerConfig() {{
             setUniversalQueueMapping(new HashMap<String, List<Map<String, Object>>>() {{
