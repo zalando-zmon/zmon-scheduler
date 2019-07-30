@@ -1,6 +1,5 @@
 package de.zalando.zmon.scheduler.ng.config;
 
-import de.zalando.zmon.scheduler.ng.DefinitionRuntime;
 import de.zalando.zmon.scheduler.ng.SchedulePersistType;
 import de.zalando.zmon.scheduler.ng.TaskSerializerType;
 import de.zalando.zmon.scheduler.ng.TaskWriterType;

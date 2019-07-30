@@ -47,7 +47,6 @@ public class Scheduler {
 
     private final Map<Integer, ScheduledCheck> scheduledChecks = new HashMap<>();
 
-    private final CommandSerializer taskSerializer;
     private final Map<Integer, Long> lastScheduleAtStartup = SchedulePersister.loadSchedule();
 
     public Scheduler(AlertRepository alertRepo,
@@ -63,8 +62,6 @@ public class Scheduler {
         this.queueSelector = queueSelector;
         this.schedulerConfig = schedulerConfig;
         this.schedulerMetrics = new SchedulerMetrics(metrics);
-
-        taskSerializer = new CommandSerializer(schedulerConfig.getTaskSerializer(), tracer);
 
         service = new ScheduledThreadPoolExecutor(schedulerConfig.getThreadCount(), new CustomizableThreadFactory("sc-pool-"));
         service.setRemoveOnCancelPolicy(true);
