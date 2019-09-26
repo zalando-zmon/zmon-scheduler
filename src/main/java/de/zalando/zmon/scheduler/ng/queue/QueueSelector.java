@@ -5,7 +5,7 @@ import de.zalando.zmon.scheduler.ng.Check;
 import de.zalando.zmon.scheduler.ng.CommandSerializer;
 import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
-import de.zalando.zmon.scheduler.ng.trailruns.TrialRunRequest;
+
 import io.opentracing.Tracer;
 
 import java.util.ArrayList;
@@ -21,45 +21,51 @@ public class QueueSelector {
     private final SchedulerConfig config;
     private final List<Selector> selectors = new ArrayList<>();
     private final CommandSerializer serializer;
+    private final PropertyQueueSelector propertySelector;
 
     public QueueSelector(QueueWriter writer, SchedulerConfig config, Tracer tracer) {
-        this(writer, config, new CommandSerializer(config.getTaskSerializer(), tracer));
-    }
-
-    public QueueSelector(QueueWriter writer, SchedulerConfig config, CommandSerializer serializer) {
         this.writer = writer;
         this.config = config;
-        this.serializer = serializer;
+        this.propertySelector = new PropertyQueueSelector(config);
 
         selectors.add(new RepoSelector(config));
         selectors.add(new HardCodedSelector(config));
-        selectors.add(new PropertyQueueSelector(config));
-        selectors.add(new UniversalSelector(config));
+        selectors.add(propertySelector);
+
+        serializer = new CommandSerializer(config.getTaskSerializer(), tracer);
     }
 
-    private String getQueueOrDefault(Entity entity, Check check, Collection<Alert> alerts, TrialRunRequest request, String defaultQueue) {
-        String queue;
+    public void execute(Entity entity, byte[] command) {
+        execute(entity, command, null);
+    }
 
-        for (Selector s : selectors) {
-            queue = s.getQueue(entity, check, alerts, request);
-            if (queue != null) {
-                return queue;
-            }
+    public void execute(Entity entity, byte[] command, String targetQueue) {
+        String queue = targetQueue;
+        if (null == queue) {
+            queue = propertySelector.getQueue(entity, null, null);
         }
 
-        return defaultQueue;
-    }
-
-    public void executeTrialRun(Entity entity, TrialRunRequest request) {
-        byte[] command = serializer.writeTrialRun(entity, request);
-        String queue = getQueueOrDefault(entity, null, null, request, config.getTrialRunQueue());
+        if (null == queue) {
+            queue =  config.getDefaultQueue();
+        }
 
         writer.exec(queue, command);
     }
 
     public void execute(Entity entity, Check check, Collection<Alert> alerts, long scheduledTime) {
         byte[] command = serializer.write(entity, check, alerts, scheduledTime);
-        String queue = getQueueOrDefault(entity, check, alerts, null, config.getDefaultQueue());
+
+        String queue = null;
+
+        for(Selector s : selectors) {
+            if (null == queue) {
+                queue = s.getQueue(entity, check, alerts);
+            }
+        }
+
+        if (null == queue) {
+            queue = config.getDefaultQueue();
+        }
 
         writer.exec(queue, command);
     }

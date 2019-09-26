@@ -4,7 +4,6 @@ import de.zalando.zmon.scheduler.ng.Alert;
 import de.zalando.zmon.scheduler.ng.Check;
 import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import de.zalando.zmon.scheduler.ng.entities.Entity;
-import de.zalando.zmon.scheduler.ng.trailruns.TrialRunRequest;
 
 
 import java.util.Collection;
@@ -15,7 +14,6 @@ import java.util.Map;
 /**
  * Created by jmussler on 30.06.16.
  */
-@Deprecated
 public class HardCodedSelector implements Selector {
 
     private final Map<Integer, String> queueMapping = new HashMap<>();
@@ -29,7 +27,7 @@ public class HardCodedSelector implements Selector {
     }
 
     @Override
-    public String getQueue(Entity entity, Check check, Collection<Alert> alerts, TrialRunRequest request) {
+    public String getQueue(Entity entity, Check check, Collection<Alert> alerts) {
         if (null == check) {
             return null;
         }
