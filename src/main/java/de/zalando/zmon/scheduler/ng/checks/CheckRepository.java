@@ -16,7 +16,7 @@ import java.util.*;
 public class CheckRepository extends CachedRepository<Integer, CheckSourceRegistry, CheckDefinition> {
 
     private final Set<CheckChangeListener> listeners = new HashSet<>();
-    private final long checkMinInterval;
+    private final MinIntervalEntityFetcher minIntervalEntityFetcher;
 
     public synchronized void registerListener(CheckChangeListener l) {
         listeners.add(l);
@@ -62,12 +62,23 @@ public class CheckRepository extends CachedRepository<Integer, CheckSourceRegist
     public synchronized void fill() {
         Map<Integer, CheckDefinition> m = new HashMap<>();
 
+        minIntervalEntityFetcher.fetch();
+        MinIntervalEntityFetcher.MinCheckIntervalData minIntervalData = minIntervalEntityFetcher.getCheckInterval();
+
         for (String name : registry.getSourceNames()) {
             for (CheckDefinition cd : registry.get(name).getCollection()) {
-                if (cd.getInterval() < checkMinInterval) {
-                    cd.setInterval(checkMinInterval);
+                Integer id = cd.getId();
+                Long interval = cd.getInterval();
+                if (interval < minIntervalData.getMinCheckInterval()) {
+                    if (minIntervalData.getWhitelistedChecks().contains(id)) {
+                        if (interval < minIntervalData.getMinWhitelistedCheckInterval()) {
+                            cd.setInterval(minIntervalData.getMinWhitelistedCheckInterval());
+                        }
+                    } else {
+                        cd.setInterval(minIntervalData.getMinCheckInterval());
+                    }
                 }
-                m.put(cd.getId(), cd);
+                m.put(id, cd);
             }
         }
         Map<Integer, CheckDefinition> oldMap = currentMap;
@@ -81,10 +92,10 @@ public class CheckRepository extends CachedRepository<Integer, CheckSourceRegist
     }
 
     @Autowired
-    public CheckRepository(CheckSourceRegistry registry, SchedulerConfig config, Tracer tracer) {
+    public CheckRepository(CheckSourceRegistry registry, Tracer tracer, MinIntervalEntityFetcher minIntervalEntityFetcher) {
         super(registry, tracer);
-        this.checkMinInterval = config.getCheckMinInterval();
-        currentMap = new HashMap<>();
+        this.currentMap = new HashMap<>();
+        this.minIntervalEntityFetcher = minIntervalEntityFetcher;
         fill();
     }
 }
