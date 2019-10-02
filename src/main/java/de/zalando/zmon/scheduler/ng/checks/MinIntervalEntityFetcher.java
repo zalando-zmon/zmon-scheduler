@@ -13,7 +13,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -45,15 +44,15 @@ public class MinIntervalEntityFetcher {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class MinCheckIntervalData {
-        private List<Long> whitelistedChecks = Collections.emptyList();
+        private List<Integer> whitelistedChecks = Collections.emptyList();
         private Long minCheckInterval = 15L;
         private Long minWhitelistedCheckInterval = 15L;
 
-        public List<Long> getWhitelistedChecks() {
+        public List<Integer> getWhitelistedChecks() {
             return whitelistedChecks;
         }
 
-        public void setWhitelistedChecks(List<Long> whitelistedChecks) {
+        public void setWhitelistedChecks(List<Integer> whitelistedChecks) {
             this.whitelistedChecks = whitelistedChecks;
         }
 
