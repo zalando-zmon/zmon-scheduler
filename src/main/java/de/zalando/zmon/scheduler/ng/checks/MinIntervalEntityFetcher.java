@@ -3,6 +3,7 @@ package de.zalando.zmon.scheduler.ng.checks;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,16 +43,11 @@ public class MinIntervalEntityFetcher {
         this.checkInterval = new MinCheckIntervalData();
     }
 
-    public class MinCheckIntervalData {
-        private List<Long> whitelistedChecks;
-        private Long minCheckInterval;
-        private Long minWhitelistedCheckInterval;
-
-        public MinCheckIntervalData() {
-            this.whitelistedChecks = Collections.emptyList();
-            this.minCheckInterval = 15L;
-            this.minWhitelistedCheckInterval = 15L;
-        }
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class MinCheckIntervalData {
+        private List<Long> whitelistedChecks = Collections.emptyList();
+        private Long minCheckInterval = 15L;
+        private Long minWhitelistedCheckInterval = 15L;
 
         public List<Long> getWhitelistedChecks() {
             return whitelistedChecks;
@@ -78,7 +74,8 @@ public class MinIntervalEntityFetcher {
         }
     }
 
-    public class MinCheckInterval {
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class MinCheckInterval {
         private MinCheckIntervalData data;
 
         public MinCheckIntervalData getData() {
@@ -106,8 +103,8 @@ public class MinIntervalEntityFetcher {
             this.checkInterval = response.getBody().getData();
 
             totalFetches.mark();
-        } catch (RestClientException e) {
-            LOG.error("MinInterval Entity Fetcher could not fetch, falling back to default", e);
+        } catch (Throwable e) {
+            LOG.error("MinInterval Entity Fetcher could not fetch, falling back to default/old", e);
             totalErrors.mark();
         }
     }
