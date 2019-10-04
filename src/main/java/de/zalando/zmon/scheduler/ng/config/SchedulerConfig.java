@@ -46,13 +46,9 @@ public class SchedulerConfig {
 
     // the entity service provides entities to run checks against ( it is part of the controller )
     String entityServiceUrl = null;
-    String entityServiceUser = null;
-    String entityServicPassword = null;
 
     // Using the zmon controller as a source for alerts and checks
     String controllerUrl = null;
-    String controllerUser = null;
-    String controllerPassword = null;
 
     // Remote/AWS support
     // used to enable polling for instant eval via http with DC id
@@ -81,8 +77,6 @@ public class SchedulerConfig {
     TaskSerializerType taskSerializer = TaskSerializerType.PLAIN;
 
     String entityPropertiesKey = null;
-
-    long checkMinInterval = 15L;
 
     @Value("${server.port}")
     String serverPort  = null;
@@ -226,44 +220,12 @@ public class SchedulerConfig {
         this.entityServiceUrl = entityServiceUrl;
     }
 
-    public String getEntityServiceUser() {
-        return entityServiceUser;
-    }
-
-    public void setEntityServiceUser(String entityServiceUser) {
-        this.entityServiceUser = entityServiceUser;
-    }
-
-    public String getEntityServicPassword() {
-        return entityServicPassword;
-    }
-
-    public void setEntityServicPassword(String entityServicPassword) {
-        this.entityServicPassword = entityServicPassword;
-    }
-
     public String getControllerUrl() {
         return controllerUrl;
     }
 
     public void setControllerUrl(String controllerUrl) {
         this.controllerUrl = controllerUrl;
-    }
-
-    public String getControllerUser() {
-        return controllerUser;
-    }
-
-    public void setControllerUser(String controllerUser) {
-        this.controllerUser = controllerUser;
-    }
-
-    public String getControllerPassword() {
-        return controllerPassword;
-    }
-
-    public void setControllerPassword(String controllerPassword) {
-        this.controllerPassword = controllerPassword;
     }
 
     public boolean isInstantEvalForward() {
@@ -368,14 +330,6 @@ public class SchedulerConfig {
 
     public void setEntityPropertiesKey(String entityPropertiesKey) {
         this.entityPropertiesKey = entityPropertiesKey;
-    }
-
-    public long getCheckMinInterval() {
-        return checkMinInterval;
-    }
-
-    public void setCheckMinInterval(long checkMinInterval) {
-        this.checkMinInterval = checkMinInterval;
     }
 
     public String getServerPort() {
