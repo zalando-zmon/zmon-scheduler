@@ -20,10 +20,15 @@ pipeline:
           then
             VERSION=$(git describe --tags --always --dirty)
             AGENT_IMAGE=registry-write.opensource.zalan.do/zmon/zmon-scheduler:${VERSION}
+            AGENT_IMAGE_OLD=registry-write.opensource.zalan.do/stups/zmon-scheduler:${VERSION}
           else
             VERSION=${CDP_BUILD_VERSION}
             AGENT_IMAGE=registry-write.opensource.zalan.do/zmon/zmon-scheduler-unstable:${VERSION}
+            AGENT_IMAGE_OLD=registry-write.opensource.zalan.do/stups/zmon-scheduler-unstable:${VERSION}
           fi
 
           docker build --tag "$AGENT_IMAGE" .
           docker push "$AGENT_IMAGE"
+
+          docker build --tag "$AGENT_IMAGE_OLD" .
+          docker push "$AGENT_IMAGE_OLD"
