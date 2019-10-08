@@ -8,6 +8,7 @@ import de.zalando.zmon.scheduler.ng.config.SchedulerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -15,7 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,13 +34,17 @@ public class MinIntervalEntityFetcher {
     private final Meter totalErrors;
     private MinCheckIntervalData checkInterval;
 
+    private final String path = "/api/v1/entities?query=";
+    private final String query = "{\"id\":\"zmon-min-check-interval\",\"type\":\"zmon_config\"}";
+
     @Autowired
-    public MinIntervalEntityFetcher(SchedulerConfig config, RestTemplate restTemplate, MetricRegistry metrics) {
+    public MinIntervalEntityFetcher(SchedulerConfig config, RestTemplate restTemplate, MetricRegistry metrics) throws UnsupportedEncodingException {
         this.restTemplate = restTemplate;
         this.timer = metrics.timer("interval-fetcher.timer");
         this.totalFetches = metrics.meter("interval-fetcher.total-fetches");
         this.totalErrors = metrics.meter("interval-fetcher.total-errors");
-        this.entityServiceUrl = URI.create(config.getEntityServiceUrl() + "/api/v1/entities/zmon-min-check-interval");
+
+        this.entityServiceUrl = URI.create(config.getEntityServiceUrl() + path + URLEncoder.encode(query, "UTF-8"));
 
         this.checkInterval = new MinCheckIntervalData();
     }
@@ -96,10 +103,16 @@ public class MinIntervalEntityFetcher {
 
         try {
             Timer.Context t = timer.time();
-            ResponseEntity<MinCheckInterval> response = restTemplate.exchange(entityServiceUrl, HttpMethod.GET, request, MinCheckInterval.class);
+            ResponseEntity<List<MinCheckInterval>> response = restTemplate.exchange(entityServiceUrl, HttpMethod.GET, request, new ParameterizedTypeReference<List<MinCheckInterval>>() {
+            });
             LOG.info("MinInterval Entity Fetcher used: {}ms", t.stop() / 1_000_000);
 
-            this.checkInterval = response.getBody().getData();
+            List<MinCheckInterval> results = response.getBody();
+            if (results.size() != 1) {
+                throw new IndexOutOfBoundsException("Wrong number of entities returned - " + results.size());
+            }
+
+            this.checkInterval = response.getBody().get(0).getData();
 
             totalFetches.mark();
         } catch (Throwable e) {
