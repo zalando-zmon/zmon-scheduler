@@ -58,7 +58,7 @@ public class EntityRepository extends CachedRepository<String, EntityAdapterRegi
     public EntityRepository(EntityAdapterRegistry registry, SchedulerConfig config, Tracer tracer) {
         super(registry, tracer);
 
-        this.skipField = config.EntitySkipOnField();
+        this.skipField = config.getEntitySkipOnField();
         this.redisHost = config.getRedisHost();
         this.redisPort = config.getRedisPort();
         this.redisPropertiesKey = config.getEntityPropertiesKey();
