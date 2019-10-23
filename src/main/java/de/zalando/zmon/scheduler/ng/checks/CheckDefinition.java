@@ -4,6 +4,7 @@ package de.zalando.zmon.scheduler.ng.checks;
  * Created by jmussler on 4/2/15.
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import de.zalando.zmon.scheduler.ng.DefinitionStatus;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -14,6 +15,7 @@ import java.util.Map;
 
 // TODO check command encoding
 @XmlAccessorType(XmlAccessType.NONE)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CheckDefinition {
 
     @XmlElement(required = true)
